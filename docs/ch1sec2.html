@@ -1,0 +1,1100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>1.2 Brainstorming Techniques | SLCC Game Dev Workshop</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #4ade80;
+            --primary-dim: #22c55e;
+            --primary-glow: rgba(74, 222, 128, 0.3);
+            --bg-dark: #0a0a0f;
+            --bg-card: #12121a;
+            --bg-card-hover: #1a1a25;
+            --text-primary: #e4e4e7;
+            --text-muted: #71717a;
+            --border: #27272a;
+            --accent-purple: #a855f7;
+            --accent-cyan: #22d3ee;
+            --accent-pink: #ec4899;
+            --accent-yellow: #facc15;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: 'Space Mono', monospace;
+            background-color: var(--bg-dark);
+            color: var(--text-primary);
+            line-height: 1.8;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* Scanline overlay */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            background: repeating-linear-gradient(
+                0deg,
+                transparent,
+                transparent 2px,
+                rgba(0, 0, 0, 0.1) 2px,
+                rgba(0, 0, 0, 0.1) 4px
+            );
+            z-index: 1000;
+            opacity: 0.3;
+        }
+
+        /* Grid background */
+        .bg-grid {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                linear-gradient(rgba(74, 222, 128, 0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(74, 222, 128, 0.03) 1px, transparent 1px);
+            background-size: 50px 50px;
+            z-index: -1;
+        }
+
+        /* Header */
+        header {
+            padding: 1.5rem 2rem;
+            border-bottom: 1px solid var(--border);
+            background: linear-gradient(180deg, rgba(74, 222, 128, 0.05) 0%, transparent 100%);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            backdrop-filter: blur(10px);
+        }
+
+        .header-content {
+            max-width: 900px;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--text-muted);
+            text-decoration: none;
+            font-size: 0.85rem;
+            transition: all 0.3s ease;
+        }
+
+        .back-link:hover {
+            color: var(--primary);
+        }
+
+        .back-link svg {
+            width: 18px;
+            height: 18px;
+            transition: transform 0.3s ease;
+        }
+
+        .back-link:hover svg {
+            transform: translateX(-3px);
+        }
+
+        .header-nav {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .header-section {
+            font-family: 'Press Start 2P', cursive;
+            font-size: 0.6rem;
+            color: var(--primary);
+            letter-spacing: 0.05em;
+        }
+
+        /* Hero */
+        .hero {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 4rem 2rem 3rem;
+            border-bottom: 1px solid var(--border);
+            animation: fadeInUp 0.6s ease-out;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .section-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .section-number {
+            font-family: 'Press Start 2P', cursive;
+            font-size: 0.9rem;
+            color: var(--bg-dark);
+            background: var(--accent-purple);
+            padding: 0.5rem 1rem;
+        }
+
+        .section-label {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+        }
+
+        .hero h1 {
+            font-size: clamp(1.5rem, 4vw, 2.25rem);
+            line-height: 1.4;
+            margin-bottom: 1rem;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        .learning-goal {
+            background: var(--bg-card);
+            border-left: 3px solid var(--primary);
+            padding: 1rem 1.5rem;
+            margin-top: 1.5rem;
+        }
+
+        .learning-goal-label {
+            font-size: 0.7rem;
+            color: var(--primary);
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            margin-bottom: 0.5rem;
+            font-weight: 700;
+        }
+
+        .learning-goal p {
+            color: var(--text-muted);
+            font-size: 0.95rem;
+            margin: 0;
+        }
+
+        .hero-meta {
+            display: flex;
+            gap: 2rem;
+            margin-top: 1.5rem;
+        }
+
+        .meta-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+
+        .meta-item svg {
+            width: 16px;
+            height: 16px;
+            color: var(--primary);
+        }
+
+        /* Main Content */
+        main {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 3rem 2rem 4rem;
+        }
+
+        /* Typography */
+        .content h2 {
+            font-family: 'Press Start 2P', cursive;
+            font-size: 0.85rem;
+            color: var(--primary);
+            margin-top: 3rem;
+            margin-bottom: 1.5rem;
+            padding-bottom: 0.75rem;
+            border-bottom: 1px solid var(--border);
+            letter-spacing: 0.05em;
+        }
+
+        .content h2:first-child {
+            margin-top: 0;
+        }
+
+        .content h3 {
+            font-size: 1.25rem;
+            color: var(--text-primary);
+            margin-top: 2.5rem;
+            margin-bottom: 1rem;
+            font-weight: 700;
+        }
+
+        .content h4 {
+            font-size: 1rem;
+            color: var(--accent-cyan);
+            margin-top: 2rem;
+            margin-bottom: 0.75rem;
+            font-weight: 700;
+        }
+
+        .content p {
+            margin-bottom: 1.25rem;
+            color: var(--text-primary);
+            font-size: 0.95rem;
+        }
+
+        .content strong {
+            color: var(--text-primary);
+            font-weight: 700;
+        }
+
+        .content em {
+            color: var(--text-muted);
+            font-style: italic;
+        }
+
+        .content ul, .content ol {
+            margin-bottom: 1.5rem;
+            padding-left: 1.5rem;
+        }
+
+        .content li {
+            margin-bottom: 0.75rem;
+            color: var(--text-primary);
+            font-size: 0.95rem;
+        }
+
+        .content li::marker {
+            color: var(--primary);
+        }
+
+        /* Callout Boxes */
+        .callout {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            padding: 1.25rem 1.5rem;
+            margin: 1.5rem 0;
+            position: relative;
+        }
+
+        .callout::before {
+            font-family: 'Press Start 2P', cursive;
+            font-size: 0.55rem;
+            position: absolute;
+            top: -0.6rem;
+            left: 1rem;
+            padding: 0.2rem 0.5rem;
+            background: var(--bg-dark);
+        }
+
+        .callout p {
+            margin: 0;
+            font-size: 0.9rem;
+        }
+
+        .callout.tip {
+            border-color: var(--primary);
+        }
+
+        .callout.tip::before {
+            content: '💡 TIP';
+            color: var(--primary);
+        }
+
+        .callout.warning {
+            border-color: var(--accent-yellow);
+        }
+
+        .callout.warning::before {
+            content: '⚠️ WARNING';
+            color: var(--accent-yellow);
+        }
+
+        .callout.note {
+            border-color: var(--accent-purple);
+        }
+
+        .callout.note::before {
+            content: '📝 NOTE';
+            color: var(--accent-purple);
+        }
+
+        /* Technique Card */
+        .technique-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            padding: 2rem;
+            margin: 2rem 0;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .technique-card:hover {
+            border-color: var(--accent-purple);
+        }
+
+        .technique-number {
+            font-family: 'Press Start 2P', cursive;
+            font-size: 0.65rem;
+            color: var(--accent-purple);
+            margin-bottom: 0.5rem;
+        }
+
+        .technique-card h3 {
+            margin-top: 0;
+            color: var(--accent-purple);
+        }
+
+        .technique-card h4 {
+            color: var(--accent-cyan);
+        }
+
+        /* Example boxes */
+        .example-box {
+            background: rgba(34, 211, 238, 0.05);
+            border: 1px solid var(--border);
+            border-left: 3px solid var(--accent-cyan);
+            padding: 1.5rem;
+            margin: 1.5rem 0;
+        }
+
+        .example-box p:last-child {
+            margin-bottom: 0;
+        }
+
+        /* Prompt boxes */
+        .prompts-box {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            padding: 1.5rem;
+            margin: 1.5rem 0;
+        }
+
+        .prompts-box h4 {
+            margin-top: 0;
+            color: var(--accent-pink);
+        }
+
+        .prompts-box ol {
+            margin-bottom: 0;
+        }
+
+        /* Constraint Categories */
+        .constraint-category {
+            margin: 1.5rem 0;
+        }
+
+        .constraint-category h4 {
+            color: var(--accent-cyan);
+            margin-bottom: 0.75rem;
+        }
+
+        .constraint-category ul {
+            margin-bottom: 0;
+        }
+
+        /* Exercise Box */
+        .exercise-box {
+            background: linear-gradient(135deg, rgba(168, 85, 247, 0.1) 0%, rgba(236, 72, 153, 0.1) 100%);
+            border: 2px solid var(--accent-purple);
+            padding: 2rem;
+            margin: 2rem 0;
+        }
+
+        .exercise-box h3 {
+            margin-top: 0;
+            color: var(--accent-purple);
+        }
+
+        .exercise-box .task {
+            font-size: 1rem;
+            color: var(--text-primary);
+            font-weight: 700;
+            margin-bottom: 1rem;
+        }
+
+        /* Horizontal Rule */
+        hr {
+            border: none;
+            border-top: 1px solid var(--border);
+            margin: 3rem 0;
+        }
+
+        /* Bottom Navigation */
+        .bottom-nav {
+            margin-top: 4rem;
+            padding-top: 2rem;
+            border-top: 1px solid var(--border);
+        }
+
+        .nav-links {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .nav-link {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 1rem 1.5rem;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            color: var(--text-primary);
+            text-decoration: none;
+            font-size: 0.85rem;
+            transition: all 0.3s ease;
+        }
+
+        .nav-link:hover {
+            border-color: var(--primary);
+            color: var(--primary);
+        }
+
+        .nav-link svg {
+            width: 18px;
+            height: 18px;
+        }
+
+        .nav-link.prev svg {
+            transition: transform 0.3s ease;
+        }
+
+        .nav-link.prev:hover svg {
+            transform: translateX(-3px);
+        }
+
+        .nav-link.next svg {
+            transition: transform 0.3s ease;
+        }
+
+        .nav-link.next:hover svg {
+            transform: translateX(3px);
+        }
+
+        .back-to-chapter {
+            display: flex;
+            justify-content: center;
+            margin-top: 1.5rem;
+        }
+
+        .back-to-chapter a {
+            color: var(--text-muted);
+            text-decoration: none;
+            font-size: 0.85rem;
+            transition: color 0.3s ease;
+        }
+
+        .back-to-chapter a:hover {
+            color: var(--primary);
+        }
+
+        /* Footer */
+        footer {
+            border-top: 1px solid var(--border);
+            padding: 2rem;
+            text-align: center;
+            background: var(--bg-card);
+        }
+
+        .footer-content {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .footer-logo {
+            font-family: 'Press Start 2P', cursive;
+            font-size: 0.6rem;
+            color: var(--primary);
+            margin-bottom: 0.5rem;
+        }
+
+        footer p {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+        }
+
+        footer a {
+            color: var(--primary);
+            text-decoration: none;
+        }
+
+        footer a:hover {
+            text-decoration: underline;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .hero {
+                padding: 3rem 1.5rem 2rem;
+            }
+
+            main {
+                padding: 2rem 1.5rem 3rem;
+            }
+
+            .hero-meta {
+                flex-direction: column;
+                gap: 0.75rem;
+            }
+
+            .nav-links {
+                flex-direction: column;
+            }
+
+            .nav-link {
+                width: 100%;
+                justify-content: center;
+            }
+
+            .technique-card {
+                padding: 1.5rem;
+            }
+        }
+
+        /* Pixel corners */
+        .pixel-corner {
+            position: fixed;
+            width: 8px;
+            height: 8px;
+            background: var(--primary);
+            opacity: 0.5;
+        }
+
+        .pixel-corner.top-left { top: 10px; left: 10px; }
+        .pixel-corner.top-right { top: 10px; right: 10px; }
+        .pixel-corner.bottom-left { bottom: 10px; left: 10px; }
+        .pixel-corner.bottom-right { bottom: 10px; right: 10px; }
+    </style>
+</head>
+<body>
+    <div class="bg-grid"></div>
+    <div class="pixel-corner top-left"></div>
+    <div class="pixel-corner top-right"></div>
+    <div class="pixel-corner bottom-left"></div>
+    <div class="pixel-corner bottom-right"></div>
+
+    <header>
+        <div class="header-content">
+            <a href="index.html" class="back-link">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+                </svg>
+                Home
+            </a>
+            <div class="header-nav">
+                <span class="header-section">SECTION 1.2</span>
+            </div>
+        </div>
+    </header>
+
+    <section class="hero">
+        <div class="section-badge">
+            <span class="section-number">1.2</span>
+            <span class="section-label">Section</span>
+        </div>
+        <h1>Brainstorming Techniques for Game Ideas</h1>
+        <div class="hero-meta">
+            <div class="meta-item">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <span>~10 min read</span>
+            </div>
+            <div class="meta-item">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                </svg>
+                <span>3,124 words</span>
+            </div>
+        </div>
+        <div class="learning-goal">
+            <div class="learning-goal-label">Learning Goal</div>
+            <p>Learn practical techniques to generate creative game ideas and overcome "blank page paralysis."</p>
+        </div>
+    </section>
+
+    <main>
+        <article class="content">
+            <h2>The Blank Page Problem</h2>
+            
+            <p>Let's be real: staring at an empty document titled "My Game Idea" is terrifying. Your brain might spiral into questions like:</p>
+
+            <ul>
+                <li>"What if my idea isn't original enough?"</li>
+                <li>"What if it's too ambitious?"</li>
+                <li>"What if someone's already made this?"</li>
+                <li>"What if it's just... bad?"</li>
+            </ul>
+
+            <p>Here's the secret that professional game designers know: <strong>everyone feels this way</strong>. Even experienced developers sit down to brainstorm and think, "I have no idea what to make." The difference is that they have techniques to push through that paralysis and get ideas flowing.</p>
+
+            <p>That's what this section is all about. We're going to give you four powerful brainstorming techniques that actually work. These aren't abstract "be creative!" suggestions—they're practical frameworks you can use right now to generate solid game concepts.</p>
+
+            <p>And here's the most important rule: <strong>During brainstorming, quantity beats quality.</strong> Don't judge your ideas yet. Weird ideas, silly ideas, half-baked ideas—write them all down. You can refine and filter later. For now, we just want to get your creative engine running.</p>
+
+            <div class="callout tip">
+                <p>Set a timer for 10-15 minutes and commit to writing down every idea that pops into your head, even the "bad" ones. You'll be surprised what happens when you stop self-editing.</p>
+            </div>
+
+            <hr>
+
+            <div class="technique-card">
+                <div class="technique-number">TECHNIQUE #1</div>
+                <h3>"What If?" Questions</h3>
+                
+                <p>This is one of the simplest and most effective brainstorming methods: take something familiar and add a twist. You're not inventing from scratch—you're remixing what already exists.</p>
+
+                <h4>How It Works</h4>
+
+                <p>Start with a game you know (it can be famous or obscure), and ask "What if [X] were different?" The [X] can be anything:</p>
+
+                <ul>
+                    <li><strong>What if the player had a different tool or ability?</strong></li>
+                    <li><strong>What if the setting were totally different?</strong></li>
+                    <li><strong>What if the perspective changed?</strong></li>
+                    <li><strong>What if the goal were reversed?</strong></li>
+                    <li><strong>What if a restriction were added or removed?</strong></li>
+                </ul>
+
+                <h4>Examples to Get You Started</h4>
+
+                <div class="example-box">
+                    <p><strong>"What if Mario had a grappling hook?"</strong> → Now you're thinking about a platformer with swinging mechanics. Maybe levels are designed vertically, and timing your swings is the challenge.</p>
+                </div>
+
+                <div class="example-box">
+                    <p><strong>"What if Tetris had multiplayer combat?"</strong> → Boom, you've basically invented games like Tetris 99 or Puyo Puyo Tetris—competitive puzzle games where clearing lines sends "attacks" to opponents.</p>
+                </div>
+
+                <div class="example-box">
+                    <p><strong>"What if a racing game happened in slow motion?"</strong> → Suddenly you're imagining tactical racing where every decision (when to turn, when to boost) is deliberate and strategic rather than reflex-based.</p>
+                </div>
+
+                <div class="example-box">
+                    <p><strong>"What if a stealth game let you rewind time?"</strong> → You could experiment with routes, fail, rewind, and try again—kind of like the way Braid combined platforming with time manipulation.</p>
+                </div>
+
+                <div class="example-box">
+                    <p><strong>"What if Pac-Man, but you're the ghost?"</strong> → Now you're chasing the player instead of fleeing. The power dynamic flips, and you're designing predator behavior instead of evasion.</p>
+                </div>
+
+                <p>See how this works? You're not pulling ideas out of thin air—you're taking familiar concepts and twisting one element. That twist becomes your hook, your unique angle.</p>
+
+                <div class="prompts-box">
+                    <h4>Prompts to Try Right Now</h4>
+                    <p>Grab a piece of paper (or open a notes app) and answer these:</p>
+                    <ol>
+                        <li>Pick a game you love. What if the main mechanic were reversed or inverted?</li>
+                        <li>What if your favorite game took place in a completely different setting (underwater, in space, inside a computer, in a dream)?</li>
+                        <li>What if the player only had one ability instead of many?</li>
+                        <li>What if there were no instructions or tutorials—just trial and error?</li>
+                        <li>What if time moved differently (super fast, super slow, backwards, in loops)?</li>
+                    </ol>
+                    <p>Don't overthink it. Just write down whatever comes to mind. Some answers will be silly. Some will be intriguing. That's the point.</p>
+                </div>
+
+                <div class="callout tip">
+                    <p>The best "What If?" questions are specific, not vague. "What if it's scary?" is too broad. "What if you're in a horror game but you can't run—only walk slowly?" gives you something concrete to design around.</p>
+                </div>
+            </div>
+
+            <hr>
+
+            <div class="technique-card">
+                <div class="technique-number">TECHNIQUE #2</div>
+                <h3>Personal Experience Inspiration</h3>
+                
+                <p>Here's a truth that might surprise you: <strong>some of the best game ideas come from real life</strong>. Not because you're literally recreating your day-to-day (though you could!), but because your hobbies, frustrations, and interests give you unique perspectives.</p>
+
+                <h4>How It Works</h4>
+
+                <p>Think about your own life—your passions, your struggles, your weird knowledge. Then ask: "How could this become a game?"</p>
+
+                <p>Games are excellent at simulating experiences, teaching concepts, or letting people explore "what if" scenarios in a safe space. Your personal connection to a subject will make your game feel authentic in ways that generic ideas can't.</p>
+
+                <h4>Examples from Real Indie Games</h4>
+
+                <div class="example-box">
+                    <p><strong>Celeste</strong> was inspired by the creator's struggle with anxiety and depression. The mountain represents that internal battle, and the game's difficulty mirrors the feeling of fighting through tough times. Players connected because it felt <em>real</em>.</p>
+                </div>
+
+                <div class="example-box">
+                    <p><strong>Stardew Valley</strong> was created by a developer who wanted to escape the grind of corporate work and imagine a simpler, more fulfilling life. That desire resonated with millions of burned-out players.</p>
+                </div>
+
+                <div class="example-box">
+                    <p><strong>Papers, Please</strong> came from the creator's fascination with bureaucracy and moral gray areas. You play an immigration officer making life-or-death decisions while following tedious rules. It's compelling because the tension feels authentic.</p>
+                </div>
+
+                <h4>How to Apply This to Your Own Ideas</h4>
+
+                <p><strong>If you have a hobby or passion:</strong></p>
+                <ul>
+                    <li>Love cooking? Design a time-management cooking game where balancing orders and ingredients is the puzzle.</li>
+                    <li>Into history? Create a strategy game set in a lesser-known historical period, or a narrative game exploring a specific event.</li>
+                    <li>Play music? Design a rhythm game, or a platformer where sound and movement are connected (like Sound Shapes).</li>
+                </ul>
+
+                <p><strong>If you've faced a challenge or frustration:</strong></p>
+                <ul>
+                    <li>Struggle with time management? Make a game about juggling tasks under pressure (like Overcooked's chaotic teamwork).</li>
+                    <li>Dealt with feeling like an outsider? Create a narrative game about finding your place in a strange world.</li>
+                    <li>Overcame a fear? Design a game where the player confronts that fear in a metaphorical or literal way.</li>
+                </ul>
+
+                <p><strong>If you have niche knowledge:</strong></p>
+                <ul>
+                    <li>Know a lot about plants? Design a farming or ecology sim with realistic botany mechanics.</li>
+                    <li>Studied psychology? Create a game exploring how people make decisions under stress.</li>
+                    <li>Worked retail? Make a dark comedy game about customer service nightmares (trust me, people will relate).</li>
+                </ul>
+
+                <p>The key is that <strong>you don't need to have lived something extraordinary</strong>. Everyday experiences—frustration, joy, curiosity—can become compelling gameplay when translated thoughtfully.</p>
+
+                <div class="prompts-box">
+                    <h4>Prompts to Try Right Now</h4>
+                    <ol>
+                        <li>What's a hobby or interest you have that you've never seen in a game? How could it work?</li>
+                        <li>What's something you wish more people understood? Could a game teach or illustrate it?</li>
+                        <li>What's a daily frustration you experience? Could it be turned into a challenge or puzzle?</li>
+                        <li>What's a "boring" subject that could actually be fascinating if gamified?</li>
+                        <li>What's an emotion you'd like players to feel? What gameplay could evoke that emotion?</li>
+                    </ol>
+                </div>
+
+                <div class="callout warning">
+                    <p>Don't feel like your game has to be autobiographical or deeply personal. Even light inspiration counts. "I love coffee shops" can become "a cozy café management sim." Start small.</p>
+                </div>
+            </div>
+
+            <hr>
+
+            <div class="technique-card">
+                <div class="technique-number">TECHNIQUE #3</div>
+                <h3>Genre Mashup</h3>
+                
+                <p>This technique is pure creative chaos—and it's incredibly fun. The idea is simple: <strong>take two genres that don't usually go together and smash them into one game</strong>.</p>
+
+                <h4>How It Works</h4>
+
+                <p>Pick two genres from the list we covered in Section 1.1 (platformer, puzzle, RPG, simulation, action, strategy, visual novel). Now imagine a game that combines their core mechanics. Don't worry about whether it's "realistic" to build—just explore the concept.</p>
+
+                <h4>Examples of Successful Mashups</h4>
+
+                <div class="example-box">
+                    <p><strong>Hades:</strong> Roguelike + Action RPG + Narrative</p>
+                    <p>You die repeatedly (roguelike), fight through levels with combat upgrades (action RPG), and each death advances character relationships and story (narrative).</p>
+                </div>
+
+                <div class="example-box">
+                    <p><strong>Slay the Spire:</strong> Strategy + Roguelike + Deck-Building</p>
+                    <p>You build a deck of cards (strategy/deck-building), climb a tower with randomized encounters (roguelike), and every run is different.</p>
+                </div>
+
+                <div class="example-box">
+                    <p><strong>Stardew Valley:</strong> Farming Sim + RPG + Social Sim</p>
+                    <p>You manage crops and animals (simulation), explore dungeons and level up (RPG), and romance villagers (social sim).</p>
+                </div>
+
+                <div class="example-box">
+                    <p><strong>Dead Cells:</strong> Platformer + Roguelike + Metroidvania</p>
+                    <p>You run, jump, and explore interconnected areas (platformer/metroidvania) but each death resets your progress with randomized layouts (roguelike).</p>
+                </div>
+
+                <p>Notice how each mashup creates something fresh by combining familiar ingredients in new ways? That's the magic.</p>
+
+                <h4>How to Generate Your Own Mashups</h4>
+
+                <p><strong>Step 1:</strong> List out genres you find interesting (even if you haven't made a game in them).</p>
+                <p><strong>Step 2:</strong> Pick two at random (literally close your eyes and point, or use a random number generator).</p>
+                <p><strong>Step 3:</strong> Brainstorm what the core loop might look like. Ask:</p>
+                <ul>
+                    <li>What does the player <em>do</em> moment-to-moment?</li>
+                    <li>How do the two genres' mechanics interact?</li>
+                    <li>What's the goal or win condition?</li>
+                </ul>
+
+                <h4>Mashup Examples to Spark Ideas</h4>
+
+                <ul>
+                    <li><strong>Platformer + Rhythm Game:</strong> Your character automatically runs, and you press buttons to the beat to jump, attack, or dodge. Miss the rhythm, fail the jump. (See: <em>Crypt of the NecroDancer</em> for a similar vibe.)</li>
+                    <li><strong>Farming Sim + Horror:</strong> By day, you tend peaceful crops. By night, something sinister emerges and you must defend your farm. Tension comes from balancing resource growth with survival.</li>
+                    <li><strong>Puzzle + First-Person Shooter:</strong> Instead of just shooting enemies, each enemy is a puzzle—you need to figure out their weakness or pattern before you can damage them.</li>
+                    <li><strong>Visual Novel + Strategy:</strong> You make dialogue choices that determine alliances, then those choices affect a tactical battle phase where your allies (or lack thereof) matter.</li>
+                    <li><strong>Roguelike + City Builder:</strong> Each run, you start with limited resources and must build a small settlement. Randomized events (disasters, raids, opportunities) keep it fresh, and death means starting over with new knowledge.</li>
+                    <li><strong>Stealth + Racing:</strong> You're racing against opponents, but making noise (crashing, honking) attracts hazards or enemies. The quietest, smoothest racer wins.</li>
+                </ul>
+
+                <div class="prompts-box">
+                    <h4>Prompts to Try Right Now</h4>
+                    <ol>
+                        <li>Pick your favorite genre and your least familiar genre. Combine them. What happens?</li>
+                        <li>What's a genre combo you've never seen before? Why might it work (or not)?</li>
+                        <li>Choose a mechanic from one genre (e.g., "jumping" from platformers) and a goal from another (e.g., "survive waves" from tower defense). Design around that.</li>
+                        <li>Think of a game you love. What genre would completely transform it if added as a secondary layer?</li>
+                    </ol>
+                </div>
+
+                <div class="callout tip">
+                    <p>Mashups can get overwhelming. For your first game, aim for a "light" mashup—one dominant genre with a flavor of another, not a 50/50 split.</p>
+                </div>
+            </div>
+
+            <hr>
+
+            <div class="technique-card">
+                <div class="technique-number">TECHNIQUE #4</div>
+                <h3>Constraint-Based Design</h3>
+                
+                <p>This might sound counterintuitive, but <strong>adding restrictions often sparks creativity</strong>. When you have infinite possibilities, it's paralyzing. When you have limitations, your brain gets creative about working within them.</p>
+
+                <p>Constraint-based design means you deliberately limit yourself—one button, a tiny screen, only three colors, ten-second levels—and build your entire game concept around that restriction.</p>
+
+                <h4>How It Works</h4>
+
+                <p>Pick a constraint (we'll give you a list in a moment), then ask: "If I could only use [X], what game could I make?"</p>
+
+                <p>The constraint forces you to think differently. Suddenly, you're not trying to make a massive open-world epic—you're trying to make the best possible game with, say, only the spacebar as input. That's a design challenge, and challenges breed clever solutions.</p>
+
+                <h4>Real-World Examples</h4>
+
+                <div class="example-box">
+                    <p><strong>One-Button Games:</strong> Games like <em>Flappy Bird</em> or <em>Downwell</em> use only one button (tap or jump). The challenge comes from timing, not complex inputs. Simple to learn, hard to master.</p>
+                </div>
+
+                <div class="example-box">
+                    <p><strong>Tiny Games:</strong> Game jams like Ludum Dare often have 48-hour limits, which forces devs to create tiny, focused experiences. Many iconic indie games started as jam projects (like <em>Celeste</em>'s original prototype).</p>
+                </div>
+
+                <div class="example-box">
+                    <p><strong>Color Restrictions:</strong> <em>Minit</em> is entirely black and white with minimal animation. The limitation gives it a stark, memorable style and forced the designers to focus on tight gameplay.</p>
+                </div>
+
+                <div class="example-box">
+                    <p><strong>Time-Based Constraint:</strong> <em>Superhot</em> revolves around one rule—time only moves when you move. That single constraint defines the entire game and creates a unique tactical shooter.</p>
+                </div>
+
+                <div class="example-box">
+                    <p><strong>No Dialogue/Text:</strong> <em>Journey</em> has no words at all, yet tells a powerful story through visuals, music, and player interaction. The constraint forced creative storytelling.</p>
+                </div>
+
+                <h4>Constraint Ideas to Try</h4>
+
+                <div class="constraint-category">
+                    <h4>Input Constraints:</h4>
+                    <ul>
+                        <li>One-button control (only jump, only shoot, only interact)</li>
+                        <li>Two-button control (move + one action)</li>
+                        <li>No keyboard—mouse only, or vice versa</li>
+                        <li>No direct control—player gives orders or influences indirectly</li>
+                    </ul>
+                </div>
+
+                <div class="constraint-category">
+                    <h4>Visual Constraints:</h4>
+                    <ul>
+                        <li>Only two colors (black and white, or any duo)</li>
+                        <li>Pixel art limited to a specific resolution (16x16, 32x32)</li>
+                        <li>No character animations—static sprites only</li>
+                        <li>Everything drawn with simple geometric shapes (circles, squares, triangles)</li>
+                    </ul>
+                </div>
+
+                <div class="constraint-category">
+                    <h4>Time Constraints:</h4>
+                    <ul>
+                        <li>Each level lasts exactly 10 seconds</li>
+                        <li>The entire game lasts 5 minutes</li>
+                        <li>Real-time progression—events happen whether you play or not (like <em>Animal Crossing</em> time systems)</li>
+                    </ul>
+                </div>
+
+                <div class="constraint-category">
+                    <h4>Mechanical Constraints:</h4>
+                    <ul>
+                        <li>Player can't jump (how do you navigate obstacles?)</li>
+                        <li>Player can't attack (how do you handle enemies—stealth? Avoidance? Diplomacy?)</li>
+                        <li>No saving—permadeath or one-session game</li>
+                        <li>Everything is procedurally generated—no handcrafted levels</li>
+                    </ul>
+                </div>
+
+                <div class="constraint-category">
+                    <h4>Scope Constraints:</h4>
+                    <ul>
+                        <li>Single-screen game (everything visible at once, no scrolling)</li>
+                        <li>One mechanic only—do one thing really, really well</li>
+                        <li>Five levels max</li>
+                        <li>No story or dialogue—pure gameplay</li>
+                    </ul>
+                </div>
+
+                <h4>How to Use Constraints Creatively</h4>
+
+                <p><strong>Step 1:</strong> Pick one constraint that sounds interesting (or intimidating!).</p>
+                <p><strong>Step 2:</strong> Brainstorm how you'd design around it. Ask:</p>
+                <ul>
+                    <li>What's fun about this limitation?</li>
+                    <li>What creative solutions does it demand?</li>
+                    <li>What genre fits this constraint naturally?</li>
+                </ul>
+                <p><strong>Step 3:</strong> Prototype the core idea. If it's not fun within the constraint, try a different one.</p>
+
+                <h4>Example Design Process</h4>
+
+                <p>Let's say your constraint is <strong>"one-button control only."</strong></p>
+
+                <ul>
+                    <li><strong>Brainstorm:</strong> What can one button do? Jump, shoot, flap, interact, reverse time?</li>
+                    <li><strong>Pick a mechanic:</strong> Let's say tapping makes you jump.</li>
+                    <li><strong>Design around it:</strong> Endless runner where timing jumps is everything. Or a rhythm game where tapping on beat triggers actions.</li>
+                    <li><strong>Add a twist:</strong> What if holding the button charges a higher jump? Now you have depth—tap for small jumps, hold for big ones.</li>
+                    <li><strong>Define the challenge:</strong> Navigate obstacles that require precise timing and jump heights.</li>
+                </ul>
+
+                <p>Boom. You've turned a constraint into a game concept.</p>
+
+                <div class="prompts-box">
+                    <h4>Prompts to Try Right Now</h4>
+                    <ol>
+                        <li>Pick a random constraint from the list above. What game could you make with it?</li>
+                        <li>Think about a game you love. What if you removed one of its core mechanics—how would it change?</li>
+                        <li>What's a limitation you initially think would make a game <em>worse</em>? Could it actually make it more interesting?</li>
+                        <li>Combine a constraint with a genre: "A puzzle game with no text" or "A platformer with no jumping."</li>
+                    </ol>
+                </div>
+
+                <div class="callout warning">
+                    <p>Don't confuse "constraint" with "lack of features." A constraint is a deliberate creative choice, not just cutting corners. The goal is to make something tight and focused, not incomplete.</p>
+                </div>
+            </div>
+
+            <hr>
+
+            <h2>Putting It All Together: Mini-Exercise</h2>
+
+            <div class="exercise-box">
+                <h3>🎮 Brainstorming Exercise</h3>
+                <p class="task">Task: Spend the next 10 minutes generating at least <strong>five game ideas</strong> using the techniques above. Use a mix—don't just stick to one method. Write them down. Don't judge quality yet.</p>
+                
+                <p><strong>Prompts to get you started:</strong></p>
+                <ol>
+                    <li>Use "What If?" to twist a familiar game.</li>
+                    <li>Use Personal Experience to think of something from your life that could be a game.</li>
+                    <li>Use Genre Mashup to combine two random genres.</li>
+                    <li>Use Constraint-Based Design to pick a limitation and design around it.</li>
+                    <li>Do any technique again—whatever sparks the most ideas for you.</li>
+                </ol>
+                
+                <p><strong>Set a timer for 10 minutes. Go.</strong></p>
+            </div>
+
+            <p>When you're done, you should have at least five rough ideas. They might be weird, half-baked, or wildly ambitious—that's perfect. The goal isn't to find your final concept right now. It's to prove to yourself that you <em>can</em> generate ideas, and that the blank page doesn't have to be scary.</p>
+
+            <div class="callout tip">
+                <p>Save all your brainstorming notes. Ideas that don't work for your first game might be perfect for your second or third. Nothing is wasted.</p>
+            </div>
+
+            <hr>
+
+            <h2>Remember: Your First Game Doesn't Need to Be Original</h2>
+
+            <p>Let's address the elephant in the room: <strong>originality anxiety</strong>. You might be thinking, "But what if my idea isn't unique? What if someone's done it before?"</p>
+
+            <p>Here's the truth: someone probably <em>has</em> done something similar. And that's okay.</p>
+
+            <p>Your goal with your first game isn't to reinvent the medium. It's to <strong>learn by doing</strong>. You're learning how to design, how to program, how to balance difficulty, how to playtest, how to finish something. Those skills matter infinitely more than having a groundbreaking concept.</p>
+
+            <p>Think of it like learning to cook. You don't start by inventing a brand-new cuisine. You start by making scrambled eggs, then pasta, then maybe something a bit fancier. Over time, your skills grow, and <em>then</em> you can experiment with innovation.</p>
+
+            <p>So if your first game idea is "a platformer where you collect coins," that's perfectly fine. If it's "a puzzle game with blocks," great. Focus on execution, on making it feel good to play, on finishing it. Originality will come with experience.</p>
+
+            <div class="callout tip">
+                <p>Many successful indie devs say their first games were "clones" of games they loved. They learned the fundamentals by recreating mechanics, then iterated toward originality in later projects.</p>
+            </div>
+
+            <hr>
+
+            <h2>Summary</h2>
+
+            <p>Let's recap the four brainstorming techniques:</p>
+
+            <ol>
+                <li><strong>"What If?" Questions:</strong> Take something familiar and twist one element (character, setting, mechanic, goal, or perspective).</li>
+                <li><strong>Personal Experience Inspiration:</strong> Draw from your hobbies, struggles, knowledge, or passions to create authentic concepts.</li>
+                <li><strong>Genre Mashup:</strong> Combine two genres that don't usually go together and explore how their mechanics interact.</li>
+                <li><strong>Constraint-Based Design:</strong> Deliberately limit yourself (one button, two colors, ten-second levels) and design creatively within that restriction.</li>
+            </ol>
+
+            <p>You also learned that:</p>
+
+            <ul>
+                <li><strong>Quantity beats quality during brainstorming.</strong> Write down everything, filter later.</li>
+                <li><strong>Constraints spark creativity</strong> by forcing you to think differently.</li>
+                <li><strong>Your first game doesn't need to be original</strong>—focus on learning and finishing something.</li>
+            </ul>
+
+            <p>The blank page isn't your enemy. It's just waiting for you to fill it with messy, weird, exciting ideas. Now you have the tools to do exactly that.</p>
+
+        </article>
+
+        <!-- Bottom Navigation -->
+        <nav class="bottom-nav">
+            <div class="nav-links">
+                <a href="ch1sec1.html" class="nav-link prev">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+                    </svg>
+                    1.1 Game Concepts & Genres
+                </a>
+                <a href="ch1sec3.html" class="nav-link next">
+                    1.3 Core Gameplay Loop
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                    </svg>
+                </a>
+            </div>
+            <div class="back-to-chapter">
+                <a href="ch1.html">← Back to Chapter 1</a>
+            </div>
+        </nav>
+    </main>
+
+    <footer>
+        <div class="footer-content">
+            <div class="footer-logo">SLCC GAME DEV WORKSHOP</div>
+            <p><a href="index.html">Home</a> · <a href="ch1.html">Chapter 1</a></p>
+        </div>
+    </footer>
+</body>
+</html>
