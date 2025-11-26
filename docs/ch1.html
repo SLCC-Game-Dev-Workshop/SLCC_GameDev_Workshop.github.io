@@ -1,0 +1,904 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chapter 1: Story & Concept Development | SLCC Game Dev Workshop</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #4ade80;
+            --primary-dim: #22c55e;
+            --primary-glow: rgba(74, 222, 128, 0.3);
+            --bg-dark: #0a0a0f;
+            --bg-card: #12121a;
+            --bg-card-hover: #1a1a25;
+            --text-primary: #e4e4e7;
+            --text-muted: #71717a;
+            --border: #27272a;
+            --accent-purple: #a855f7;
+            --accent-cyan: #22d3ee;
+            --accent-pink: #ec4899;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: 'Space Mono', monospace;
+            background-color: var(--bg-dark);
+            color: var(--text-primary);
+            line-height: 1.7;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* Scanline overlay effect */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            background: repeating-linear-gradient(
+                0deg,
+                transparent,
+                transparent 2px,
+                rgba(0, 0, 0, 0.1) 2px,
+                rgba(0, 0, 0, 0.1) 4px
+            );
+            z-index: 1000;
+            opacity: 0.3;
+        }
+
+        /* Grid background pattern */
+        .bg-grid {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                linear-gradient(rgba(74, 222, 128, 0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(74, 222, 128, 0.03) 1px, transparent 1px);
+            background-size: 50px 50px;
+            z-index: -1;
+        }
+
+        /* Header */
+        header {
+            padding: 1.5rem 2rem;
+            border-bottom: 1px solid var(--border);
+            background: linear-gradient(180deg, rgba(74, 222, 128, 0.05) 0%, transparent 100%);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            backdrop-filter: blur(10px);
+        }
+
+        .header-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--text-muted);
+            text-decoration: none;
+            font-size: 0.85rem;
+            transition: all 0.3s ease;
+        }
+
+        .back-link:hover {
+            color: var(--primary);
+        }
+
+        .back-link svg {
+            width: 18px;
+            height: 18px;
+            transition: transform 0.3s ease;
+        }
+
+        .back-link:hover svg {
+            transform: translateX(-3px);
+        }
+
+        .header-chapter {
+            font-family: 'Press Start 2P', cursive;
+            font-size: 0.65rem;
+            color: var(--primary);
+            letter-spacing: 0.1em;
+        }
+
+        /* Hero Section */
+        .hero {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 5rem 2rem 4rem;
+            animation: fadeInUp 0.8s ease-out;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .chapter-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .chapter-number {
+            font-family: 'Press Start 2P', cursive;
+            font-size: 1rem;
+            color: var(--bg-dark);
+            background: var(--primary);
+            padding: 0.5rem 1rem;
+            text-shadow: none;
+        }
+
+        .chapter-label {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+        }
+
+        .hero h1 {
+            font-family: 'Press Start 2P', cursive;
+            font-size: clamp(1.2rem, 4vw, 2rem);
+            line-height: 1.6;
+            margin-bottom: 1.5rem;
+            color: var(--text-primary);
+        }
+
+        .hero-description {
+            font-size: 1.1rem;
+            color: var(--text-muted);
+            max-width: 700px;
+            margin-bottom: 2rem;
+        }
+
+        .hero-meta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 2rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid var(--border);
+        }
+
+        .meta-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+
+        .meta-item svg {
+            width: 18px;
+            height: 18px;
+            color: var(--primary);
+        }
+
+        .meta-item strong {
+            color: var(--text-primary);
+        }
+
+        /* Main Content */
+        main {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 0 2rem 6rem;
+        }
+
+        /* Section Headers */
+        .section-header {
+            margin-bottom: 2rem;
+            margin-top: 4rem;
+            position: relative;
+        }
+
+        .section-header:first-child {
+            margin-top: 0;
+        }
+
+        .section-header::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 50%;
+            width: 100%;
+            height: 1px;
+            background: var(--border);
+            z-index: -1;
+        }
+
+        .section-title {
+            font-family: 'Press Start 2P', cursive;
+            font-size: 0.75rem;
+            color: var(--primary);
+            background: var(--bg-dark);
+            padding-right: 1.5rem;
+            display: inline-block;
+            letter-spacing: 0.1em;
+        }
+
+        /* Learning Outcomes */
+        .outcomes-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .outcome-item {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            padding: 1.25rem;
+            display: flex;
+            align-items: flex-start;
+            gap: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .outcome-item:hover {
+            border-color: var(--primary);
+        }
+
+        .outcome-icon {
+            width: 24px;
+            height: 24px;
+            color: var(--accent-cyan);
+            flex-shrink: 0;
+            margin-top: 2px;
+        }
+
+        .outcome-item p {
+            font-size: 0.9rem;
+            color: var(--text-primary);
+            line-height: 1.5;
+        }
+
+        /* Sections List */
+        .sections-list {
+            display: flex;
+            flex-direction: column;
+            gap: 1px;
+            background: var(--border);
+            border: 1px solid var(--border);
+            margin-bottom: 2rem;
+        }
+
+        .section-link {
+            display: flex;
+            align-items: flex-start;
+            gap: 1.25rem;
+            padding: 1.5rem;
+            background: var(--bg-card);
+            text-decoration: none;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .section-link::after {
+            content: '→';
+            position: absolute;
+            right: 1.5rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-muted);
+            opacity: 0;
+            transition: all 0.3s ease;
+        }
+
+        .section-link:hover {
+            background: var(--bg-card-hover);
+            padding-left: 2rem;
+        }
+
+        .section-link:hover::after {
+            opacity: 1;
+            color: var(--primary);
+        }
+
+        .section-number {
+            font-family: 'Press Start 2P', cursive;
+            font-size: 0.6rem;
+            color: var(--accent-cyan);
+            background: rgba(34, 211, 238, 0.1);
+            padding: 0.5rem 0.75rem;
+            flex-shrink: 0;
+        }
+
+        .section-info {
+            flex: 1;
+        }
+
+        .section-info h3 {
+            font-size: 1rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 0.5rem;
+            transition: color 0.3s ease;
+        }
+
+        .section-link:hover .section-info h3 {
+            color: var(--primary);
+        }
+
+        .section-info p {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            line-height: 1.5;
+            margin-bottom: 0.75rem;
+        }
+
+        .section-meta {
+            display: flex;
+            gap: 1rem;
+            font-size: 0.75rem;
+        }
+
+        .section-meta span {
+            color: var(--accent-purple);
+        }
+
+        /* Pixel Quest Feature */
+        .pixel-quest-feature {
+            background: linear-gradient(135deg, var(--bg-card) 0%, rgba(34, 211, 238, 0.05) 100%);
+            border: 1px solid var(--border);
+            padding: 2.5rem;
+            margin-bottom: 2rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .pixel-quest-feature::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 4px;
+            height: 100%;
+            background: linear-gradient(180deg, var(--accent-cyan), var(--accent-purple));
+        }
+
+        .pixel-quest-feature h3 {
+            font-family: 'Press Start 2P', cursive;
+            font-size: 0.8rem;
+            color: var(--accent-cyan);
+            margin-bottom: 1rem;
+        }
+
+        .pixel-quest-feature h4 {
+            font-size: 1.25rem;
+            margin-bottom: 1rem;
+            color: var(--text-primary);
+        }
+
+        .pixel-quest-feature p {
+            color: var(--text-muted);
+            margin-bottom: 1rem;
+            font-size: 0.95rem;
+        }
+
+        .pixel-quest-details {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-top: 1.5rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid var(--border);
+        }
+
+        .detail-item {
+            font-size: 0.85rem;
+        }
+
+        .detail-item strong {
+            color: var(--accent-cyan);
+            display: block;
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            margin-bottom: 0.25rem;
+        }
+
+        .detail-item span {
+            color: var(--text-primary);
+        }
+
+        /* Deliverable Box */
+        .deliverable-box {
+            background: var(--bg-card);
+            border: 2px solid var(--primary);
+            padding: 2rem;
+            position: relative;
+        }
+
+        .deliverable-box::before {
+            content: 'DELIVERABLE';
+            font-family: 'Press Start 2P', cursive;
+            font-size: 0.6rem;
+            position: absolute;
+            top: -0.75rem;
+            left: 1.5rem;
+            background: var(--bg-dark);
+            padding: 0.25rem 0.75rem;
+            color: var(--primary);
+        }
+
+        .deliverable-box h3 {
+            font-size: 1.1rem;
+            margin-bottom: 1rem;
+            color: var(--text-primary);
+        }
+
+        .deliverable-box p {
+            color: var(--text-muted);
+            margin-bottom: 1rem;
+            font-size: 0.9rem;
+        }
+
+        .deliverable-list {
+            list-style: none;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 0.5rem;
+        }
+
+        .deliverable-list li {
+            font-size: 0.85rem;
+            color: var(--text-primary);
+            padding-left: 1.5rem;
+            position: relative;
+        }
+
+        .deliverable-list li::before {
+            content: '✓';
+            position: absolute;
+            left: 0;
+            color: var(--primary);
+            font-weight: bold;
+        }
+
+        /* CTA Section */
+        .cta-section {
+            margin-top: 4rem;
+            text-align: center;
+            padding: 3rem;
+            background: linear-gradient(135deg, rgba(74, 222, 128, 0.1) 0%, transparent 100%);
+            border: 1px solid var(--border);
+        }
+
+        .cta-section h3 {
+            font-family: 'Press Start 2P', cursive;
+            font-size: 0.9rem;
+            color: var(--primary);
+            margin-bottom: 1rem;
+        }
+
+        .cta-section p {
+            color: var(--text-muted);
+            margin-bottom: 2rem;
+            max-width: 500px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .cta-button {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 1rem 2rem;
+            background: var(--primary);
+            color: var(--bg-dark);
+            text-decoration: none;
+            font-weight: 700;
+            font-size: 0.9rem;
+            letter-spacing: 0.05em;
+            transition: all 0.3s ease;
+            border: 2px solid var(--primary);
+        }
+
+        .cta-button:hover {
+            background: transparent;
+            color: var(--primary);
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px var(--primary-glow);
+        }
+
+        .cta-button svg {
+            width: 20px;
+            height: 20px;
+            transition: transform 0.3s ease;
+        }
+
+        .cta-button:hover svg {
+            transform: translateX(5px);
+        }
+
+        /* Footer */
+        footer {
+            border-top: 1px solid var(--border);
+            padding: 2rem;
+            text-align: center;
+            background: var(--bg-card);
+        }
+
+        .footer-content {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .footer-logo {
+            font-family: 'Press Start 2P', cursive;
+            font-size: 0.6rem;
+            color: var(--primary);
+            margin-bottom: 0.5rem;
+        }
+
+        footer p {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+        }
+
+        footer a {
+            color: var(--primary);
+            text-decoration: none;
+        }
+
+        footer a:hover {
+            text-decoration: underline;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .hero {
+                padding: 3rem 1.5rem 2rem;
+            }
+
+            .hero-meta {
+                gap: 1rem;
+            }
+
+            main {
+                padding: 0 1.5rem 4rem;
+            }
+
+            .section-link {
+                flex-direction: column;
+                gap: 0.75rem;
+            }
+
+            .section-link::after {
+                display: none;
+            }
+
+            .pixel-quest-feature {
+                padding: 1.5rem;
+            }
+
+            .cta-section {
+                padding: 2rem 1.5rem;
+            }
+        }
+
+        /* Animations */
+        .section-link {
+            animation: fadeInStagger 0.5s ease-out backwards;
+        }
+
+        .section-link:nth-child(1) { animation-delay: 0.1s; }
+        .section-link:nth-child(2) { animation-delay: 0.15s; }
+        .section-link:nth-child(3) { animation-delay: 0.2s; }
+        .section-link:nth-child(4) { animation-delay: 0.25s; }
+        .section-link:nth-child(5) { animation-delay: 0.3s; }
+        .section-link:nth-child(6) { animation-delay: 0.35s; }
+        .section-link:nth-child(7) { animation-delay: 0.4s; }
+
+        @keyframes fadeInStagger {
+            from {
+                opacity: 0;
+                transform: translateX(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        /* Pixel decorations */
+        .pixel-corner {
+            position: fixed;
+            width: 8px;
+            height: 8px;
+            background: var(--primary);
+            opacity: 0.5;
+        }
+
+        .pixel-corner.top-left { top: 10px; left: 10px; }
+        .pixel-corner.top-right { top: 10px; right: 10px; }
+        .pixel-corner.bottom-left { bottom: 10px; left: 10px; }
+        .pixel-corner.bottom-right { bottom: 10px; right: 10px; }
+    </style>
+</head>
+<body>
+    <div class="bg-grid"></div>
+    <div class="pixel-corner top-left"></div>
+    <div class="pixel-corner top-right"></div>
+    <div class="pixel-corner bottom-left"></div>
+    <div class="pixel-corner bottom-right"></div>
+
+    <header>
+        <div class="header-content">
+            <a href="index.html" class="back-link">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+                </svg>
+                Back to Home
+            </a>
+            <span class="header-chapter">CHAPTER 1 OF 3</span>
+        </div>
+    </header>
+
+    <section class="hero">
+        <div class="chapter-badge">
+            <span class="chapter-number">01</span>
+            <span class="chapter-label">Chapter</span>
+        </div>
+        <h1>Story & Concept Development</h1>
+        <p class="hero-description">
+            Learn to develop a game concept from initial idea to finalized one-page Game Concept Document. 
+            Master brainstorming techniques, design compelling gameplay loops, structure effective narratives, 
+            and create memorable characters and worlds.
+        </p>
+        <div class="hero-meta">
+            <div class="meta-item">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <span><strong>~79 minutes</strong> total reading</span>
+            </div>
+            <div class="meta-item">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                </svg>
+                <span><strong>7 sections</strong></span>
+            </div>
+            <div class="meta-item">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                </svg>
+                <span><strong>23,767 words</strong></span>
+            </div>
+        </div>
+    </section>
+
+    <main>
+        <!-- What You'll Learn -->
+        <div class="section-header">
+            <h2 class="section-title">// WHAT YOU'LL LEARN</h2>
+        </div>
+
+        <div class="outcomes-grid">
+            <div class="outcome-item">
+                <svg class="outcome-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+                </svg>
+                <p>What makes game concepts strong and how to evaluate ideas</p>
+            </div>
+            <div class="outcome-item">
+                <svg class="outcome-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                </svg>
+                <p>Practical brainstorming techniques to generate ideas on demand</p>
+            </div>
+            <div class="outcome-item">
+                <svg class="outcome-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                </svg>
+                <p>Design core gameplay loops that keep players engaged</p>
+            </div>
+            <div class="outcome-item">
+                <svg class="outcome-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                </svg>
+                <p>Structure simple, effective game narratives</p>
+            </div>
+            <div class="outcome-item">
+                <svg class="outcome-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                </svg>
+                <p>Create memorable characters and compelling worlds</p>
+            </div>
+            <div class="outcome-item">
+                <svg class="outcome-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <p>Synthesize everything into a professional concept document</p>
+            </div>
+        </div>
+
+        <!-- Sections -->
+        <div class="section-header">
+            <h2 class="section-title">// SECTIONS</h2>
+        </div>
+
+        <div class="sections-list">
+            <a href="ch1sec1.html" class="section-link">
+                <span class="section-number">1.1</span>
+                <div class="section-info">
+                    <h3>Introduction to Game Concepts and Genres</h3>
+                    <p>Understand what makes a strong game concept and explore the 7 major game genres with modern examples.</p>
+                    <div class="section-meta">
+                        <span>~10 min</span>
+                        <span>2,494 words</span>
+                    </div>
+                </div>
+            </a>
+            <a href="ch1sec2.html" class="section-link">
+                <span class="section-number">1.2</span>
+                <div class="section-info">
+                    <h3>Brainstorming Techniques</h3>
+                    <p>Master 4 practical techniques: "What If?" questions, personal experience, genre mashup, and constraint-based design.</p>
+                    <div class="section-meta">
+                        <span>~10 min</span>
+                        <span>3,124 words</span>
+                    </div>
+                </div>
+            </a>
+            <a href="ch1sec3.html" class="section-link">
+                <span class="section-number">1.3</span>
+                <div class="section-info">
+                    <h3>Core Gameplay Loop</h3>
+                    <p>Learn the Action → Response → Reward → Motivation formula with 6 detailed examples from real games.</p>
+                    <div class="section-meta">
+                        <span>~12 min</span>
+                        <span>3,433 words</span>
+                    </div>
+                </div>
+            </a>
+            <a href="ch1sec4.html" class="section-link">
+                <span class="section-number">1.4</span>
+                <div class="section-info">
+                    <h3>Basic Story Structure</h3>
+                    <p>Discover 3 simple story frameworks: goal-oriented, conflict-driven, and mystery/discovery narratives.</p>
+                    <div class="section-meta">
+                        <span>~12 min</span>
+                        <span>4,261 words</span>
+                    </div>
+                </div>
+            </a>
+            <a href="ch1sec5.html" class="section-link">
+                <span class="section-number">1.5</span>
+                <div class="section-info">
+                    <h3>Character and World-Building</h3>
+                    <p>Answer the 4 key character questions and 3 world-building questions. Apply the silhouette test and "less is more" principle.</p>
+                    <div class="section-meta">
+                        <span>~12 min</span>
+                        <span>4,213 words</span>
+                    </div>
+                </div>
+            </a>
+            <a href="ch1sec6.html" class="section-link">
+                <span class="section-number">1.6</span>
+                <div class="section-info">
+                    <h3>Exercise: Game Concept Document</h3>
+                    <p>Fill out your own 8-section Game Concept Document with step-by-step guidance and the complete Pixel Quest example.</p>
+                    <div class="section-meta">
+                        <span>~15 min</span>
+                        <span>3,817 words</span>
+                    </div>
+                </div>
+            </a>
+            <a href="ch1sec7.html" class="section-link">
+                <span class="section-number">1.7</span>
+                <div class="section-info">
+                    <h3>Resources and Next Steps</h3>
+                    <p>Curated learning resources, complete Chapter 1 checklist, and preview of Chapter 2: Game Mechanics & Design.</p>
+                    <div class="section-meta">
+                        <span>~8 min</span>
+                        <span>2,425 words</span>
+                    </div>
+                </div>
+            </a>
+        </div>
+
+        <!-- Pixel Quest Running Example -->
+        <div class="section-header">
+            <h2 class="section-title">// RUNNING EXAMPLE</h2>
+        </div>
+
+        <div class="pixel-quest-feature">
+            <h3>PIXEL QUEST</h3>
+            <h4>Follow a complete game concept from start to finish</h4>
+            <p>
+                Throughout Chapter 1, you'll follow the development of <strong>Pixel Quest</strong> — a fictional 2D platformer 
+                that demonstrates every concept we teach. Watch how a simple idea transforms into a complete, professional game concept.
+            </p>
+            <div class="pixel-quest-details">
+                <div class="detail-item">
+                    <strong>Premise</strong>
+                    <span>A sentient pixel escapes deletion inside a glitching computer system</span>
+                </div>
+                <div class="detail-item">
+                    <strong>Genre</strong>
+                    <span>Platformer with puzzle elements</span>
+                </div>
+                <div class="detail-item">
+                    <strong>Character</strong>
+                    <span>Bit — the smallest possible protagonist</span>
+                </div>
+                <div class="detail-item">
+                    <strong>Theme</strong>
+                    <span>Creativity vs. conformity, underdog survival</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Deliverable -->
+        <div class="section-header">
+            <h2 class="section-title">// CHAPTER DELIVERABLE</h2>
+        </div>
+
+        <div class="deliverable-box">
+            <h3>One-Page Game Concept Document</h3>
+            <p>By completing Chapter 1, you'll produce a professional concept document containing:</p>
+            <ul class="deliverable-list">
+                <li>Clear game title and genre</li>
+                <li>One-sentence core gameplay loop</li>
+                <li>2-3 sentence narrative hook</li>
+                <li>Character profile (3-5 bullets)</li>
+                <li>World description (2-3 sentences)</li>
+                <li>Target audience identification</li>
+                <li>Inspiration list (3-5 works)</li>
+            </ul>
+        </div>
+
+        <!-- CTA -->
+        <div class="cta-section">
+            <h3>READY TO BEGIN?</h3>
+            <p>Start with Section 1.1 and work through each section in order. Take your time — this foundation is critical for everything that follows.</p>
+            <a href="ch1sec1.html" class="cta-button">
+                Start Section 1.1
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3" />
+                </svg>
+            </a>
+        </div>
+    </main>
+
+    <footer>
+        <div class="footer-content">
+            <div class="footer-logo">SLCC GAME DEV WORKSHOP</div>
+            <p><a href="index.html">← Back to all chapters</a></p>
+        </div>
+    </footer>
+</body>
+</html>
