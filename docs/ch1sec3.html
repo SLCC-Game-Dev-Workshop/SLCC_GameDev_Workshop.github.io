@@ -1,0 +1,1093 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>1.3 Core Gameplay Loop | SLCC Game Dev Workshop</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #4ade80;
+            --primary-dim: #22c55e;
+            --primary-glow: rgba(74, 222, 128, 0.3);
+            --bg-dark: #0a0a0f;
+            --bg-card: #12121a;
+            --bg-card-hover: #1a1a25;
+            --text-primary: #e4e4e7;
+            --text-muted: #71717a;
+            --border: #27272a;
+            --accent-purple: #a855f7;
+            --accent-cyan: #22d3ee;
+            --accent-pink: #ec4899;
+            --accent-yellow: #facc15;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: 'Space Mono', monospace;
+            background-color: var(--bg-dark);
+            color: var(--text-primary);
+            line-height: 1.8;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            background: repeating-linear-gradient(
+                0deg,
+                transparent,
+                transparent 2px,
+                rgba(0, 0, 0, 0.1) 2px,
+                rgba(0, 0, 0, 0.1) 4px
+            );
+            z-index: 1000;
+            opacity: 0.3;
+        }
+
+        .bg-grid {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                linear-gradient(rgba(74, 222, 128, 0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(74, 222, 128, 0.03) 1px, transparent 1px);
+            background-size: 50px 50px;
+            z-index: -1;
+        }
+
+        header {
+            padding: 1.5rem 2rem;
+            border-bottom: 1px solid var(--border);
+            background: linear-gradient(180deg, rgba(74, 222, 128, 0.05) 0%, transparent 100%);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            backdrop-filter: blur(10px);
+        }
+
+        .header-content {
+            max-width: 900px;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--text-muted);
+            text-decoration: none;
+            font-size: 0.85rem;
+            transition: all 0.3s ease;
+        }
+
+        .back-link:hover {
+            color: var(--primary);
+        }
+
+        .back-link svg {
+            width: 18px;
+            height: 18px;
+            transition: transform 0.3s ease;
+        }
+
+        .back-link:hover svg {
+            transform: translateX(-3px);
+        }
+
+        .header-nav {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .header-section {
+            font-family: 'Press Start 2P', cursive;
+            font-size: 0.6rem;
+            color: var(--primary);
+            letter-spacing: 0.05em;
+        }
+
+        .hero {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 4rem 2rem 3rem;
+            border-bottom: 1px solid var(--border);
+            animation: fadeInUp 0.6s ease-out;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .section-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .section-number {
+            font-family: 'Press Start 2P', cursive;
+            font-size: 0.9rem;
+            color: var(--bg-dark);
+            background: var(--accent-cyan);
+            padding: 0.5rem 1rem;
+        }
+
+        .section-label {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+        }
+
+        .hero h1 {
+            font-size: clamp(1.5rem, 4vw, 2.25rem);
+            line-height: 1.4;
+            margin-bottom: 1rem;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        .learning-goal {
+            background: var(--bg-card);
+            border-left: 3px solid var(--primary);
+            padding: 1rem 1.5rem;
+            margin-top: 1.5rem;
+        }
+
+        .learning-goal-label {
+            font-size: 0.7rem;
+            color: var(--primary);
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            margin-bottom: 0.5rem;
+            font-weight: 700;
+        }
+
+        .learning-goal p {
+            color: var(--text-muted);
+            font-size: 0.95rem;
+            margin: 0;
+        }
+
+        .hero-meta {
+            display: flex;
+            gap: 2rem;
+            margin-top: 1.5rem;
+        }
+
+        .meta-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+
+        .meta-item svg {
+            width: 16px;
+            height: 16px;
+            color: var(--primary);
+        }
+
+        main {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 3rem 2rem 4rem;
+        }
+
+        .content h2 {
+            font-family: 'Press Start 2P', cursive;
+            font-size: 0.85rem;
+            color: var(--primary);
+            margin-top: 3rem;
+            margin-bottom: 1.5rem;
+            padding-bottom: 0.75rem;
+            border-bottom: 1px solid var(--border);
+            letter-spacing: 0.05em;
+        }
+
+        .content h2:first-child {
+            margin-top: 0;
+        }
+
+        .content h3 {
+            font-size: 1.25rem;
+            color: var(--text-primary);
+            margin-top: 2.5rem;
+            margin-bottom: 1rem;
+            font-weight: 700;
+        }
+
+        .content h4 {
+            font-size: 1rem;
+            color: var(--accent-cyan);
+            margin-top: 2rem;
+            margin-bottom: 0.75rem;
+            font-weight: 700;
+        }
+
+        .content p {
+            margin-bottom: 1.25rem;
+            color: var(--text-primary);
+            font-size: 0.95rem;
+        }
+
+        .content strong {
+            color: var(--text-primary);
+            font-weight: 700;
+        }
+
+        .content em {
+            color: var(--text-muted);
+            font-style: italic;
+        }
+
+        .content ul, .content ol {
+            margin-bottom: 1.5rem;
+            padding-left: 1.5rem;
+        }
+
+        .content li {
+            margin-bottom: 0.75rem;
+            color: var(--text-primary);
+            font-size: 0.95rem;
+        }
+
+        .content li::marker {
+            color: var(--primary);
+        }
+
+        .callout {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            padding: 1.25rem 1.5rem;
+            margin: 1.5rem 0;
+            position: relative;
+        }
+
+        .callout::before {
+            font-family: 'Press Start 2P', cursive;
+            font-size: 0.55rem;
+            position: absolute;
+            top: -0.6rem;
+            left: 1rem;
+            padding: 0.2rem 0.5rem;
+            background: var(--bg-dark);
+        }
+
+        .callout p {
+            margin: 0;
+            font-size: 0.9rem;
+        }
+
+        .callout.tip {
+            border-color: var(--primary);
+        }
+
+        .callout.tip::before {
+            content: '💡 TIP';
+            color: var(--primary);
+        }
+
+        .callout.warning {
+            border-color: var(--accent-yellow);
+        }
+
+        .callout.warning::before {
+            content: '⚠️ WARNING';
+            color: var(--accent-yellow);
+        }
+
+        .callout.note {
+            border-color: var(--accent-purple);
+        }
+
+        .callout.note::before {
+            content: '📝 NOTE';
+            color: var(--accent-purple);
+        }
+
+        .loop-formula {
+            background: linear-gradient(135deg, rgba(74, 222, 128, 0.1) 0%, rgba(34, 211, 238, 0.1) 100%);
+            border: 2px solid var(--primary);
+            padding: 2rem;
+            margin: 2rem 0;
+            text-align: center;
+        }
+
+        .loop-formula p {
+            font-family: 'Press Start 2P', cursive;
+            font-size: 0.75rem;
+            color: var(--primary);
+            margin: 0;
+            line-height: 1.6;
+        }
+
+        .game-analysis {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            padding: 2rem;
+            margin: 2rem 0;
+            transition: all 0.3s ease;
+        }
+
+        .game-analysis:hover {
+            border-color: var(--accent-cyan);
+        }
+
+        .game-analysis h4 {
+            margin-top: 0;
+            color: var(--accent-cyan);
+            font-size: 1.1rem;
+        }
+
+        .loop-component {
+            margin: 1rem 0;
+            padding-left: 1rem;
+            border-left: 2px solid var(--border);
+        }
+
+        .loop-component strong {
+            color: var(--accent-pink);
+        }
+
+        .nested-loops {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            padding: 2rem;
+            margin: 2rem 0;
+        }
+
+        .nested-loops h4 {
+            margin-top: 0;
+            color: var(--accent-purple);
+        }
+
+        .loop-tier {
+            margin: 1.5rem 0;
+            padding: 1rem;
+            border: 1px solid var(--border);
+        }
+
+        .loop-tier h5 {
+            color: var(--accent-cyan);
+            font-size: 0.9rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .loop-tier ul {
+            margin: 0;
+        }
+
+        .interactive-pause {
+            background: linear-gradient(135deg, rgba(236, 72, 153, 0.1) 0%, rgba(168, 85, 247, 0.1) 100%);
+            border: 2px solid var(--accent-pink);
+            padding: 2rem;
+            margin: 2rem 0;
+            text-align: center;
+        }
+
+        .interactive-pause h3 {
+            margin-top: 0;
+            color: var(--accent-pink);
+        }
+
+        .interactive-pause .pause-icon {
+            font-size: 2rem;
+            margin-bottom: 1rem;
+        }
+
+        .pixel-quest-box {
+            background: var(--bg-card);
+            border: 2px solid var(--accent-purple);
+            padding: 2rem;
+            margin: 2rem 0;
+        }
+
+        .pixel-quest-box h3 {
+            margin-top: 0;
+            color: var(--accent-purple);
+        }
+
+        .pixel-quest-box h4 {
+            color: var(--accent-cyan);
+        }
+
+        .homework-box {
+            background: linear-gradient(135deg, rgba(74, 222, 128, 0.1) 0%, rgba(34, 211, 238, 0.1) 100%);
+            border: 2px solid var(--primary);
+            padding: 2rem;
+            margin: 2rem 0;
+        }
+
+        .homework-box h3 {
+            margin-top: 0;
+            color: var(--primary);
+        }
+
+        .homework-box .task {
+            font-size: 1rem;
+            color: var(--text-primary);
+            font-weight: 700;
+            margin-bottom: 1rem;
+        }
+
+        hr {
+            border: none;
+            border-top: 1px solid var(--border);
+            margin: 3rem 0;
+        }
+
+        .bottom-nav {
+            margin-top: 4rem;
+            padding-top: 2rem;
+            border-top: 1px solid var(--border);
+        }
+
+        .nav-links {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .nav-link {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 1rem 1.5rem;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            color: var(--text-primary);
+            text-decoration: none;
+            font-size: 0.85rem;
+            transition: all 0.3s ease;
+        }
+
+        .nav-link:hover {
+            border-color: var(--primary);
+            color: var(--primary);
+        }
+
+        .nav-link svg {
+            width: 18px;
+            height: 18px;
+        }
+
+        .nav-link.prev svg {
+            transition: transform 0.3s ease;
+        }
+
+        .nav-link.prev:hover svg {
+            transform: translateX(-3px);
+        }
+
+        .nav-link.next svg {
+            transition: transform 0.3s ease;
+        }
+
+        .nav-link.next:hover svg {
+            transform: translateX(3px);
+        }
+
+        .back-to-chapter {
+            display: flex;
+            justify-content: center;
+            margin-top: 1.5rem;
+        }
+
+        .back-to-chapter a {
+            color: var(--text-muted);
+            text-decoration: none;
+            font-size: 0.85rem;
+            transition: color 0.3s ease;
+        }
+
+        .back-to-chapter a:hover {
+            color: var(--primary);
+        }
+
+        footer {
+            border-top: 1px solid var(--border);
+            padding: 2rem;
+            text-align: center;
+            background: var(--bg-card);
+        }
+
+        .footer-content {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .footer-logo {
+            font-family: 'Press Start 2P', cursive;
+            font-size: 0.6rem;
+            color: var(--primary);
+            margin-bottom: 0.5rem;
+        }
+
+        footer p {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+        }
+
+        footer a {
+            color: var(--primary);
+            text-decoration: none;
+        }
+
+        footer a:hover {
+            text-decoration: underline;
+        }
+
+        @media (max-width: 768px) {
+            .hero {
+                padding: 3rem 1.5rem 2rem;
+            }
+
+            main {
+                padding: 2rem 1.5rem 3rem;
+            }
+
+            .hero-meta {
+                flex-direction: column;
+                gap: 0.75rem;
+            }
+
+            .nav-links {
+                flex-direction: column;
+            }
+
+            .nav-link {
+                width: 100%;
+                justify-content: center;
+            }
+
+            .game-analysis {
+                padding: 1.5rem;
+            }
+        }
+
+        .pixel-corner {
+            position: fixed;
+            width: 8px;
+            height: 8px;
+            background: var(--primary);
+            opacity: 0.5;
+        }
+
+        .pixel-corner.top-left { top: 10px; left: 10px; }
+        .pixel-corner.top-right { top: 10px; right: 10px; }
+        .pixel-corner.bottom-left { bottom: 10px; left: 10px; }
+        .pixel-corner.bottom-right { bottom: 10px; right: 10px; }
+    </style>
+</head>
+<body>
+    <div class="bg-grid"></div>
+    <div class="pixel-corner top-left"></div>
+    <div class="pixel-corner top-right"></div>
+    <div class="pixel-corner bottom-left"></div>
+    <div class="pixel-corner bottom-right"></div>
+
+    <header>
+        <div class="header-content">
+            <a href="index.html" class="back-link">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+                </svg>
+                Home
+            </a>
+            <div class="header-nav">
+                <span class="header-section">SECTION 1.3</span>
+            </div>
+        </div>
+    </header>
+
+    <section class="hero">
+        <div class="section-badge">
+            <span class="section-number">1.3</span>
+            <span class="section-label">Section</span>
+        </div>
+        <h1>Defining Your Core Gameplay Loop</h1>
+        <div class="hero-meta">
+            <div class="meta-item">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <span>~12 min read</span>
+            </div>
+            <div class="meta-item">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                </svg>
+                <span>3,433 words</span>
+            </div>
+        </div>
+        <div class="learning-goal">
+            <div class="learning-goal-label">Learning Goal</div>
+            <p>Understand what a gameplay loop is, why it matters, and how to design one that keeps players engaged.</p>
+        </div>
+    </section>
+
+    <main>
+        <article class="content">
+            <h2>What Is a Gameplay Loop?</h2>
+            
+            <p>Imagine you're playing your favorite game. What are you doing, second-to-second, minute-to-minute? You're probably repeating a cycle of actions: move, attack, collect, upgrade, repeat. Or maybe: solve puzzle, reach goal, get harder puzzle, repeat. That cycle—that repeating sequence of actions—is your <strong>gameplay loop</strong>.</p>
+
+            <p>The gameplay loop is the heartbeat of your game. It's the fundamental pattern of play that hooks people and keeps them coming back. When someone says a game is "addictive" or has "one more turn" syndrome, they're talking about a well-designed loop that feels satisfying to repeat.</p>
+
+            <p>Here's why the loop matters so much:</p>
+
+            <ol>
+                <li><strong>It defines what your game actually IS.</strong> Not the story, not the graphics—what the player <em>does</em>.</li>
+                <li><strong>It determines if your game is fun.</strong> If the loop feels good to repeat, your game works. If it's tedious or confusing, no amount of story or polish will save it.</li>
+                <li><strong>It guides all your design decisions.</strong> Every mechanic, level, and feature should support or enhance the core loop.</li>
+            </ol>
+
+            <p>Think of it like the chorus of a song. You might have verses and bridges and outros, but the chorus is what people remember and hum later. Your gameplay loop is that chorus—the part that defines the experience.</p>
+
+            <div class="callout tip">
+                <p>If you can't clearly describe what the player will be doing repeatedly, your concept might not be ready yet. The loop should be simple enough to explain in one sentence.</p>
+            </div>
+
+            <hr>
+
+            <h2>The Gameplay Loop Formula</h2>
+
+            <p>At its simplest, a gameplay loop looks like this:</p>
+
+            <div class="loop-formula">
+                <p>[Player Action] → [Game Response] → [Reward/Consequence] → [Increased Challenge or Motivation] → [Repeat]</p>
+            </div>
+
+            <p>Let's break that down:</p>
+
+            <ol>
+                <li><strong>Player Action:</strong> The player does something—jumps, shoots, places a block, makes a choice.</li>
+                <li><strong>Game Response:</strong> The game reacts immediately—an enemy dies, a platform moves, a dialogue box appears.</li>
+                <li><strong>Reward/Consequence:</strong> The player gets feedback—points, progress, a new area unlocked, or failure and the chance to try again.</li>
+                <li><strong>Increased Challenge/Motivation:</strong> The game nudges the player forward—a harder level, a new tool, a story beat, curiosity about what's next.</li>
+                <li><strong>Repeat:</strong> The player does it again because it was satisfying or because they want to see what comes next.</li>
+            </ol>
+
+            <p>This formula applies to almost every game, from Tetris to The Witcher 3. The complexity might vary wildly, but the underlying structure is the same.</p>
+
+            <p>Let's see this formula in action with some real examples.</p>
+
+            <hr>
+
+            <h2>Analyzing Gameplay Loops</h2>
+
+            <h3>Example 1: Angry Birds (Simple Loop)</h3>
+
+            <div class="game-analysis">
+                <h4>🎯 Angry Birds</h4>
+                
+                <div class="loop-component">
+                    <p><strong>Player Action:</strong> You aim the slingshot and launch a bird toward a structure.</p>
+                </div>
+
+                <div class="loop-component">
+                    <p><strong>Game Response:</strong> Physics kick in—the bird flies through the air, hits blocks, and structures collapse (or don't).</p>
+                </div>
+
+                <div class="loop-component">
+                    <p><strong>Reward/Consequence:</strong></p>
+                    <ul>
+                        <li>If you destroy all the pigs: You win, get a score, see a satisfying explosion of debris and stars.</li>
+                        <li>If you fail: You see what went wrong (where the bird landed, what didn't break) and get to immediately try again.</li>
+                    </ul>
+                </div>
+
+                <div class="loop-component">
+                    <p><strong>Increased Challenge/Motivation:</strong> Each level adds complexity—tougher structures, more pigs, different bird abilities. You want to beat the level, get three stars, or try the next challenge.</p>
+                </div>
+
+                <div class="loop-component">
+                    <p><strong>Repeat:</strong> Launch, watch destruction, retry or advance. The loop takes seconds and feels viscerally satisfying because of the physics and visual feedback.</p>
+                </div>
+
+                <p><strong>Why it works:</strong> The loop is <em>fast</em> (you're not waiting long between tries), <em>clear</em> (you know if you succeeded or failed instantly), and <em>satisfying</em> (watching structures crumble is fun). Even when you fail, the loop makes you want to try "just one more time."</p>
+            </div>
+
+            <div class="callout tip">
+                <p>Notice how immediate feedback is. You don't wait—launch, impact, result, next. Fast loops keep players engaged because there's no downtime.</p>
+            </div>
+
+            <h3>Example 2: Stardew Valley (Layered Loop)</h3>
+
+            <div class="game-analysis">
+                <h4>🌾 Stardew Valley</h4>
+                
+                <p>Stardew Valley is more complex, with multiple loops happening at different scales. Let's focus on the core <strong>daily farming loop</strong>:</p>
+
+                <div class="loop-component">
+                    <p><strong>Player Action:</strong> You plant seeds, water crops, tend animals, and explore your farm each in-game day.</p>
+                </div>
+
+                <div class="loop-component">
+                    <p><strong>Game Response:</strong> Crops grow (visually changing day by day), animals produce eggs/milk, resources accumulate in your inventory.</p>
+                </div>
+
+                <div class="loop-component">
+                    <p><strong>Reward/Consequence:</strong></p>
+                    <ul>
+                        <li>Crops mature and you harvest them for gold or crafting materials.</li>
+                        <li>That gold lets you buy better seeds, tools, or farm expansions.</li>
+                        <li>You might also unlock new areas, meet villagers, or trigger story events.</li>
+                    </ul>
+                </div>
+
+                <div class="loop-component">
+                    <p><strong>Increased Challenge/Motivation:</strong></p>
+                    <ul>
+                        <li>Seasons change, bringing new crops and challenges (some crops only grow in spring, others in summer).</li>
+                        <li>You set personal goals—"I want to complete the community center" or "I want to romance this character."</li>
+                        <li>The game introduces deeper systems: fishing, mining, relationships, festivals.</li>
+                    </ul>
+                </div>
+
+                <div class="loop-component">
+                    <p><strong>Repeat:</strong> Each day you wake up, tend your farm, make progress, go to bed, and start the next day a little stronger or richer. The loop resets daily but carries forward your progression.</p>
+                </div>
+
+                <p><strong>Why it works:</strong> The loop is <em>relaxing</em> (you set your own pace), <em>progressive</em> (you always see tangible growth), and <em>open-ended</em> (you decide what to focus on). There's no fail state—just constant forward motion and the satisfaction of building something over time.</p>
+            </div>
+
+            <div class="callout note">
+                <p>Stardew Valley actually has multiple loops—a daily loop (tending the farm), a seasonal loop (preparing for each season's crops), and a long-term loop (completing the community center or other major goals). We'll talk more about this later.</p>
+            </div>
+
+            <h3>Example 3: Minecraft (Exploration & Crafting Loop)</h3>
+
+            <div class="game-analysis">
+                <h4>⛏️ Minecraft</h4>
+                
+                <p>Minecraft's genius is that its loop is almost entirely player-driven. There's no "correct" way to play, but the core loop looks like this:</p>
+
+                <div class="loop-component">
+                    <p><strong>Player Action:</strong> You explore the world, mine resources (wood, stone, ores), and gather materials.</p>
+                </div>
+
+                <div class="loop-component">
+                    <p><strong>Game Response:</strong> Blocks break, items drop into your inventory, the world reacts (dig too deep and you might find lava or caves).</p>
+                </div>
+
+                <div class="loop-component">
+                    <p><strong>Reward/Consequence:</strong></p>
+                    <ul>
+                        <li>You collect resources that let you craft tools, build structures, or create new items.</li>
+                        <li>Better tools let you mine harder materials (stone tools → iron tools → diamond tools).</li>
+                        <li>Building gives you shelter, farms, or creative expression.</li>
+                    </ul>
+                </div>
+
+                <div class="loop-component">
+                    <p><strong>Increased Challenge/Motivation:</strong></p>
+                    <ul>
+                        <li>Survival mode adds danger (hunger, enemies at night), motivating you to build shelter and gear.</li>
+                        <li>Curiosity drives exploration—"What's over that hill? Is there a village nearby? What's in this cave?"</li>
+                        <li>Creative goals emerge: "I want to build a castle" or "I want to find diamonds."</li>
+                    </ul>
+                </div>
+
+                <div class="loop-component">
+                    <p><strong>Repeat:</strong> Mine, craft, build, explore, discover, mine more, craft better tools, explore further. The loop scales infinitely because you always have new goals—whether that's defeating the Ender Dragon or building a scale replica of the Eiffel Tower.</p>
+                </div>
+
+                <p><strong>Why it works:</strong> The loop is <em>modular</em> (you can focus on building, exploring, or combat based on mood), <em>progressive</em> (better tools unlock new possibilities), and <em>creative</em> (you set your own goals). Minecraft trusts you to find fun within the loop.</p>
+            </div>
+
+            <div class="callout tip">
+                <p>Player-driven loops work when the systems are deep enough to support creativity. If your game gives players tools and freedom, they'll create their own challenges and goals.</p>
+            </div>
+
+            <h3>Example 4: Celeste (Precision Platforming Loop)</h3>
+
+            <div class="game-analysis">
+                <h4>🏔️ Celeste</h4>
+                
+                <p>Celeste's loop is extremely tight and focused—it's all about mastering movement through challenging screens.</p>
+
+                <div class="loop-component">
+                    <p><strong>Player Action:</strong> You move, jump, dash (one air-dash per jump), and climb to navigate obstacles and reach the goal at the end of each screen.</p>
+                </div>
+
+                <div class="loop-component">
+                    <p><strong>Game Response:</strong></p>
+                    <ul>
+                        <li>Your character reacts instantly—movement is pixel-perfect and responsive.</li>
+                        <li>The environment responds: platforms may move, hazards kill you instantly, checkpoints save your progress.</li>
+                    </ul>
+                </div>
+
+                <div class="loop-component">
+                    <p><strong>Reward/Consequence:</strong></p>
+                    <ul>
+                        <li><strong>Success:</strong> You reach the end of the screen, feel a rush of accomplishment, and move to the next (slightly harder) screen.</li>
+                        <li><strong>Failure:</strong> You die instantly but respawn at the last checkpoint within a second. Death count is tracked but there's no punishment—just encouragement to try again.</li>
+                    </ul>
+                </div>
+
+                <div class="loop-component">
+                    <p><strong>Increased Challenge/Motivation:</strong></p>
+                    <ul>
+                        <li>Each screen introduces a new obstacle or mechanic (moving platforms, wind, disappearing blocks, new movement abilities).</li>
+                        <li>The difficulty ramps smoothly—you're always challenged but rarely overwhelmed.</li>
+                        <li>Story beats and characters between chapters give emotional context to your climb.</li>
+                    </ul>
+                </div>
+
+                <div class="loop-component">
+                    <p><strong>Repeat:</strong> Attempt screen, fail, learn, retry, succeed, next screen. The loop can happen dozens of times per minute, and each success feels earned.</p>
+                </div>
+
+                <p><strong>Why it works:</strong> The loop is <em>instant</em> (no waiting after death), <em>fair</em> (you always know why you died), and <em>rewarding</em> (success feels amazing because the challenge was real). The game respects your time by making retries fast and seamless.</p>
+            </div>
+
+            <div class="callout warning">
+                <p>If your loop involves frustration (unfair deaths, unclear goals, long waits), players will quit. Celeste avoids this by making every death feel like a learning opportunity, not a punishment.</p>
+            </div>
+
+            <h3>Example 5: Portal (Puzzle-Solving Loop)</h3>
+
+            <div class="game-analysis">
+                <h4>🔵 Portal</h4>
+                
+                <p>Portal's loop is all about experimentation and "aha!" moments.</p>
+
+                <div class="loop-component">
+                    <p><strong>Player Action:</strong> You're placed in a test chamber with a puzzle. You experiment—place portals, move objects, test ideas.</p>
+                </div>
+
+                <div class="loop-component">
+                    <p><strong>Game Response:</strong></p>
+                    <ul>
+                        <li>Portals appear where you shoot them (or don't, if the surface isn't valid).</li>
+                        <li>Objects fall through portals, momentum is preserved, physics interact.</li>
+                        <li>You either solve the puzzle and unlock the exit, or your idea doesn't work and you try something else.</li>
+                    </ul>
+                </div>
+
+                <div class="loop-component">
+                    <p><strong>Reward/Consequence:</strong></p>
+                    <ul>
+                        <li><strong>Success:</strong> The exit opens, GLaDOS (the AI antagonist) comments (often sarcastically), and you move to the next chamber.</li>
+                        <li><strong>Failure:</strong> Nothing punishes you—just try a different approach. The game encourages experimentation.</li>
+                    </ul>
+                </div>
+
+                <div class="loop-component">
+                    <p><strong>Increased Challenge/Motivation:</strong></p>
+                    <ul>
+                        <li>Each chamber introduces a new element: buttons, cubes, turrets, energy balls, moving platforms.</li>
+                        <li>Solutions become less obvious—early chambers teach, later chambers test your creativity.</li>
+                        <li>The darkly funny story and GLaDOS's personality keep you engaged between puzzles.</li>
+                    </ul>
+                </div>
+
+                <div class="loop-component">
+                    <p><strong>Repeat:</strong> Enter chamber, analyze puzzle, experiment, solve, hear GLaDOS quip, move to next chamber. The loop can take minutes per puzzle, but the pacing keeps you hooked.</p>
+                </div>
+
+                <p><strong>Why it works:</strong> The loop is <em>mentally satisfying</em> (solving feels smart), <em>forgiving</em> (no punishment for experimenting), and <em>progressive</em> (each puzzle builds on past knowledge). Portal respects your intelligence and rewards creative thinking.</p>
+            </div>
+
+            <div class="callout tip">
+                <p>Puzzle game loops need to balance challenge and frustration. If a puzzle is too hard, players get stuck. If it's too easy, they get bored. Playtest relentlessly to find that sweet spot.</p>
+            </div>
+
+            <hr>
+
+            <h2>Core Loop vs. Meta Loop</h2>
+
+            <div class="nested-loops">
+                <h4>Understanding Nested Loops</h4>
+                
+                <p>You might've noticed that some games have loops within loops. That's intentional. Let's clarify:</p>
+
+                <div class="loop-tier">
+                    <h5>Core Loop (Moment-to-Moment Gameplay)</h5>
+                    <p>This is what you're doing second-to-second or minute-to-minute. It's the immediate, repeating action.</p>
+                    <ul>
+                        <li><strong>Celeste:</strong> Move, jump, dash, navigate obstacle, reach goal, next screen.</li>
+                        <li><strong>Portal:</strong> Analyze puzzle, place portals, test solution, solve, next puzzle.</li>
+                        <li><strong>Angry Birds:</strong> Aim, launch, watch result, retry or advance.</li>
+                    </ul>
+                    <p>The core loop is tight, focused, and happens frequently. If this loop isn't fun, your game isn't fun.</p>
+                </div>
+
+                <div class="loop-tier">
+                    <h5>Meta Loop (Long-Term Progression)</h5>
+                    <p>This is what you're working toward over hours or days of play. It's the overarching structure that gives the core loop purpose.</p>
+                    <ul>
+                        <li><strong>Stardew Valley:</strong> Complete the community center, max out relationships, expand your farm.</li>
+                        <li><strong>Minecraft:</strong> Defeat the Ender Dragon, build a mega-structure, explore every biome.</li>
+                        <li><strong>Celeste:</strong> Climb the mountain, unlock B-sides and C-sides, collect strawberries.</li>
+                    </ul>
+                    <p>The meta loop gives context and motivation. It's why you keep playing even after repeating the core loop hundreds of times.</p>
+                </div>
+
+                <p><strong>Why Both Matter:</strong></p>
+                <ul>
+                    <li><strong>Core loop = fun.</strong> If the moment-to-moment gameplay isn't engaging, players quit early.</li>
+                    <li><strong>Meta loop = retention.</strong> If there's no long-term goal or progression, players get bored even if the core loop is fun.</li>
+                </ul>
+            </div>
+
+            <p>For your first game, <strong>focus on nailing the core loop</strong>. You can add meta-progression later if time allows, but the core loop is non-negotiable.</p>
+
+            <div class="callout warning">
+                <p>Don't confuse progression systems with fun. A game where you "level up" but the core loop is boring will still fail. Make the loop fun first, then add rewards and progression.</p>
+            </div>
+
+            <hr>
+
+            <h2>Interactive Exercise</h2>
+
+            <div class="interactive-pause">
+                <div class="pause-icon">⏸️</div>
+                <h3>Your Turn: Analyze Your Favorite Game</h3>
+                <p>Pause and think about YOUR favorite game. Any game.</p>
+                <p><strong>Ask yourself:</strong></p>
+                <ol>
+                    <li>What's the action I do repeatedly?</li>
+                    <li>What feedback does the game give me?</li>
+                    <li>What's my reward?</li>
+                    <li>Why do I want to do it again?</li>
+                </ol>
+                <p>Write it down in four bullet points. Map the loop.</p>
+                <p><strong>Take a minute. I'll wait.</strong></p>
+            </div>
+
+            <p>Did you figure it out? I bet you did. Once you SEE the loop, you can't unsee it.</p>
+
+            <hr>
+
+            <h2>Designing Your Own Gameplay Loop: Pixel Quest Example</h2>
+
+            <div class="pixel-quest-box">
+                <h3>🎮 Pixel Quest: Core Gameplay Loop</h3>
+                
+                <p>Let's design Pixel Quest's core gameplay loop right now. Remember: Pixel Quest is a 2D platformer where you're a single pixel navigating glitching computer environments.</p>
+
+                <h4>Player Action</h4>
+                <p>Navigate pixel through glitching platforms and obstacles. Jump, dash, squeeze through tiny gaps.</p>
+
+                <h4>Game Response</h4>
+                <ul>
+                    <li><strong>Visual:</strong> Glitch effects when you interact with corrupted areas</li>
+                    <li><strong>Audio:</strong> Digital blips and error sounds</li>
+                    <li><strong>Tactile:</strong> Tight, responsive controls (jump feels GOOD)</li>
+                </ul>
+
+                <h4>Reward</h4>
+                <ul>
+                    <li><strong>Immediate:</strong> Reach checkpoint/safe zone (satisfying "error resolved" animation)</li>
+                    <li><strong>Short-term:</strong> Collect data fragments that reveal story bits</li>
+                    <li><strong>Long-term:</strong> Unlock new areas of the corrupted system</li>
+                </ul>
+
+                <h4>Motivation to Repeat</h4>
+                <ul>
+                    <li><strong>Core:</strong> "That platforming felt tight, I want to perfect my run"</li>
+                    <li><strong>Meta:</strong> "I need more data fragments to understand what happened to this system"</li>
+                </ul>
+
+                <h4>The Meta Loop</h4>
+                <p>Explore corrupted system → Collect data fragments → Unlock story revelations → Access new zones → Discover what caused the glitch → Final confrontation with corrupted AI.</p>
+
+                <p><strong>Core loop keeps you engaged room to room. Meta loop keeps you playing hour to hour.</strong></p>
+            </div>
+
+            <hr>
+
+            <h2>Summary</h2>
+
+            <p>Let's bring it home. The core gameplay loop is your foundation:</p>
+
+            <div class="loop-formula">
+                <p>ACTION → FEEDBACK → REWARD → REPEAT</p>
+            </div>
+
+            <ul>
+                <li><strong>ACTION</strong> - What the player does</li>
+                <li><strong>FEEDBACK</strong> - How the game responds</li>
+                <li><strong>REWARD</strong> - What the player gains</li>
+                <li><strong>REPEAT</strong> - Why they want to do it again</li>
+            </ul>
+
+            <p>Good games have a satisfying core loop (moment to moment) AND a compelling meta loop (long-term progression).</p>
+
+            <div class="homework-box">
+                <h3>📝 Your Homework</h3>
+                <p class="task">Write your game's core loop in one sentence using the formula:</p>
+                <p>"The player [ACTION], receives [FEEDBACK], earns [REWARD], and is motivated to [REPEAT] because [REASON]."</p>
+                <p>If you can't write it in one sentence, your loop might be too complicated. Simple is good. Tetris is simple. Mario is simple. Simple loops, deeply executed.</p>
+            </div>
+
+        </article>
+
+        <nav class="bottom-nav">
+            <div class="nav-links">
+                <a href="ch1sec2.html" class="nav-link prev">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+                    </svg>
+                    1.2 Brainstorming Techniques
+                </a>
+                <a href="ch1sec4.html" class="nav-link next">
+                    1.4 Basic Story Structure
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                    </svg>
+                </a>
+            </div>
+            <div class="back-to-chapter">
+                <a href="ch1.html">← Back to Chapter 1</a>
+            </div>
+        </nav>
+    </main>
+
+    <footer>
+        <div class="footer-content">
+            <div class="footer-logo">SLCC GAME DEV WORKSHOP</div>
+            <p><a href="index.html">Home</a> · <a href="ch1.html">Chapter 1</a></p>
+        </div>
+    </footer>
+</body>
+</html>
