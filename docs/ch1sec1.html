@@ -1,0 +1,974 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>1.1 Game Concepts & Genres | SLCC Game Dev Workshop</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #4ade80;
+            --primary-dim: #22c55e;
+            --primary-glow: rgba(74, 222, 128, 0.3);
+            --bg-dark: #0a0a0f;
+            --bg-card: #12121a;
+            --bg-card-hover: #1a1a25;
+            --text-primary: #e4e4e7;
+            --text-muted: #71717a;
+            --border: #27272a;
+            --accent-purple: #a855f7;
+            --accent-cyan: #22d3ee;
+            --accent-pink: #ec4899;
+            --accent-yellow: #facc15;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: 'Space Mono', monospace;
+            background-color: var(--bg-dark);
+            color: var(--text-primary);
+            line-height: 1.8;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* Scanline overlay */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            background: repeating-linear-gradient(
+                0deg,
+                transparent,
+                transparent 2px,
+                rgba(0, 0, 0, 0.1) 2px,
+                rgba(0, 0, 0, 0.1) 4px
+            );
+            z-index: 1000;
+            opacity: 0.3;
+        }
+
+        /* Grid background */
+        .bg-grid {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                linear-gradient(rgba(74, 222, 128, 0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(74, 222, 128, 0.03) 1px, transparent 1px);
+            background-size: 50px 50px;
+            z-index: -1;
+        }
+
+        /* Header */
+        header {
+            padding: 1.5rem 2rem;
+            border-bottom: 1px solid var(--border);
+            background: linear-gradient(180deg, rgba(74, 222, 128, 0.05) 0%, transparent 100%);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            backdrop-filter: blur(10px);
+        }
+
+        .header-content {
+            max-width: 900px;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--text-muted);
+            text-decoration: none;
+            font-size: 0.85rem;
+            transition: all 0.3s ease;
+        }
+
+        .back-link:hover {
+            color: var(--primary);
+        }
+
+        .back-link svg {
+            width: 18px;
+            height: 18px;
+            transition: transform 0.3s ease;
+        }
+
+        .back-link:hover svg {
+            transform: translateX(-3px);
+        }
+
+        .header-nav {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .header-section {
+            font-family: 'Press Start 2P', cursive;
+            font-size: 0.6rem;
+            color: var(--primary);
+            letter-spacing: 0.05em;
+        }
+
+        /* Hero */
+        .hero {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 4rem 2rem 3rem;
+            border-bottom: 1px solid var(--border);
+            animation: fadeInUp 0.6s ease-out;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .section-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .section-number {
+            font-family: 'Press Start 2P', cursive;
+            font-size: 0.9rem;
+            color: var(--bg-dark);
+            background: var(--accent-cyan);
+            padding: 0.5rem 1rem;
+        }
+
+        .section-label {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+        }
+
+        .hero h1 {
+            font-size: clamp(1.5rem, 4vw, 2.25rem);
+            line-height: 1.4;
+            margin-bottom: 1rem;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        .learning-goal {
+            background: var(--bg-card);
+            border-left: 3px solid var(--primary);
+            padding: 1rem 1.5rem;
+            margin-top: 1.5rem;
+        }
+
+        .learning-goal-label {
+            font-size: 0.7rem;
+            color: var(--primary);
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            margin-bottom: 0.5rem;
+            font-weight: 700;
+        }
+
+        .learning-goal p {
+            color: var(--text-muted);
+            font-size: 0.95rem;
+            margin: 0;
+        }
+
+        .hero-meta {
+            display: flex;
+            gap: 2rem;
+            margin-top: 1.5rem;
+        }
+
+        .meta-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+
+        .meta-item svg {
+            width: 16px;
+            height: 16px;
+            color: var(--primary);
+        }
+
+        /* Main Content */
+        main {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 3rem 2rem 4rem;
+        }
+
+        /* Typography */
+        .content h2 {
+            font-family: 'Press Start 2P', cursive;
+            font-size: 0.85rem;
+            color: var(--primary);
+            margin-top: 3rem;
+            margin-bottom: 1.5rem;
+            padding-bottom: 0.75rem;
+            border-bottom: 1px solid var(--border);
+            letter-spacing: 0.05em;
+        }
+
+        .content h2:first-child {
+            margin-top: 0;
+        }
+
+        .content h3 {
+            font-size: 1.25rem;
+            color: var(--text-primary);
+            margin-top: 2.5rem;
+            margin-bottom: 1rem;
+            font-weight: 700;
+        }
+
+        .content h4 {
+            font-size: 1rem;
+            color: var(--accent-cyan);
+            margin-top: 2rem;
+            margin-bottom: 0.75rem;
+            font-weight: 700;
+        }
+
+        .content p {
+            margin-bottom: 1.25rem;
+            color: var(--text-primary);
+            font-size: 0.95rem;
+        }
+
+        .content strong {
+            color: var(--text-primary);
+            font-weight: 700;
+        }
+
+        .content em {
+            color: var(--text-muted);
+            font-style: italic;
+        }
+
+        .content ul, .content ol {
+            margin-bottom: 1.5rem;
+            padding-left: 1.5rem;
+        }
+
+        .content li {
+            margin-bottom: 0.75rem;
+            color: var(--text-primary);
+            font-size: 0.95rem;
+        }
+
+        .content li::marker {
+            color: var(--primary);
+        }
+
+        /* Callout Boxes */
+        .callout {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            padding: 1.25rem 1.5rem;
+            margin: 1.5rem 0;
+            position: relative;
+        }
+
+        .callout::before {
+            font-family: 'Press Start 2P', cursive;
+            font-size: 0.55rem;
+            position: absolute;
+            top: -0.6rem;
+            left: 1rem;
+            padding: 0.2rem 0.5rem;
+            background: var(--bg-dark);
+        }
+
+        .callout p {
+            margin: 0;
+            font-size: 0.9rem;
+        }
+
+        .callout.tip {
+            border-color: var(--primary);
+        }
+
+        .callout.tip::before {
+            content: '💡 TIP';
+            color: var(--primary);
+        }
+
+        .callout.warning {
+            border-color: var(--accent-yellow);
+        }
+
+        .callout.warning::before {
+            content: '⚠️ WARNING';
+            color: var(--accent-yellow);
+        }
+
+        .callout.note {
+            border-color: var(--accent-purple);
+        }
+
+        .callout.note::before {
+            content: '📝 NOTE';
+            color: var(--accent-purple);
+        }
+
+        /* Example boxes */
+        .example-box {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            padding: 1.5rem;
+            margin: 1.5rem 0;
+        }
+
+        .example-box h4 {
+            margin-top: 0;
+            color: var(--accent-cyan);
+        }
+
+        .example-box p:last-child {
+            margin-bottom: 0;
+        }
+
+        /* Genre Card */
+        .genre-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            padding: 2rem;
+            margin: 2rem 0;
+            transition: all 0.3s ease;
+        }
+
+        .genre-card:hover {
+            border-color: var(--accent-cyan);
+        }
+
+        .genre-card h3 {
+            margin-top: 0;
+            color: var(--accent-cyan);
+        }
+
+        .genre-card .core-focus {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            font-style: italic;
+            margin-bottom: 1rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        /* Tables */
+        .table-wrapper {
+            overflow-x: auto;
+            margin: 2rem 0;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.85rem;
+        }
+
+        th {
+            background: var(--bg-card);
+            color: var(--primary);
+            font-weight: 700;
+            text-align: left;
+            padding: 1rem;
+            border: 1px solid var(--border);
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        td {
+            padding: 1rem;
+            border: 1px solid var(--border);
+            color: var(--text-primary);
+        }
+
+        tr:hover td {
+            background: var(--bg-card);
+        }
+
+        /* Concept Examples List */
+        .concept-list {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            padding: 1.5rem;
+            margin: 1.5rem 0;
+        }
+
+        .concept-list ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .concept-list li {
+            padding: 0.75rem 0;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .concept-list li:last-child {
+            border-bottom: none;
+            padding-bottom: 0;
+        }
+
+        .concept-list li:first-child {
+            padding-top: 0;
+        }
+
+        /* Horizontal Rule */
+        hr {
+            border: none;
+            border-top: 1px solid var(--border);
+            margin: 3rem 0;
+        }
+
+        /* Bottom Navigation */
+        .bottom-nav {
+            margin-top: 4rem;
+            padding-top: 2rem;
+            border-top: 1px solid var(--border);
+        }
+
+        .nav-links {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .nav-link {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 1rem 1.5rem;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            color: var(--text-primary);
+            text-decoration: none;
+            font-size: 0.85rem;
+            transition: all 0.3s ease;
+        }
+
+        .nav-link:hover {
+            border-color: var(--primary);
+            color: var(--primary);
+        }
+
+        .nav-link svg {
+            width: 18px;
+            height: 18px;
+        }
+
+        .nav-link.prev svg {
+            transition: transform 0.3s ease;
+        }
+
+        .nav-link.prev:hover svg {
+            transform: translateX(-3px);
+        }
+
+        .nav-link.next svg {
+            transition: transform 0.3s ease;
+        }
+
+        .nav-link.next:hover svg {
+            transform: translateX(3px);
+        }
+
+        .nav-link.disabled {
+            opacity: 0.5;
+            pointer-events: none;
+        }
+
+        .back-to-chapter {
+            display: flex;
+            justify-content: center;
+            margin-top: 1.5rem;
+        }
+
+        .back-to-chapter a {
+            color: var(--text-muted);
+            text-decoration: none;
+            font-size: 0.85rem;
+            transition: color 0.3s ease;
+        }
+
+        .back-to-chapter a:hover {
+            color: var(--primary);
+        }
+
+        /* Footer */
+        footer {
+            border-top: 1px solid var(--border);
+            padding: 2rem;
+            text-align: center;
+            background: var(--bg-card);
+        }
+
+        .footer-content {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .footer-logo {
+            font-family: 'Press Start 2P', cursive;
+            font-size: 0.6rem;
+            color: var(--primary);
+            margin-bottom: 0.5rem;
+        }
+
+        footer p {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+        }
+
+        footer a {
+            color: var(--primary);
+            text-decoration: none;
+        }
+
+        footer a:hover {
+            text-decoration: underline;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .hero {
+                padding: 3rem 1.5rem 2rem;
+            }
+
+            main {
+                padding: 2rem 1.5rem 3rem;
+            }
+
+            .hero-meta {
+                flex-direction: column;
+                gap: 0.75rem;
+            }
+
+            .nav-links {
+                flex-direction: column;
+            }
+
+            .nav-link {
+                width: 100%;
+                justify-content: center;
+            }
+
+            .genre-card {
+                padding: 1.5rem;
+            }
+        }
+
+        /* Pixel corners */
+        .pixel-corner {
+            position: fixed;
+            width: 8px;
+            height: 8px;
+            background: var(--primary);
+            opacity: 0.5;
+        }
+
+        .pixel-corner.top-left { top: 10px; left: 10px; }
+        .pixel-corner.top-right { top: 10px; right: 10px; }
+        .pixel-corner.bottom-left { bottom: 10px; left: 10px; }
+        .pixel-corner.bottom-right { bottom: 10px; right: 10px; }
+    </style>
+</head>
+<body>
+    <div class="bg-grid"></div>
+    <div class="pixel-corner top-left"></div>
+    <div class="pixel-corner top-right"></div>
+    <div class="pixel-corner bottom-left"></div>
+    <div class="pixel-corner bottom-right"></div>
+
+    <header>
+        <div class="header-content">
+            <a href="index.html" class="back-link">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+                </svg>
+                Home
+            </a>
+            <div class="header-nav">
+                <span class="header-section">SECTION 1.1</span>
+            </div>
+        </div>
+    </header>
+
+    <section class="hero">
+        <div class="section-badge">
+            <span class="section-number">1.1</span>
+            <span class="section-label">Section</span>
+        </div>
+        <h1>Introduction to Game Concepts and Genres</h1>
+        <div class="hero-meta">
+            <div class="meta-item">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <span>~10 min read</span>
+            </div>
+            <div class="meta-item">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                </svg>
+                <span>2,494 words</span>
+            </div>
+        </div>
+        <div class="learning-goal">
+            <div class="learning-goal-label">Learning Goal</div>
+            <p>Understand what makes a strong game concept and explore the major game genres to find what excites you.</p>
+        </div>
+    </section>
+
+    <main>
+        <article class="content">
+            <h2>What Is a Game Concept, Anyway?</h2>
+            
+            <p>Here's the thing: when you're just starting out in game development, one of the scariest moments is staring at a blank page and thinking, "What game should I make?" You might feel like you need a fully-fleshed-out masterpiece with detailed mechanics, complex storylines, and groundbreaking innovation. Spoiler alert: <strong>you absolutely don't</strong>.</p>
+
+            <p>A game concept isn't your complete design document. It's not every mechanic, every level, or every line of dialogue. Think of it as your elevator pitch—the core idea that captures what your game is about in one or two sentences. For example:</p>
+
+            <div class="concept-list">
+                <ul>
+                    <li><strong>Portal:</strong> "A puzzle game where you solve challenges using a gun that creates teleportation portals."</li>
+                    <li><strong>Celeste:</strong> "A challenging platformer about climbing a mountain while dealing with anxiety and self-doubt."</li>
+                    <li><strong>Stardew Valley:</strong> "A farming simulation where you restore your grandfather's old farm and build relationships with townsfolk."</li>
+                </ul>
+            </div>
+
+            <p>See the pattern? These are simple, clear, and immediately give you a sense of what the game <em>is</em>. Your first concept doesn't need to be revolutionary—it just needs to be <strong>clear and exciting to you</strong>. That excitement will fuel you through the learning process.</p>
+
+            <div class="callout tip">
+                <p>If you can't explain your game concept to a friend in 30 seconds, it might be too complex. Simplicity is your friend when you're starting out!</p>
+            </div>
+
+            <hr>
+
+            <h2>Why Genres Matter (And Why They Don't)</h2>
+
+            <p>Before we dive into your own concept, let's talk about game genres. Genres are basically categories that group games by their core gameplay style. Think of them like music genres—just as "rock" tells you something about what a song might sound like, "platformer" tells you something about what a game might play like.</p>
+
+            <p>Here's why understanding genres is useful for beginners:</p>
+
+            <ol>
+                <li><strong>They give you a starting point.</strong> Instead of "I want to make a game," you can say "I want to make a puzzle game," which immediately narrows your focus.</li>
+                <li><strong>They help you study similar games.</strong> If you're making a platformer, you can play and analyze other platformers to understand what works.</li>
+                <li><strong>They set player expectations.</strong> Players understand genres, so saying "it's a roguelike" instantly communicates certain mechanics.</li>
+            </ol>
+
+            <p>But here's the important part: <strong>genres aren't prison cells</strong>. You're not locked into one category forever. Some of the most interesting games blend genres (think Undertale mixing RPG with bullet-hell mechanics, or Portal combining puzzles with first-person action). For your first project, though, picking one primary genre and keeping things simple will help you actually finish something.</p>
+
+            <hr>
+
+            <h2>The Major Game Genres (Your Playground)</h2>
+
+            <p>Let's walk through the major genres you'll encounter. As you read each one, pay attention to which ones make you think, "Ooh, I'd love to try making that!"</p>
+
+            <div class="genre-card">
+                <h3>Platformer</h3>
+                <p class="core-focus"><strong>Core Focus:</strong> Precise movement, jumping, navigating obstacles</p>
+                
+                <p>Platformers are all about getting from point A to point B by running, jumping, and avoiding hazards. The appeal? Tight, responsive controls that feel satisfying to master. Think about Super Mario Bros—the core fun comes from the simple joy of momentum and timing your jumps perfectly.</p>
+
+                <h4>Modern Example: Celeste</h4>
+                <p>Celeste is a masterclass in tight platforming. You control Madeline as she climbs a mountain, and the game constantly introduces new mechanics (dash moves, moving platforms, wind physics) that keep the challenge fresh. What makes it beginner-friendly to study? The levels are bite-sized, and each screen teaches one clear lesson. You can see exactly how the designers layer difficulty.</p>
+
+                <p><strong>Why it's appealing for beginners:</strong> Platformers teach you fundamental game design—how player movement feels, how to pace challenges, how to reward mastery. Plus, the core loop (move, jump, overcome obstacle, repeat) is crystal clear.</p>
+
+                <div class="callout tip">
+                    <p>If you love the feeling of mastering precise controls and want to focus on level design, platformers are your jam.</p>
+                </div>
+            </div>
+
+            <div class="genre-card">
+                <h3>Puzzle</h3>
+                <p class="core-focus"><strong>Core Focus:</strong> Problem-solving, logical thinking, "aha!" moments</p>
+                
+                <p>Puzzle games challenge your brain, not your reflexes. The satisfaction comes from figuring out the solution—that moment when the pieces click together. These games can range from abstract (Tetris) to narrative-driven (The Witness) to physics-based (Portal).</p>
+
+                <h4>Modern Example: Portal</h4>
+                <p>Portal is legendary for a reason. You're given one tool—a portal gun—and the entire game is about creative problem-solving using that single mechanic. Each test chamber introduces a new wrinkle (moving platforms, energy balls, turrets) that forces you to think differently. The genius? The mechanic is simple, but the combinations are endlessly creative.</p>
+
+                <p><strong>Why it's appealing for beginners:</strong> Puzzle games often focus on one or two core mechanics, which means you can keep your scope manageable. You're designing challenges, not complex combat systems or sprawling worlds. Plus, puzzle design teaches you to think like a player—what's intuitive? What's too hard? What's satisfying?</p>
+
+                <div class="callout warning">
+                    <p>Don't make puzzles so hard that only you can solve them! Playtest early and watch real people struggle (in a good way).</p>
+                </div>
+            </div>
+
+            <div class="genre-card">
+                <h3>RPG (Role-Playing Game)</h3>
+                <p class="core-focus"><strong>Core Focus:</strong> Character progression, choice-driven narrative, exploration</p>
+                
+                <p>RPGs put you in the role of a character (or party of characters) who grows stronger over time. You'll explore worlds, make choices, fight battles, and often get deeply invested in the story. RPGs can be action-focused (Dark Souls), turn-based (classic Final Fantasy), or narrative-heavy (Disco Elysium).</p>
+
+                <h4>Modern Example: Undertale</h4>
+                <p>Undertale is proof that RPGs don't need huge budgets or massive teams. It's a quirky, heartfelt game where your choices actually matter—you can fight monsters or spare them, and the game remembers. The combat mixes traditional turn-based mechanics with bullet-hell dodging, creating something fresh. What makes it special? The writing, the characters, and the sense that your decisions have weight.</p>
+
+                <p><strong>Why it's appealing for beginners:</strong> RPGs let you focus on storytelling and systems design (like leveling up or inventory management) rather than fast-paced action. If you love world-building and characters, this genre gives you room to flex those creative muscles.</p>
+
+                <div class="callout tip">
+                    <p>Your first RPG doesn't need 50 hours of content. A tight 30-minute experience with meaningful choices can be just as impactful.</p>
+                </div>
+            </div>
+
+            <div class="genre-card">
+                <h3>Simulation</h3>
+                <p class="core-focus"><strong>Core Focus:</strong> Replicating real-world systems, resource management, sandbox creativity</p>
+                
+                <p>Simulation games let you manage systems—whether that's a farm, a city, a theme park, or even someone's daily life (looking at you, The Sims). The appeal? You're given tools and rules, and you create your own goals and stories within that framework.</p>
+
+                <h4>Modern Example: Stardew Valley</h4>
+                <p>Stardew Valley captured millions of players by letting them escape to a peaceful farm life. You plant crops, raise animals, fish, mine, and build relationships—all at your own pace. What's brilliant about it? The game respects your time and lets you play how you want. Want to focus on farming? Great. Want to romance villagers? Go for it. Want to explore caves? That's there too.</p>
+
+                <p><strong>Why it's appealing for beginners:</strong> Simulation games teach you about systems design—how different mechanics interact and create emergent gameplay. They're also forgiving in terms of "failure"—there's often no way to lose, just different outcomes. Plus, players love creativity and self-expression, which sims provide.</p>
+
+                <div class="callout warning">
+                    <p>Simulation games can spiral into complexity. For your first project, pick ONE system (farming, or fishing, or managing a lemonade stand) and do it really well.</p>
+                </div>
+            </div>
+
+            <div class="genre-card">
+                <h3>Action/Shooter</h3>
+                <p class="core-focus"><strong>Core Focus:</strong> Fast-paced combat, reflexes, moment-to-moment intensity</p>
+                
+                <p>Action games and shooters are all about quick decisions, precise aiming, and adrenaline. Whether you're blasting demons in Doom or dodging bullets in Enter the Gungeon, the thrill comes from high-intensity gameplay that tests your reaction time.</p>
+
+                <h4>Modern Example: Doom (2016)</h4>
+                <p>The modern Doom reboot perfected "push-forward combat"—instead of hiding behind cover, you're rewarded for aggressive, in-your-face fighting. Low on health? Kill enemies up close for health drops. Low on ammo? Chainsaw a demon. The gameplay loop is relentless and satisfying, built around one philosophy: keep moving, keep shooting.</p>
+
+                <p><strong>Why it's appealing for beginners:</strong> If you love excitement and energy, action games deliver instant feedback. Every shot, every dodge, every explosion feels impactful. You'll learn about player feedback (hit effects, sound design, screen shake) and how to make actions feel powerful.</p>
+
+                <div class="callout tip">
+                    <p>Action games require polished feel—movement, aiming, and combat need to be responsive. Budget extra time for playtesting and tweaking until it "feels right."</p>
+                </div>
+            </div>
+
+            <div class="genre-card">
+                <h3>Strategy</h3>
+                <p class="core-focus"><strong>Core Focus:</strong> Long-term planning, resource management, tactical thinking</p>
+                
+                <p>Strategy games challenge you to think ahead. Whether you're building an empire in Civilization, commanding armies in StarCraft, or managing a team in XCOM, success comes from smart decisions, not quick reflexes. These games reward careful thought and adaptation.</p>
+
+                <h4>Modern Example: Into the Breach</h4>
+                <p>Into the Breach is a brilliant, bite-sized strategy game where you command mechs to protect cities from giant monsters. Here's the twist: you can see exactly what enemies will do next turn, so every move is a puzzle. "If I move here, the enemy attacks that building… but if I push the enemy one tile, they miss." It's chess-like strategy in a streamlined, accessible package.</p>
+
+                <p><strong>Why it's appealing for beginners:</strong> Strategy games teach you about balancing challenge and fairness. They're also often turn-based, which means you're not fighting against time constraints during development—you can focus on the logic and systems. If you love board games, this genre is a natural fit.</p>
+
+                <div class="callout warning">
+                    <p>Strategy games can become overwhelming with too many systems. Keep your first project focused—maybe a small tactical battle, not an entire civilization simulator.</p>
+                </div>
+            </div>
+
+            <div class="genre-card">
+                <h3>Visual Novel / Narrative Games</h3>
+                <p class="core-focus"><strong>Core Focus:</strong> Story-driven experiences, dialogue choices, emotional impact</p>
+                
+                <p>Visual novels and narrative games prioritize storytelling above all else. They're often reading-heavy, with branching dialogue choices that affect the outcome. Think of them as interactive stories where player choice shapes the narrative.</p>
+
+                <h4>Modern Example: What Remains of Edith Finch</h4>
+                <p>This game is a series of short stories about a cursed family, and each vignette plays differently. You might be a cat knocking things off shelves, or a child imagining adventures while doing chores. It's emotionally powerful, beautifully told, and proves that games can be art. The "gameplay" is minimal—mostly walking and observing—but the experience is unforgettable.</p>
+
+                <p><strong>Why it's appealing for beginners:</strong> If you're a writer first and coder second, narrative games let you shine. You're not building complex mechanics; you're crafting choices, dialogue, and atmosphere. Tools like Ren'Py or Twine make this genre especially accessible to beginners.</p>
+
+                <div class="callout tip">
+                    <p>Great narrative games understand pacing. You don't need a novel's worth of text—sometimes less is more. Focus on impactful moments.</p>
+                </div>
+            </div>
+
+            <hr>
+
+            <h2>Genre Blending: Where the Magic Happens</h2>
+
+            <p>Here's where things get fun: <strong>genres love to mix</strong>. Some of the most innovative games exist in the spaces between traditional categories.</p>
+
+            <ul>
+                <li><strong>Puzzle-Platformer:</strong> Portal (mentioned above), Braid, Celeste's trickier B-sides</li>
+                <li><strong>Action-RPG:</strong> Hades, Dark Souls, Diablo</li>
+                <li><strong>Strategy-Roguelike:</strong> Slay the Spire, Into the Breach</li>
+                <li><strong>Narrative-Adventure:</strong> The Walking Dead, Life is Strange</li>
+                <li><strong>Farming-RPG:</strong> Stardew Valley (it's a simulation <em>and</em> an RPG!)</li>
+            </ul>
+
+            <p>The beauty of blending genres is that you can take what you love from each and combine them. Love the progression of RPGs but want faster gameplay? Make an action-RPG. Love puzzle-solving but want movement challenges? Make a puzzle-platformer.</p>
+
+            <p><strong>For your first project</strong>, I'd recommend starting with one primary genre and maybe adding a light touch of another. For example: "It's mainly a platformer, but you collect items that give you RPG-style abilities." That's a clear concept with a fun twist, but it's not trying to be five games at once.</p>
+
+            <div class="callout tip">
+                <p>Genre-blending is exciting, but be honest about scope. Combining genres means combining workloads. Start simple, prove the concept, then expand.</p>
+            </div>
+
+            <hr>
+
+            <h2>Quick Reference: Genre Comparison</h2>
+
+            <p>Here's a handy table to help you compare genres at a glance:</p>
+
+            <div class="table-wrapper">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Genre</th>
+                            <th>Core Focus</th>
+                            <th>Good for Beginners?</th>
+                            <th>Example Games</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>Platformer</strong></td>
+                            <td>Movement, jumping, obstacles</td>
+                            <td>✅ Yes - teaches core design</td>
+                            <td>Celeste, Super Mario Bros, Hollow Knight</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Puzzle</strong></td>
+                            <td>Problem-solving, logic</td>
+                            <td>✅ Yes - focused mechanics</td>
+                            <td>Portal, The Witness, Tetris</td>
+                        </tr>
+                        <tr>
+                            <td><strong>RPG</strong></td>
+                            <td>Progression, story, exploration</td>
+                            <td>⚠️ Medium - can get complex</td>
+                            <td>Undertale, Pokémon, Final Fantasy</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Simulation</strong></td>
+                            <td>Systems, management, creativity</td>
+                            <td>⚠️ Medium - scope can explode</td>
+                            <td>Stardew Valley, The Sims, Cities: Skylines</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Action/Shooter</strong></td>
+                            <td>Combat, reflexes, intensity</td>
+                            <td>⚠️ Medium - requires polish</td>
+                            <td>Doom, Enter the Gungeon, Hades</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Strategy</strong></td>
+                            <td>Planning, tactics, thinking ahead</td>
+                            <td>⚠️ Medium - needs balancing</td>
+                            <td>Into the Breach, Civilization, XCOM</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Visual Novel</strong></td>
+                            <td>Story, choices, dialogue</td>
+                            <td>✅ Yes - writing-focused</td>
+                            <td>What Remains of Edith Finch, Doki Doki Literature Club</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="callout note">
+                <p>"Medium" difficulty doesn't mean avoid these genres—it just means be mindful of scope! With clear goals and focus, any genre can work for beginners.</p>
+            </div>
+
+            <hr>
+
+            <h2>Finding Your Genre</h2>
+
+            <p>So, which genre should you pick? Here's a simple exercise:</p>
+
+            <ol>
+                <li><strong>Think about games you love playing.</strong> What do you enjoy most—solving puzzles, exploring worlds, mastering combat, building systems?</li>
+                <li><strong>Think about games you love analyzing.</strong> When you play a game, what do you notice? Level design? Story pacing? Character builds?</li>
+                <li><strong>Think about your skills.</strong> Are you more comfortable with writing, visual design, or programming? Different genres emphasize different strengths.</li>
+                <li><strong>Think about your time.</strong> Be realistic. Some genres require more content (RPGs need story and progression systems, simulations need depth). Puzzles and platformers can be tight and focused.</li>
+            </ol>
+
+            <p>There's no wrong answer here. The best genre for your first game is the one that excites you enough to push through the learning curve.</p>
+
+            <div class="callout tip">
+                <p>Don't stress about picking the "perfect" genre. Your first game is about learning the process. Many developers make games in genres they've never played before—it's all part of the adventure!</p>
+            </div>
+
+            <hr>
+
+            <h2>Summary</h2>
+
+            <p>Let's recap what we've covered:</p>
+
+            <ul>
+                <li>A <strong>game concept</strong> is your elevator pitch—a simple, clear idea of what your game is about, not a complete design.</li>
+                <li><strong>Genres</strong> are categories that help you understand and communicate what kind of gameplay your game offers.</li>
+                <li>We explored <strong>7 major genres</strong>: Platformer, Puzzle, RPG, Simulation, Action/Shooter, Strategy, and Visual Novel/Narrative.</li>
+                <li><strong>Genre-blending</strong> can create exciting combinations, but keep your scope manageable for a first project.</li>
+                <li>The best genre for you is the one that <strong>excites you</strong> and matches your strengths and available time.</li>
+            </ul>
+
+            <p>Remember: Your goal right now isn't to make the next indie masterpiece. It's to learn the ropes, finish something small, and have fun doing it. The game industry is full of people who started with tiny, weird, imperfect projects—and those projects taught them everything they needed to know.</p>
+
+        </article>
+
+        <!-- Bottom Navigation -->
+        <nav class="bottom-nav">
+            <div class="nav-links">
+                <a href="ch1.html" class="nav-link prev">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+                    </svg>
+                    Chapter Overview
+                </a>
+                <a href="ch1sec2.html" class="nav-link next">
+                    1.2 Brainstorming Techniques
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                    </svg>
+                </a>
+            </div>
+            <div class="back-to-chapter">
+                <a href="ch1.html">← Back to Chapter 1</a>
+            </div>
+        </nav>
+    </main>
+
+    <footer>
+        <div class="footer-content">
+            <div class="footer-logo">SLCC GAME DEV WORKSHOP</div>
+            <p><a href="index.html">Home</a> · <a href="ch1.html">Chapter 1</a></p>
+        </div>
+    </footer>
+</body>
+</html>
