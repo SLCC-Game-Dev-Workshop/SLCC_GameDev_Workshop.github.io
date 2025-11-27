@@ -1,0 +1,903 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chapter 2: Game Mechanics & Design | SLCC Game Dev Workshop</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #4ade80;
+            --primary-dim: #22c55e;
+            --primary-glow: rgba(74, 222, 128, 0.3);
+            --bg-dark: #0a0a0f;
+            --bg-card: #12121a;
+            --bg-card-hover: #1a1a25;
+            --text-primary: #e4e4e7;
+            --text-muted: #71717a;
+            --border: #27272a;
+            --accent-purple: #a855f7;
+            --accent-cyan: #22d3ee;
+            --accent-pink: #ec4899;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: 'Space Mono', monospace;
+            background-color: var(--bg-dark);
+            color: var(--text-primary);
+            line-height: 1.7;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* Scanline overlay effect */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            background: repeating-linear-gradient(
+                0deg,
+                transparent,
+                transparent 2px,
+                rgba(0, 0, 0, 0.1) 2px,
+                rgba(0, 0, 0, 0.1) 4px
+            );
+            z-index: 1000;
+            opacity: 0.3;
+        }
+
+        /* Grid background pattern */
+        .bg-grid {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                linear-gradient(rgba(74, 222, 128, 0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(74, 222, 128, 0.03) 1px, transparent 1px);
+            background-size: 50px 50px;
+            z-index: -1;
+        }
+
+        /* Header */
+        header {
+            padding: 1.5rem 2rem;
+            border-bottom: 1px solid var(--border);
+            background: linear-gradient(180deg, rgba(74, 222, 128, 0.05) 0%, transparent 100%);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            backdrop-filter: blur(10px);
+        }
+
+        .header-content {
+            max-width: 900px;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--text-muted);
+            text-decoration: none;
+            font-size: 0.85rem;
+            transition: all 0.3s ease;
+        }
+
+        .back-link:hover {
+            color: var(--primary);
+        }
+
+        .back-link svg {
+            width: 18px;
+            height: 18px;
+            transition: transform 0.3s ease;
+        }
+
+        .back-link:hover svg {
+            transform: translateX(-3px);
+        }
+
+        .header-chapter {
+            font-family: 'Press Start 2P', cursive;
+            font-size: 0.65rem;
+            color: var(--primary);
+            letter-spacing: 0.1em;
+        }
+
+        /* Hero Section */
+        .hero {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 5rem 2rem 4rem;
+            animation: fadeInUp 0.8s ease-out;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .chapter-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .chapter-number {
+            font-family: 'Press Start 2P', cursive;
+            font-size: 1rem;
+            color: var(--bg-dark);
+            background: var(--primary);
+            padding: 0.5rem 1rem;
+            text-shadow: none;
+        }
+
+        .chapter-label {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+        }
+
+        .hero h1 {
+            font-family: 'Press Start 2P', cursive;
+            font-size: clamp(1.2rem, 4vw, 2rem);
+            line-height: 1.6;
+            margin-bottom: 1.5rem;
+            color: var(--text-primary);
+        }
+
+        .hero-description {
+            font-size: 1.1rem;
+            color: var(--text-muted);
+            max-width: 700px;
+            margin-bottom: 2rem;
+        }
+
+        .hero-meta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 2rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid var(--border);
+        }
+
+        .meta-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+
+        .meta-item svg {
+            width: 18px;
+            height: 18px;
+            color: var(--primary);
+        }
+
+        .meta-item strong {
+            color: var(--text-primary);
+        }
+
+        /* Main Content */
+        main {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 0 2rem 6rem;
+        }
+
+        /* Section Headers */
+        .section-header {
+            margin-bottom: 2rem;
+            margin-top: 4rem;
+            position: relative;
+        }
+
+        .section-header:first-child {
+            margin-top: 0;
+        }
+
+        .section-header::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 50%;
+            width: 100%;
+            height: 1px;
+            background: var(--border);
+            z-index: -1;
+        }
+
+        .section-title {
+            font-family: 'Press Start 2P', cursive;
+            font-size: 0.75rem;
+            color: var(--primary);
+            background: var(--bg-dark);
+            padding-right: 1.5rem;
+            display: inline-block;
+            letter-spacing: 0.1em;
+        }
+
+        /* Learning Outcomes */
+        .outcomes-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .outcome-item {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            padding: 1.25rem;
+            display: flex;
+            align-items: flex-start;
+            gap: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .outcome-item:hover {
+            border-color: var(--primary);
+        }
+
+        .outcome-icon {
+            width: 24px;
+            height: 24px;
+            color: var(--accent-cyan);
+            flex-shrink: 0;
+            margin-top: 2px;
+        }
+
+        .outcome-item p {
+            font-size: 0.9rem;
+            color: var(--text-primary);
+            line-height: 1.5;
+        }
+
+        /* Sections List */
+        .sections-list {
+            display: flex;
+            flex-direction: column;
+            gap: 1px;
+            background: var(--border);
+            border: 1px solid var(--border);
+            margin-bottom: 2rem;
+        }
+
+        .section-link {
+            display: flex;
+            align-items: flex-start;
+            gap: 1.25rem;
+            padding: 1.5rem;
+            background: var(--bg-card);
+            text-decoration: none;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .section-link::after {
+            content: '→';
+            position: absolute;
+            right: 1.5rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-muted);
+            opacity: 0;
+            transition: all 0.3s ease;
+        }
+
+        .section-link:hover {
+            background: var(--bg-card-hover);
+            padding-left: 2rem;
+        }
+
+        .section-link:hover::after {
+            opacity: 1;
+            color: var(--primary);
+        }
+
+        .section-number {
+            font-family: 'Press Start 2P', cursive;
+            font-size: 0.6rem;
+            color: var(--accent-cyan);
+            background: rgba(34, 211, 238, 0.1);
+            padding: 0.5rem 0.75rem;
+            flex-shrink: 0;
+        }
+
+        .section-info {
+            flex: 1;
+        }
+
+        .section-info h3 {
+            font-size: 1rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 0.5rem;
+            transition: color 0.3s ease;
+        }
+
+        .section-link:hover .section-info h3 {
+            color: var(--primary);
+        }
+
+        .section-info p {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            line-height: 1.5;
+            margin-bottom: 0.75rem;
+        }
+
+        .section-meta {
+            display: flex;
+            gap: 1rem;
+            font-size: 0.75rem;
+        }
+
+        .section-meta span {
+            color: var(--accent-purple);
+        }
+
+        /* Pixel Quest Feature */
+        .pixel-quest-feature {
+            background: linear-gradient(135deg, var(--bg-card) 0%, rgba(34, 211, 238, 0.05) 100%);
+            border: 1px solid var(--border);
+            padding: 2.5rem;
+            margin-bottom: 2rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .pixel-quest-feature::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 4px;
+            height: 100%;
+            background: linear-gradient(180deg, var(--accent-cyan), var(--accent-purple));
+        }
+
+        .pixel-quest-feature h3 {
+            font-family: 'Press Start 2P', cursive;
+            font-size: 0.8rem;
+            color: var(--accent-cyan);
+            margin-bottom: 1rem;
+        }
+
+        .pixel-quest-feature h4 {
+            font-size: 1.25rem;
+            margin-bottom: 1rem;
+            color: var(--text-primary);
+        }
+
+        .pixel-quest-feature p {
+            color: var(--text-muted);
+            margin-bottom: 1rem;
+            font-size: 0.95rem;
+        }
+
+        .pixel-quest-details {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-top: 1.5rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid var(--border);
+        }
+
+        .detail-item {
+            font-size: 0.85rem;
+        }
+
+        .detail-item strong {
+            color: var(--accent-cyan);
+            display: block;
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            margin-bottom: 0.25rem;
+        }
+
+        .detail-item span {
+            color: var(--text-primary);
+        }
+
+        /* Deliverable Box */
+        .deliverable-box {
+            background: var(--bg-card);
+            border: 2px solid var(--primary);
+            padding: 2rem;
+            position: relative;
+        }
+
+        .deliverable-box::before {
+            content: 'DELIVERABLE';
+            font-family: 'Press Start 2P', cursive;
+            font-size: 0.6rem;
+            position: absolute;
+            top: -0.75rem;
+            left: 1.5rem;
+            background: var(--bg-dark);
+            padding: 0.25rem 0.75rem;
+            color: var(--primary);
+        }
+
+        .deliverable-box h3 {
+            font-size: 1.1rem;
+            margin-bottom: 1rem;
+            color: var(--text-primary);
+        }
+
+        .deliverable-box p {
+            color: var(--text-muted);
+            margin-bottom: 1rem;
+            font-size: 0.9rem;
+        }
+
+        .deliverable-list {
+            list-style: none;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 0.5rem;
+        }
+
+        .deliverable-list li {
+            font-size: 0.85rem;
+            color: var(--text-primary);
+            padding-left: 1.5rem;
+            position: relative;
+        }
+
+        .deliverable-list li::before {
+            content: '✓';
+            position: absolute;
+            left: 0;
+            color: var(--primary);
+            font-weight: bold;
+        }
+
+        /* CTA Section */
+        .cta-section {
+            margin-top: 4rem;
+            text-align: center;
+            padding: 3rem;
+            background: linear-gradient(135deg, rgba(74, 222, 128, 0.1) 0%, transparent 100%);
+            border: 1px solid var(--border);
+        }
+
+        .cta-section h3 {
+            font-family: 'Press Start 2P', cursive;
+            font-size: 0.9rem;
+            color: var(--primary);
+            margin-bottom: 1rem;
+        }
+
+        .cta-section p {
+            color: var(--text-muted);
+            margin-bottom: 2rem;
+            max-width: 500px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .cta-button {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 1rem 2rem;
+            background: var(--primary);
+            color: var(--bg-dark);
+            text-decoration: none;
+            font-weight: 700;
+            font-size: 0.9rem;
+            letter-spacing: 0.05em;
+            transition: all 0.3s ease;
+            border: 2px solid var(--primary);
+        }
+
+        .cta-button:hover {
+            background: transparent;
+            color: var(--primary);
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px var(--primary-glow);
+        }
+
+        .cta-button svg {
+            width: 20px;
+            height: 20px;
+            transition: transform 0.3s ease;
+        }
+
+        .cta-button:hover svg {
+            transform: translateX(5px);
+        }
+
+        /* Footer */
+        footer {
+            border-top: 1px solid var(--border);
+            padding: 2rem;
+            text-align: center;
+            background: var(--bg-card);
+        }
+
+        .footer-content {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .footer-logo {
+            font-family: 'Press Start 2P', cursive;
+            font-size: 0.6rem;
+            color: var(--primary);
+            margin-bottom: 0.5rem;
+        }
+
+        footer p {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+        }
+
+        footer a {
+            color: var(--primary);
+            text-decoration: none;
+        }
+
+        footer a:hover {
+            text-decoration: underline;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .hero {
+                padding: 3rem 1.5rem 2rem;
+            }
+
+            .hero-meta {
+                gap: 1rem;
+            }
+
+            main {
+                padding: 0 1.5rem 4rem;
+            }
+
+            .section-link {
+                flex-direction: column;
+                gap: 0.75rem;
+            }
+
+            .section-link::after {
+                display: none;
+            }
+
+            .pixel-quest-feature {
+                padding: 1.5rem;
+            }
+
+            .cta-section {
+                padding: 2rem 1.5rem;
+            }
+        }
+
+        /* Animations */
+        .section-link {
+            animation: fadeInStagger 0.5s ease-out backwards;
+        }
+
+        .section-link:nth-child(1) { animation-delay: 0.1s; }
+        .section-link:nth-child(2) { animation-delay: 0.15s; }
+        .section-link:nth-child(3) { animation-delay: 0.2s; }
+        .section-link:nth-child(4) { animation-delay: 0.25s; }
+        .section-link:nth-child(5) { animation-delay: 0.3s; }
+        .section-link:nth-child(6) { animation-delay: 0.35s; }
+        .section-link:nth-child(7) { animation-delay: 0.4s; }
+
+        @keyframes fadeInStagger {
+            from {
+                opacity: 0;
+                transform: translateX(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        /* Pixel decorations */
+        .pixel-corner {
+            position: fixed;
+            width: 8px;
+            height: 8px;
+            background: var(--primary);
+            opacity: 0.5;
+        }
+
+        .pixel-corner.top-left { top: 10px; left: 10px; }
+        .pixel-corner.top-right { top: 10px; right: 10px; }
+        .pixel-corner.bottom-left { bottom: 10px; left: 10px; }
+        .pixel-corner.bottom-right { bottom: 10px; right: 10px; }
+    </style>
+</head>
+<body>
+    <div class="bg-grid"></div>
+    <div class="pixel-corner top-left"></div>
+    <div class="pixel-corner top-right"></div>
+    <div class="pixel-corner bottom-left"></div>
+    <div class="pixel-corner bottom-right"></div>
+
+    <header>
+        <div class="header-content">
+            <a href="index.html" class="back-link">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+                </svg>
+                Back to Home
+            </a>
+            <span class="header-chapter">CHAPTER 2 OF 3</span>
+        </div>
+    </header>
+
+    <section class="hero">
+        <div class="chapter-badge">
+            <span class="chapter-number">02</span>
+            <span class="chapter-label">Chapter</span>
+        </div>
+        <h1>Game Mechanics & Design</h1>
+        <p class="hero-description">
+            Transform your game concept into playable mechanics. Learn to distinguish core from secondary mechanics, 
+            design meaningful player agency, balance challenge progression, create reward systems, and document 
+            everything in a professional Game Design Document.
+        </p>
+        <div class="hero-meta">
+            <div class="meta-item">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <span><strong>~85 minutes</strong> total reading</span>
+            </div>
+            <div class="meta-item">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                </svg>
+                <span><strong>7 sections</strong></span>
+            </div>
+            <div class="meta-item">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                </svg>
+                <span><strong>~24,000 words</strong></span>
+            </div>
+        </div>
+    </section>
+
+    <main>
+        <!-- What You'll Learn -->
+        <div class="section-header">
+            <h2 class="section-title">// WHAT YOU'LL LEARN</h2>
+        </div>
+
+        <div class="outcomes-grid">
+            <div class="outcome-item">
+                <svg class="outcome-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <p>Distinguish core mechanics (essential, repeated) from secondary mechanics (add depth)</p>
+            </div>
+            <div class="outcome-item">
+                <svg class="outcome-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                </svg>
+                <p>Design meaningful player agency across tactical, strategic, moral, and creative decisions</p>
+            </div>
+            <div class="outcome-item">
+                <svg class="outcome-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+                </svg>
+                <p>Keep players in flow state with balanced difficulty curves and progression systems</p>
+            </div>
+            <div class="outcome-item">
+                <svg class="outcome-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                </svg>
+                <p>Map feedback loops and reward systems that drive engagement</p>
+            </div>
+            <div class="outcome-item">
+                <svg class="outcome-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                </svg>
+                <p>Create a professional Game Design Document as your blueprint</p>
+            </div>
+            <div class="outcome-item">
+                <svg class="outcome-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 4a2 2 0 114 0v1a1 1 0 001 1h3a1 1 0 011 1v3a1 1 0 01-1 1h-1a2 2 0 100 4h1a1 1 0 011 1v3a1 1 0 01-1 1h-3a1 1 0 01-1-1v-1a2 2 0 10-4 0v1a1 1 0 01-1 1H7a1 1 0 01-1-1v-3a1 1 0 00-1-1H4a2 2 0 110-4h1a1 1 0 001-1V7a1 1 0 011-1h3a1 1 0 001-1V4z" />
+                </svg>
+                <p>Document your three core mechanics with clear inputs, responses, and design reasoning</p>
+            </div>
+        </div>
+
+        <!-- Sections -->
+        <div class="section-header">
+            <h2 class="section-title">// SECTIONS</h2>
+        </div>
+
+        <div class="sections-list">
+            <a href="ch2sec1.html" class="section-link">
+                <span class="section-number">2.1</span>
+                <div class="section-info">
+                    <h3>Core vs Secondary Mechanics</h3>
+                    <p>Learn to identify essential, repeated core mechanics (2-4) versus nice-to-have secondary mechanics. Build core first, add depth later.</p>
+                    <div class="section-meta">
+                        <span>~10 min</span>
+                        <span>2,800 words</span>
+                    </div>
+                </div>
+            </a>
+            <a href="ch2sec2.html" class="section-link">
+                <span class="section-number">2.2</span>
+                <div class="section-info">
+                    <h3>Player Agency & Decision-Making</h3>
+                    <p>Design meaningful choices across four decision types: tactical, strategic, moral/narrative, and creative. Balance freedom and guidance.</p>
+                    <div class="section-meta">
+                        <span>~12 min</span>
+                        <span>3,400 words</span>
+                    </div>
+                </div>
+            </a>
+            <a href="ch2sec3.html" class="section-link">
+                <span class="section-number">2.3</span>
+                <div class="section-info">
+                    <h3>Challenge, Progression & Balancing</h3>
+                    <p>Keep players in flow state where challenge matches skill. Design smooth difficulty curves across level-based, skill-based, or unlock-based progression.</p>
+                    <div class="section-meta">
+                        <span>~14 min</span>
+                        <span>3,900 words</span>
+                    </div>
+                </div>
+            </a>
+            <a href="ch2sec4.html" class="section-link">
+                <span class="section-number">2.4</span>
+                <div class="section-info">
+                    <h3>Feedback Loops & Player Rewards</h3>
+                    <p>Layer immediate (seconds), short-term (minutes), and long-term (hours) feedback. Balance intrinsic and extrinsic rewards to create the "one more round" effect.</p>
+                    <div class="section-meta">
+                        <span>~12 min</span>
+                        <span>3,500 words</span>
+                    </div>
+                </div>
+            </a>
+            <a href="ch2sec5.html" class="section-link">
+                <span class="section-number">2.5</span>
+                <div class="section-info">
+                    <h3>Introduction to Game Design Documents</h3>
+                    <p>Learn what a GDD is, why you need one, and how to create a beginner-friendly 2-5 page document (not 200 pages).</p>
+                    <div class="section-meta">
+                        <span>~10 min</span>
+                        <span>2,900 words</span>
+                    </div>
+                </div>
+            </a>
+            <a href="ch2sec6.html" class="section-link">
+                <span class="section-number">2.6</span>
+                <div class="section-info">
+                    <h3>Exercise: Design Three Core Mechanics</h3>
+                    <p>Apply everything you've learned to document your game's three core mechanics with player inputs, responses, interactions, and progression.</p>
+                    <div class="section-meta">
+                        <span>~16 min</span>
+                        <span>4,600 words</span>
+                    </div>
+                </div>
+            </a>
+            <a href="ch2sec7.html" class="section-link">
+                <span class="section-number">2.7</span>
+                <div class="section-info">
+                    <h3>Resources & Next Steps</h3>
+                    <p>Curated learning resources, complete Chapter 2 checklist, key takeaways summary, and preview of Chapter 3: Development Tools.</p>
+                    <div class="section-meta">
+                        <span>~11 min</span>
+                        <span>2,900 words</span>
+                    </div>
+                </div>
+            </a>
+        </div>
+
+        <!-- Pixel Quest Running Example -->
+        <div class="section-header">
+            <h2 class="section-title">// RUNNING EXAMPLE</h2>
+        </div>
+
+        <div class="pixel-quest-feature">
+            <h3>PIXEL QUEST MECHANICS</h3>
+            <h4>Watch how core mechanics are designed and documented</h4>
+            <p>
+                Throughout Chapter 2, you'll see <strong>Pixel Quest</strong> evolve from concept to fully documented mechanics. 
+                Watch how Move, Jump, and Wall-Cling are analyzed, tested, and refined into a professional Mechanics Design Document.
+            </p>
+            <div class="pixel-quest-details">
+                <div class="detail-item">
+                    <strong>Core Mechanic 1</strong>
+                    <span>Move - Eight-directional movement with responsive controls</span>
+                </div>
+                <div class="detail-item">
+                    <strong>Core Mechanic 2</strong>
+                    <span>Jump - Floaty physics rewarding timing and air control</span>
+                </div>
+                <div class="detail-item">
+                    <strong>Core Mechanic 3</strong>
+                    <span>Wall-Cling - Navigate vertical surfaces and time escapes</span>
+                </div>
+                <div class="detail-item">
+                    <strong>Progression</strong>
+                    <span>Five zones introducing mechanics one at a time, then combining</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Deliverable -->
+        <div class="section-header">
+            <h2 class="section-title">// CHAPTER DELIVERABLE</h2>
+        </div>
+
+        <div class="deliverable-box">
+            <h3>Mechanics Design Document (GDD Section 2)</h3>
+            <p>By completing Chapter 2, you'll produce a professional mechanics document containing:</p>
+            <ul class="deliverable-list">
+                <li>3 core mechanics fully documented</li>
+                <li>Player inputs and game responses</li>
+                <li>Design reasoning for each mechanic</li>
+                <li>Mechanic interactions mapped</li>
+                <li>Progression outline (when mechanics appear)</li>
+                <li>Examples from similar games</li>
+            </ul>
+        </div>
+
+        <!-- CTA -->
+        <div class="cta-section">
+            <h3>READY TO BEGIN?</h3>
+            <p>Start with Section 2.1 and work through each section in order. By the end, you'll have fully designed mechanics ready to build in Chapter 3.</p>
+            <a href="ch2sec1.html" class="cta-button">
+                Start Section 2.1
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3" />
+                </svg>
+            </a>
+        </div>
+    </main>
+
+    <footer>
+        <div class="footer-content">
+            <div class="footer-logo">SLCC GAME DEV WORKSHOP</div>
+            <p><a href="index.html">← Back to all chapters</a></p>
+        </div>
+    </footer>
+</body>
+</html>
