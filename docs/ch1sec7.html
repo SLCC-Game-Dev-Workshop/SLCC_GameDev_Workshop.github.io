@@ -1,0 +1,979 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>1.7 Resources and Next Steps | SLCC Game Dev Workshop</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #4ade80;
+            --primary-dim: #22c55e;
+            --primary-glow: rgba(74, 222, 128, 0.3);
+            --bg-dark: #0a0a0f;
+            --bg-card: #12121a;
+            --bg-card-hover: #1a1a25;
+            --text-primary: #e4e4e7;
+            --text-muted: #71717a;
+            --border: #27272a;
+            --accent-purple: #a855f7;
+            --accent-cyan: #22d3ee;
+            --accent-pink: #ec4899;
+            --accent-yellow: #facc15;
+            --accent-orange: #fb923c;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: 'Space Mono', monospace;
+            background-color: var(--bg-dark);
+            color: var(--text-primary);
+            line-height: 1.8;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            background: repeating-linear-gradient(
+                0deg,
+                transparent,
+                transparent 2px,
+                rgba(0, 0, 0, 0.1) 2px,
+                rgba(0, 0, 0, 0.1) 4px
+            );
+            z-index: 1000;
+            opacity: 0.3;
+        }
+
+        .bg-grid {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                linear-gradient(rgba(74, 222, 128, 0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(74, 222, 128, 0.03) 1px, transparent 1px);
+            background-size: 50px 50px;
+            z-index: -1;
+        }
+
+        header {
+            padding: 1.5rem 2rem;
+            border-bottom: 1px solid var(--border);
+            background: linear-gradient(180deg, rgba(74, 222, 128, 0.05) 0%, transparent 100%);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            backdrop-filter: blur(10px);
+        }
+
+        .header-content {
+            max-width: 900px;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--text-muted);
+            text-decoration: none;
+            font-size: 0.85rem;
+            transition: all 0.3s ease;
+        }
+
+        .back-link:hover {
+            color: var(--primary);
+        }
+
+        .back-link svg {
+            width: 18px;
+            height: 18px;
+            transition: transform 0.3s ease;
+        }
+
+        .back-link:hover svg {
+            transform: translateX(-3px);
+        }
+
+        .header-nav {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .header-section {
+            font-family: 'Press Start 2P', cursive;
+            font-size: 0.6rem;
+            color: var(--primary);
+            letter-spacing: 0.05em;
+        }
+
+        .hero {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 4rem 2rem 3rem;
+            border-bottom: 1px solid var(--border);
+            animation: fadeInUp 0.6s ease-out;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .section-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .section-number {
+            font-family: 'Press Start 2P', cursive;
+            font-size: 0.9rem;
+            color: var(--bg-dark);
+            background: var(--primary);
+            padding: 0.5rem 1rem;
+        }
+
+        .section-label {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+        }
+
+        .hero h1 {
+            font-size: clamp(1.5rem, 4vw, 2.25rem);
+            line-height: 1.4;
+            margin-bottom: 1rem;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        .celebration-banner {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--accent-cyan) 100%);
+            color: var(--bg-dark);
+            padding: 1.5rem 2rem;
+            margin: 2rem 0;
+            text-align: center;
+            font-family: 'Press Start 2P', cursive;
+            font-size: 0.8rem;
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.02); }
+        }
+
+        .learning-goal {
+            background: var(--bg-card);
+            border-left: 3px solid var(--primary);
+            padding: 1rem 1.5rem;
+            margin-top: 1.5rem;
+        }
+
+        .learning-goal-label {
+            font-size: 0.7rem;
+            color: var(--primary);
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            margin-bottom: 0.5rem;
+            font-weight: 700;
+        }
+
+        .learning-goal p {
+            color: var(--text-muted);
+            font-size: 0.95rem;
+            margin: 0;
+        }
+
+        .hero-meta {
+            display: flex;
+            gap: 2rem;
+            margin-top: 1.5rem;
+        }
+
+        .meta-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+
+        .meta-item svg {
+            width: 16px;
+            height: 16px;
+            color: var(--primary);
+        }
+
+        main {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 3rem 2rem 4rem;
+        }
+
+        .content h2 {
+            font-family: 'Press Start 2P', cursive;
+            font-size: 0.85rem;
+            color: var(--primary);
+            margin-top: 3rem;
+            margin-bottom: 1.5rem;
+            padding-bottom: 0.75rem;
+            border-bottom: 1px solid var(--border);
+            letter-spacing: 0.05em;
+        }
+
+        .content h2:first-child {
+            margin-top: 0;
+        }
+
+        .content h3 {
+            font-size: 1.25rem;
+            color: var(--text-primary);
+            margin-top: 2.5rem;
+            margin-bottom: 1rem;
+            font-weight: 700;
+        }
+
+        .content h4 {
+            font-size: 1rem;
+            color: var(--accent-cyan);
+            margin-top: 2rem;
+            margin-bottom: 0.75rem;
+            font-weight: 700;
+        }
+
+        .content p {
+            margin-bottom: 1.25rem;
+            color: var(--text-primary);
+            font-size: 0.95rem;
+        }
+
+        .content strong {
+            color: var(--text-primary);
+            font-weight: 700;
+        }
+
+        .content em {
+            color: var(--text-muted);
+            font-style: italic;
+        }
+
+        .content ul, .content ol {
+            margin-bottom: 1.5rem;
+            padding-left: 1.5rem;
+        }
+
+        .content li {
+            margin-bottom: 0.75rem;
+            color: var(--text-primary);
+            font-size: 0.95rem;
+        }
+
+        .content li::marker {
+            color: var(--primary);
+        }
+
+        .callout {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            padding: 1.25rem 1.5rem;
+            margin: 1.5rem 0;
+            position: relative;
+        }
+
+        .callout::before {
+            font-family: 'Press Start 2P', cursive;
+            font-size: 0.55rem;
+            position: absolute;
+            top: -0.6rem;
+            left: 1rem;
+            padding: 0.2rem 0.5rem;
+            background: var(--bg-dark);
+        }
+
+        .callout p {
+            margin: 0;
+            font-size: 0.9rem;
+        }
+
+        .callout.tip {
+            border-color: var(--primary);
+        }
+
+        .callout.tip::before {
+            content: '💡 TIP';
+            color: var(--primary);
+        }
+
+        .callout.warning {
+            border-color: var(--accent-yellow);
+        }
+
+        .callout.warning::before {
+            content: '⚠️ COMMON MISTAKE';
+            color: var(--accent-yellow);
+        }
+
+        .resources-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.5rem;
+            margin: 2rem 0;
+        }
+
+        .resource-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            padding: 1.5rem;
+            transition: all 0.3s ease;
+        }
+
+        .resource-card:hover {
+            border-color: var(--primary);
+            transform: translateY(-2px);
+        }
+
+        .resource-card h4 {
+            margin-top: 0;
+            color: var(--primary);
+            font-family: 'Press Start 2P', cursive;
+            font-size: 0.7rem;
+            margin-bottom: 1rem;
+        }
+
+        .resource-card ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .resource-card li {
+            margin-bottom: 0.75rem;
+            padding-left: 1.5rem;
+            position: relative;
+        }
+
+        .resource-card li::before {
+            content: '▸';
+            position: absolute;
+            left: 0;
+            color: var(--primary);
+        }
+
+        .resource-card a {
+            color: var(--accent-cyan);
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+
+        .resource-card a:hover {
+            color: var(--primary);
+        }
+
+        .checklist {
+            background: var(--bg-card);
+            border: 2px solid var(--primary);
+            padding: 2rem;
+            margin: 2rem 0;
+        }
+
+        .checklist h3 {
+            margin-top: 0;
+            color: var(--primary);
+        }
+
+        .checklist-items {
+            list-style: none;
+            padding: 0;
+        }
+
+        .checklist-items li {
+            padding: 1rem;
+            margin-bottom: 0.5rem;
+            background: rgba(74, 222, 128, 0.05);
+            border-left: 3px solid var(--primary);
+            padding-left: 2.5rem;
+            position: relative;
+        }
+
+        .checklist-items li::before {
+            content: '☐';
+            position: absolute;
+            left: 1rem;
+            font-size: 1.2rem;
+            color: var(--primary);
+        }
+
+        .chapter-complete {
+            background: linear-gradient(135deg, rgba(74, 222, 128, 0.1) 0%, rgba(34, 211, 238, 0.1) 100%);
+            border: 3px solid var(--primary);
+            padding: 3rem 2rem;
+            margin: 3rem 0;
+            text-align: center;
+        }
+
+        .chapter-complete h2 {
+            border: none;
+            padding: 0;
+            margin: 0 0 1rem 0;
+            font-size: 1.2rem;
+        }
+
+        .chapter-complete .achievement {
+            font-family: 'Press Start 2P', cursive;
+            font-size: 0.7rem;
+            color: var(--accent-yellow);
+            margin: 1rem 0;
+        }
+
+        .next-chapter-preview {
+            background: linear-gradient(135deg, rgba(168, 85, 247, 0.1) 0%, rgba(236, 72, 153, 0.1) 100%);
+            border: 2px solid var(--accent-purple);
+            padding: 2rem;
+            margin: 3rem 0;
+        }
+
+        .next-chapter-preview h3 {
+            margin-top: 0;
+            color: var(--accent-purple);
+        }
+
+        hr {
+            border: none;
+            border-top: 1px solid var(--border);
+            margin: 3rem 0;
+        }
+
+        .bottom-nav {
+            margin-top: 4rem;
+            padding-top: 2rem;
+            border-top: 1px solid var(--border);
+        }
+
+        .nav-links {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .nav-link {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 1rem 1.5rem;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            color: var(--text-primary);
+            text-decoration: none;
+            font-size: 0.85rem;
+            transition: all 0.3s ease;
+        }
+
+        .nav-link:hover {
+            border-color: var(--primary);
+            color: var(--primary);
+        }
+
+        .nav-link svg {
+            width: 18px;
+            height: 18px;
+        }
+
+        .nav-link.prev svg {
+            transition: transform 0.3s ease;
+        }
+
+        .nav-link.prev:hover svg {
+            transform: translateX(-3px);
+        }
+
+        .back-to-chapter {
+            display: flex;
+            justify-content: center;
+            margin-top: 1.5rem;
+        }
+
+        .back-to-chapter a {
+            color: var(--text-muted);
+            text-decoration: none;
+            font-size: 0.85rem;
+            transition: color 0.3s ease;
+        }
+
+        .back-to-chapter a:hover {
+            color: var(--primary);
+        }
+
+        footer {
+            border-top: 1px solid var(--border);
+            padding: 2rem;
+            text-align: center;
+            background: var(--bg-card);
+        }
+
+        .footer-content {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .footer-logo {
+            font-family: 'Press Start 2P', cursive;
+            font-size: 0.6rem;
+            color: var(--primary);
+            margin-bottom: 0.5rem;
+        }
+
+        footer p {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+        }
+
+        footer a {
+            color: var(--primary);
+            text-decoration: none;
+        }
+
+        footer a:hover {
+            text-decoration: underline;
+        }
+
+        @media (max-width: 768px) {
+            .hero {
+                padding: 3rem 1.5rem 2rem;
+            }
+
+            main {
+                padding: 2rem 1.5rem 3rem;
+            }
+
+            .hero-meta {
+                flex-direction: column;
+                gap: 0.75rem;
+            }
+
+            .nav-links {
+                flex-direction: column;
+            }
+
+            .nav-link {
+                width: 100%;
+                justify-content: center;
+            }
+
+            .resources-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .pixel-corner {
+            position: fixed;
+            width: 8px;
+            height: 8px;
+            background: var(--primary);
+            opacity: 0.5;
+        }
+
+        .pixel-corner.top-left { top: 10px; left: 10px; }
+        .pixel-corner.top-right { top: 10px; right: 10px; }
+        .pixel-corner.bottom-left { bottom: 10px; left: 10px; }
+        .pixel-corner.bottom-right { bottom: 10px; right: 10px; }
+    </style>
+</head>
+<body>
+    <div class="bg-grid"></div>
+    <div class="pixel-corner top-left"></div>
+    <div class="pixel-corner top-right"></div>
+    <div class="pixel-corner bottom-left"></div>
+    <div class="pixel-corner bottom-right"></div>
+
+    <header>
+        <div class="header-content">
+            <a href="index.html" class="back-link">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+                </svg>
+                Home
+            </a>
+            <div class="header-nav">
+                <span class="header-section">SECTION 1.7</span>
+            </div>
+        </div>
+    </header>
+
+    <section class="hero">
+        <div class="section-badge">
+            <span class="section-number">1.7</span>
+            <span class="section-label">Wrap-Up</span>
+        </div>
+        <h1>Resources and Next Steps</h1>
+        <div class="celebration-banner">
+            🎉 CONGRATULATIONS - CHAPTER 1 COMPLETE! 🎉
+        </div>
+        <div class="hero-meta">
+            <div class="meta-item">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <span>~8 min read</span>
+            </div>
+            <div class="meta-item">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                </svg>
+                <span>2,425 words</span>
+            </div>
+        </div>
+        <div class="learning-goal">
+            <div class="learning-goal-label">Learning Goal</div>
+            <p>Discover additional learning resources, complete your Chapter 1 checklist, and prepare for Chapter 2.</p>
+        </div>
+    </section>
+
+    <main>
+        <article class="content">
+            <h2>Congratulations—You've Completed Chapter 1!</h2>
+            
+            <p>Take a second to let that sink in. When you started this chapter, you might have been staring at a blank page wondering "What game should I make?" Now, you have:</p>
+
+            <ul>
+                <li>✅ An understanding of game genres and what makes concepts strong</li>
+                <li>✅ Practical brainstorming techniques to generate ideas</li>
+                <li>✅ A clearly defined core gameplay loop</li>
+                <li>✅ A simple story framework giving your game context</li>
+                <li>✅ A memorable character and a compelling world</li>
+                <li>✅ <strong>A complete one-page Game Concept Document</strong></li>
+            </ul>
+
+            <p>That's not just theory. That's actionable game design work. You've gone from zero to "I have a game concept" in one chapter. Many aspiring game developers never make it this far—they get stuck in the dreaming phase and never commit to a specific idea.</p>
+
+            <p>You committed. You designed something. That takes courage and discipline. Be proud of that.</p>
+
+            <p>But you're not done yet. Chapter 1 is your foundation, and now we're going to build on it. Before we move forward, let's make sure you have everything you need to continue learning.</p>
+
+            <hr>
+
+            <h2>Further Learning Resources</h2>
+
+            <p>Game design is a massive field, and this workshop is just the beginning. If you want to go deeper into any of the topics we've covered, here are some excellent (and mostly free) resources to explore.</p>
+
+            <div class="resources-grid">
+                <div class="resource-card">
+                    <h4>📺 YouTube Channels</h4>
+                    <ul>
+                        <li><a href="https://www.youtube.com/@GMTK" target="_blank">Game Maker's Toolkit</a> - Incredible video essays analyzing game design</li>
+                        <li><a href="https://www.youtube.com/@ExtraCredits" target="_blank">Extra Credits</a> - Short, animated videos on design concepts</li>
+                        <li><a href="https://www.youtube.com/@AdamMillard" target="_blank">Adam Millard</a> - In-depth analysis of mechanics and systems</li>
+                        <li><a href="https://www.youtube.com/@DesignDoc" target="_blank">Design Doc</a> - Case studies of specific games</li>
+                    </ul>
+                </div>
+
+                <div class="resource-card">
+                    <h4>📚 Books & Articles</h4>
+                    <ul>
+                        <li><strong>The Art of Game Design: A Book of Lenses</strong> by Jesse Schell - THE game design bible</li>
+                        <li><a href="https://www.gamedeveloper.com/" target="_blank">Game Developer (Gamasutra)</a> - Industry articles and postmortems</li>
+                        <li><a href="https://www.designer-notes.com/" target="_blank">Designer Notes Podcast</a> - Interviews with professional designers</li>
+                    </ul>
+                </div>
+
+                <div class="resource-card">
+                    <h4>🎮 Core Loop Resources</h4>
+                    <ul>
+                        <li>"The Core Loop of Hades" (GMTK) - How Hades creates addictive gameplay</li>
+                        <li>"The Genius of Breath of the Wild's Open World" - Exploration loop breakdown</li>
+                        <li>"Why Do We Play Games?" (Extra Credits) - Intrinsic vs extrinsic motivation</li>
+                    </ul>
+                </div>
+
+                <div class="resource-card">
+                    <h4>✍️ Story & Narrative</h4>
+                    <ul>
+                        <li><a href="https://www.youtube.com/@OverlySarcasticProductions" target="_blank">Overly Sarcastic Productions</a> - Trope Talk series on storytelling</li>
+                        <li>"Storytelling in Dark Souls" (GMTK) - Environmental storytelling</li>
+                        <li><strong>Save the Cat! Writes a Novel</strong> by Jessica Brody - Story structure advice</li>
+                        <li><a href="https://twinery.org/" target="_blank">Twine</a> - Free tool for creating branching narratives</li>
+                    </ul>
+                </div>
+
+                <div class="resource-card">
+                    <h4>🎨 Character Design</h4>
+                    <ul>
+                        <li><a href="https://www.pinterest.com/characterdesigh/" target="_blank">Character Design References</a> - Pinterest boards with thousands of examples</li>
+                        <li><a href="https://www.ctrlpaint.com/library" target="_blank">Ctrl+Paint</a> - Free digital art tutorials</li>
+                        <li>"How Hollow Knight's Characters Tell a Story" - Character design deep-dive</li>
+                    </ul>
+                </div>
+
+                <div class="resource-card">
+                    <h4>🌍 World-Building</h4>
+                    <ul>
+                        <li>"World-Building in Games" (Extra Credits)</li>
+                        <li>"The Architecture of Hollow Knight" (GMTK)</li>
+                        <li><a href="https://www.reddit.com/r/worldbuilding/" target="_blank">r/worldbuilding</a> - Community for world-building tips</li>
+                        <li><a href="https://www.reddit.com/r/PixelArt/" target="_blank">r/PixelArt</a> - Inspiration and tutorials</li>
+                    </ul>
+                </div>
+
+                <div class="resource-card">
+                    <h4>👥 Communities</h4>
+                    <ul>
+                        <li><a href="https://www.reddit.com/r/gamedev/" target="_blank">r/gamedev</a> - Huge community of indie devs</li>
+                        <li><a href="https://www.reddit.com/r/IndieGaming/" target="_blank">r/IndieGaming</a> - Showcase and discover indie games</li>
+                        <li>Game Dev Discord servers - Real-time chat with other devs</li>
+                        <li><a href="https://ldjam.com/" target="_blank">Ludum Dare</a> - 48-hour game jams</li>
+                        <li><a href="https://itch.io/jams" target="_blank">itch.io Game Jams</a> - Hundreds of jams running constantly</li>
+                    </ul>
+                </div>
+
+                <div class="resource-card">
+                    <h4>🔧 Tools & Assets</h4>
+                    <ul>
+                        <li><a href="https://godotengine.org/" target="_blank">Godot Engine</a> - Free, open-source game engine</li>
+                        <li><a href="https://unity.com/" target="_blank">Unity</a> - Popular game engine with free tier</li>
+                        <li><a href="https://opengameart.org/" target="_blank">OpenGameArt</a> - Free sprites, sounds, and music</li>
+                        <li><a href="https://kenney.nl/" target="_blank">Kenney.nl</a> - Thousands of free game assets</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="callout tip">
+                <p>Don't try to consume everything at once. Pick one YouTube channel or article that interests you, watch/read it, then come back to your own project and apply what you learned.</p>
+            </div>
+
+            <div class="callout tip">
+                <p><strong>Game jams are incredible for beginners.</strong> They force you to finish something small, teach you to scope realistically, and introduce you to other devs. Even if your jam game is "bad," you'll learn more in one weekend than in weeks of passive study.</p>
+            </div>
+
+            <hr>
+
+            <h2>Chapter 1 Checklist</h2>
+
+            <p>Before you move to Chapter 2, make sure you've completed everything. Here's your checklist:</p>
+
+            <div class="checklist">
+                <h3>✓ Core Learning</h3>
+                <ul class="checklist-items">
+                    <li>Read all Chapter 1 sections (1.1 through 1.7)</li>
+                    <li>Completed brainstorming exercises (generated at least 5 game ideas in Section 1.2)</li>
+                    <li>Defined your core gameplay loop (one-sentence formula in Section 1.3)</li>
+                    <li>Chose a story framework (goal-oriented, conflict-driven, or mystery/discovery in Section 1.4)</li>
+                    <li>Designed a character and world (answered key questions in Section 1.5)</li>
+                </ul>
+            </div>
+
+            <div class="checklist">
+                <h3>✓ Main Deliverable</h3>
+                <ul class="checklist-items">
+                    <li>Filled out your one-page Game Concept Document (Section 1.6)</li>
+                    <li>Document includes: Title, genre, loop, hook, character, world, audience, inspiration</li>
+                </ul>
+            </div>
+
+            <div class="checklist">
+                <h3>✓ Optional but Encouraged</h3>
+                <ul class="checklist-items">
+                    <li>Shared your concept with at least one person for feedback</li>
+                    <li>Reviewed the Pixel Quest example to compare structure and clarity</li>
+                    <li>Saved all brainstorming notes for future reference</li>
+                </ul>
+            </div>
+
+            <p>If you've checked off the core items, <strong>you're ready for Chapter 2</strong>. If not, take the time to finish them. This foundation is critical—don't skip ahead without it.</p>
+
+            <hr>
+
+            <h2>Common Questions Before Moving Forward</h2>
+
+            <h3>"My concept feels too simple. Should I add more?"</h3>
+
+            <p><strong>Answer:</strong> NO. Simple is <em>good</em> for a first project. Complexity can come later. A simple, well-executed game beats a complex, half-finished one every time.</p>
+
+            <div class="callout tip">
+                <p>Remember: Portal's core concept is "solve puzzles with a portal gun." Celeste's is "climb the mountain." Tetris is "fit blocks together." Simple ≠ bad.</p>
+            </div>
+
+            <h3>"My concept keeps changing. Is that normal?"</h3>
+
+            <p><strong>Answer:</strong> Absolutely. Your concept will evolve as you prototype, playtest, and learn. That's not failure—that's iteration, and iteration is how great games are made.</p>
+
+            <div class="callout tip">
+                <p>Update your Game Concept Document whenever something significant changes. Treat it as a living document, not a contract.</p>
+            </div>
+
+            <h3>"I don't like my concept anymore. Should I start over?"</h3>
+
+            <p><strong>Answer:</strong> Be careful. It's easy to fall into the trap of endlessly restarting. Ask yourself:</p>
+
+            <ul>
+                <li><strong>Is the concept fundamentally broken?</strong> (unclear loop, no goal, mechanics don't work)
+                    <ul><li>If yes, revise or start fresh.</li></ul>
+                </li>
+                <li><strong>Or am I just scared/overwhelmed and looking for an excuse to avoid moving forward?</strong>
+                    <ul><li>If this is the case, push through. You'll learn more by finishing something "imperfect" than by restarting endlessly.</li></ul>
+                </li>
+            </ul>
+
+            <div class="callout tip">
+                <p>Set a rule: You're committing to this concept through Chapter 2. After that, if you still hate it, reconsider. But give it a real chance first.</p>
+            </div>
+
+            <h3>"My game sounds like other games. Is that okay?"</h3>
+
+            <p><strong>Answer:</strong> YES. Especially for your first project. You're learning, not inventing the medium. Many successful devs started by cloning games they loved.</p>
+
+            <div class="callout tip">
+                <p>Remember: Stardew Valley was inspired by Harvest Moon. Celeste was inspired by Super Meat Boy. Hollow Knight was inspired by Dark Souls and Metroid. Originality comes from execution and personal touches, not from having a 100% unique concept.</p>
+            </div>
+
+            <hr>
+
+            <h2>Preview of Chapter 2: Game Mechanics & Design</h2>
+
+            <div class="next-chapter-preview">
+                <h3>🎮 What's Next?</h3>
+                
+                <p>In Chapter 1, you focused on the <strong>big picture</strong>: concept, story, character, world. You answered "What is my game?"</p>
+
+                <p>In <strong>Chapter 2</strong>, we're going to zoom in and get tactical. You'll learn:</p>
+
+                <ul>
+                    <li><strong>What are core mechanics vs. secondary mechanics?</strong> (and how to prioritize them)</li>
+                    <li><strong>How do you design player agency?</strong> (making players feel in control and impactful)</li>
+                    <li><strong>What is challenge, and how do you balance it?</strong> (making games hard but fair)</li>
+                    <li><strong>What are feedback loops?</strong> (how games reward players and keep them engaged)</li>
+                    <li><strong>How do you create a simplified Game Design Document (GDD)?</strong> (translating your concept into implementable mechanics)</li>
+                </ul>
+
+                <p>By the end of Chapter 2, you'll have:</p>
+                <ul>
+                    <li>✅ <strong>3 clearly defined core mechanics</strong> for your game</li>
+                    <li>✅ <strong>A plan for how difficulty escalates</strong></li>
+                    <li>✅ <strong>A simplified GDD</strong> that maps out your game's mechanical structure</li>
+                </ul>
+
+                <p>If Chapter 1 was about <em>vision</em>, Chapter 2 is about <em>execution</em>. You'll take your concept and turn it into something buildable.</p>
+            </div>
+
+            <h3>How to Prepare for Chapter 2</h3>
+
+            <p><strong>1. Keep your Game Concept Document handy.</strong> You'll reference it constantly. Every mechanic you design must serve your core loop and concept.</p>
+
+            <p><strong>2. Play games critically.</strong> Pick 2-3 games (ideally in your genre) and play them with a designer's eye:</p>
+            <ul>
+                <li>What are the core mechanics?</li>
+                <li>How does difficulty ramp up?</li>
+                <li>What makes you want to keep playing?</li>
+                <li>What frustrates you, and why?</li>
+            </ul>
+
+            <p>Take notes. You'll apply these observations to your own design.</p>
+
+            <p><strong>3. Don't overthink yet.</strong> Chapter 2 will guide you step-by-step. You don't need to have all the answers now. Just come prepared with your concept and a willingness to iterate.</p>
+
+            <hr>
+
+            <h2>Tips for Staying Motivated</h2>
+
+            <p>Game development is a marathon, not a sprint. Here are some strategies to keep momentum:</p>
+
+            <h3>Break it Into Small Wins</h3>
+            <p>Don't think "I need to finish a whole game." Think "Today, I'm designing one mechanic" or "This week, I'm prototyping one level." Small wins build confidence and prevent overwhelm.</p>
+
+            <h3>Set a Schedule</h3>
+            <p>Even 30 minutes a day adds up. Consistency beats intensity. Block out time in your calendar for game dev like you would for any other commitment.</p>
+
+            <h3>Share Your Progress</h3>
+            <p>Post screenshots, GIFs, or concept art to social media, Reddit, or Discord. The act of sharing creates accountability, and positive feedback fuels motivation.</p>
+
+            <h3>Don't Compare Yourself to Pros</h3>
+            <p>Remember: every incredible indie game you admire started as a messy prototype made by someone learning as they went. You're on that same path. Be patient with yourself.</p>
+
+            <h3>Celebrate Milestones</h3>
+            <p>Finished your concept? Celebrate. Designed your first mechanic? Celebrate. Completed a prototype? CELEBRATE. Game dev is hard—acknowledge your progress.</p>
+
+            <div class="callout tip">
+                <p>Keep a dev journal. Write down what you learned, what went well, and what challenged you. Months from now, you'll look back and be amazed at how much you've grown.</p>
+            </div>
+
+            <hr>
+
+            <h2>A Final Word Before Chapter 2</h2>
+
+            <p>You've done something most people only dream about: you've started.</p>
+
+            <p>The hardest part of making a game isn't the coding, the art, or the design. It's taking that first step—committing to an idea, putting it on paper, and saying "This is what I'm making." You've done that. You've crossed the threshold from "I want to make a game someday" to "I am actively designing a game."</p>
+
+            <p>That shift in identity—from dreamer to creator—is profound. Hold onto it.</p>
+
+            <p>Chapter 1 gave you a vision. Chapter 2 will give you a plan. Chapter 3 will give you the tools. And after that? You'll be equipped to start building.</p>
+
+            <p>The game in your head is starting to take shape. Keep going. Keep designing. Keep believing in your weird, imperfect, beautiful idea.</p>
+
+            <p>We'll see you in Chapter 2.</p>
+
+            <div class="chapter-complete">
+                <h2>🎉 CHAPTER 1 COMPLETE! 🎉</h2>
+                <p class="achievement">Achievement Unlocked: Game Concept Designer</p>
+                <p>You've completed Story & Concept Development and created your first Game Concept Document. That's real game design work. Be proud.</p>
+            </div>
+
+        </article>
+
+        <nav class="bottom-nav">
+            <div class="nav-links">
+                <a href="ch1sec6.html" class="nav-link prev">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+                    </svg>
+                    1.6 Exercise: Game Concept Document
+                </a>
+            </div>
+            <div class="back-to-chapter">
+                <a href="ch1.html">← Back to Chapter 1</a>
+            </div>
+        </nav>
+    </main>
+
+    <footer>
+        <div class="footer-content">
+            <div class="footer-logo">SLCC GAME DEV WORKSHOP</div>
+            <p><a href="index.html">Home</a> · <a href="ch1.html">Chapter 1</a> · <strong>Ready for Chapter 2!</strong></p>
+        </div>
+    </footer>
+</body>
+</html>
