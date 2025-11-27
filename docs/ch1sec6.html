@@ -1,0 +1,1174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>1.6 Exercise: Game Concept Document | SLCC Game Dev Workshop</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #4ade80;
+            --primary-dim: #22c55e;
+            --primary-glow: rgba(74, 222, 128, 0.3);
+            --bg-dark: #0a0a0f;
+            --bg-card: #12121a;
+            --bg-card-hover: #1a1a25;
+            --text-primary: #e4e4e7;
+            --text-muted: #71717a;
+            --border: #27272a;
+            --accent-purple: #a855f7;
+            --accent-cyan: #22d3ee;
+            --accent-pink: #ec4899;
+            --accent-yellow: #facc15;
+            --accent-orange: #fb923c;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: 'Space Mono', monospace;
+            background-color: var(--bg-dark);
+            color: var(--text-primary);
+            line-height: 1.8;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            background: repeating-linear-gradient(
+                0deg,
+                transparent,
+                transparent 2px,
+                rgba(0, 0, 0, 0.1) 2px,
+                rgba(0, 0, 0, 0.1) 4px
+            );
+            z-index: 1000;
+            opacity: 0.3;
+        }
+
+        .bg-grid {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                linear-gradient(rgba(74, 222, 128, 0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(74, 222, 128, 0.03) 1px, transparent 1px);
+            background-size: 50px 50px;
+            z-index: -1;
+        }
+
+        header {
+            padding: 1.5rem 2rem;
+            border-bottom: 1px solid var(--border);
+            background: linear-gradient(180deg, rgba(74, 222, 128, 0.05) 0%, transparent 100%);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            backdrop-filter: blur(10px);
+        }
+
+        .header-content {
+            max-width: 900px;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--text-muted);
+            text-decoration: none;
+            font-size: 0.85rem;
+            transition: all 0.3s ease;
+        }
+
+        .back-link:hover {
+            color: var(--primary);
+        }
+
+        .back-link svg {
+            width: 18px;
+            height: 18px;
+            transition: transform 0.3s ease;
+        }
+
+        .back-link:hover svg {
+            transform: translateX(-3px);
+        }
+
+        .header-nav {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .header-section {
+            font-family: 'Press Start 2P', cursive;
+            font-size: 0.6rem;
+            color: var(--primary);
+            letter-spacing: 0.05em;
+        }
+
+        .hero {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 4rem 2rem 3rem;
+            border-bottom: 1px solid var(--border);
+            animation: fadeInUp 0.6s ease-out;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .section-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .section-number {
+            font-family: 'Press Start 2P', cursive;
+            font-size: 0.9rem;
+            color: var(--bg-dark);
+            background: var(--accent-orange);
+            padding: 0.5rem 1rem;
+        }
+
+        .section-label {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+        }
+
+        .hero h1 {
+            font-size: clamp(1.5rem, 4vw, 2.25rem);
+            line-height: 1.4;
+            margin-bottom: 1rem;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        .learning-goal {
+            background: var(--bg-card);
+            border-left: 3px solid var(--primary);
+            padding: 1rem 1.5rem;
+            margin-top: 1.5rem;
+        }
+
+        .learning-goal-label {
+            font-size: 0.7rem;
+            color: var(--primary);
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            margin-bottom: 0.5rem;
+            font-weight: 700;
+        }
+
+        .learning-goal p {
+            color: var(--text-muted);
+            font-size: 0.95rem;
+            margin: 0;
+        }
+
+        .hero-meta {
+            display: flex;
+            gap: 2rem;
+            margin-top: 1.5rem;
+        }
+
+        .meta-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+
+        .meta-item svg {
+            width: 16px;
+            height: 16px;
+            color: var(--primary);
+        }
+
+        main {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 3rem 2rem 4rem;
+        }
+
+        .content h2 {
+            font-family: 'Press Start 2P', cursive;
+            font-size: 0.85rem;
+            color: var(--primary);
+            margin-top: 3rem;
+            margin-bottom: 1.5rem;
+            padding-bottom: 0.75rem;
+            border-bottom: 1px solid var(--border);
+            letter-spacing: 0.05em;
+        }
+
+        .content h2:first-child {
+            margin-top: 0;
+        }
+
+        .content h3 {
+            font-size: 1.25rem;
+            color: var(--text-primary);
+            margin-top: 2.5rem;
+            margin-bottom: 1rem;
+            font-weight: 700;
+        }
+
+        .content h4 {
+            font-size: 1rem;
+            color: var(--accent-orange);
+            margin-top: 2rem;
+            margin-bottom: 0.75rem;
+            font-weight: 700;
+        }
+
+        .content p {
+            margin-bottom: 1.25rem;
+            color: var(--text-primary);
+            font-size: 0.95rem;
+        }
+
+        .content strong {
+            color: var(--text-primary);
+            font-weight: 700;
+        }
+
+        .content em {
+            color: var(--text-muted);
+            font-style: italic;
+        }
+
+        .content ul, .content ol {
+            margin-bottom: 1.5rem;
+            padding-left: 1.5rem;
+        }
+
+        .content li {
+            margin-bottom: 0.75rem;
+            color: var(--text-primary);
+            font-size: 0.95rem;
+        }
+
+        .content li::marker {
+            color: var(--primary);
+        }
+
+        .callout {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            padding: 1.25rem 1.5rem;
+            margin: 1.5rem 0;
+            position: relative;
+        }
+
+        .callout::before {
+            font-family: 'Press Start 2P', cursive;
+            font-size: 0.55rem;
+            position: absolute;
+            top: -0.6rem;
+            left: 1rem;
+            padding: 0.2rem 0.5rem;
+            background: var(--bg-dark);
+        }
+
+        .callout p {
+            margin: 0;
+            font-size: 0.9rem;
+        }
+
+        .callout.tip {
+            border-color: var(--primary);
+        }
+
+        .callout.tip::before {
+            content: '💡 TIP';
+            color: var(--primary);
+        }
+
+        .callout.warning {
+            border-color: var(--accent-yellow);
+        }
+
+        .callout.warning::before {
+            content: '⚠️ WARNING';
+            color: var(--accent-yellow);
+        }
+
+        .callout.exercise {
+            border-color: var(--accent-orange);
+        }
+
+        .callout.exercise::before {
+            content: '✏️ YOUR TURN';
+            color: var(--accent-orange);
+        }
+
+        .template-section {
+            background: var(--bg-card);
+            border: 2px solid var(--accent-orange);
+            padding: 2rem;
+            margin: 2rem 0;
+        }
+
+        .template-section h4 {
+            margin-top: 0;
+            color: var(--accent-orange);
+        }
+
+        .template-field {
+            background: rgba(251, 146, 60, 0.05);
+            border-left: 2px solid var(--accent-orange);
+            padding: 1rem;
+            margin: 1rem 0;
+        }
+
+        .template-field strong {
+            color: var(--accent-orange);
+        }
+
+        .example-box {
+            background: rgba(74, 222, 128, 0.05);
+            border: 1px solid var(--primary);
+            padding: 1.5rem;
+            margin: 1rem 0;
+        }
+
+        .example-box h5 {
+            color: var(--primary);
+            font-size: 0.85rem;
+            margin-bottom: 0.75rem;
+            font-family: 'Press Start 2P', cursive;
+        }
+
+        .pixel-quest-document {
+            background: var(--bg-card);
+            border: 3px solid var(--primary);
+            padding: 2.5rem;
+            margin: 3rem 0;
+        }
+
+        .pixel-quest-document h3 {
+            margin-top: 0;
+            text-align: center;
+            font-family: 'Press Start 2P', cursive;
+            color: var(--primary);
+            font-size: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .gcd-field {
+            margin-bottom: 2rem;
+        }
+
+        .gcd-field h4 {
+            color: var(--accent-cyan);
+            font-size: 0.85rem;
+            margin-bottom: 0.5rem;
+            font-family: 'Press Start 2P', cursive;
+        }
+
+        .gcd-field p {
+            margin-bottom: 0.5rem;
+        }
+
+        .gcd-field ul {
+            margin-bottom: 0;
+        }
+
+        .pitfall-section {
+            background: linear-gradient(135deg, rgba(250, 204, 21, 0.1) 0%, rgba(236, 72, 153, 0.1) 100%);
+            border: 2px solid var(--accent-yellow);
+            padding: 2rem;
+            margin: 3rem 0;
+        }
+
+        .pitfall-section h3 {
+            margin-top: 0;
+            color: var(--accent-yellow);
+        }
+
+        .pitfall {
+            background: var(--bg-card);
+            border-left: 3px solid var(--accent-yellow);
+            padding: 1.5rem;
+            margin: 1.5rem 0;
+        }
+
+        .pitfall h4 {
+            margin-top: 0;
+            color: var(--accent-yellow);
+        }
+
+        .comparison {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            margin: 1rem 0;
+        }
+
+        .comparison-bad {
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            padding: 1rem;
+        }
+
+        .comparison-bad::before {
+            content: '❌ BAD';
+            display: block;
+            font-family: 'Press Start 2P', cursive;
+            font-size: 0.6rem;
+            color: #ef4444;
+            margin-bottom: 0.5rem;
+        }
+
+        .comparison-good {
+            background: rgba(74, 222, 128, 0.1);
+            border: 1px solid rgba(74, 222, 128, 0.3);
+            padding: 1rem;
+        }
+
+        .comparison-good::before {
+            content: '✅ GOOD';
+            display: block;
+            font-family: 'Press Start 2P', cursive;
+            font-size: 0.6rem;
+            color: var(--primary);
+            margin-bottom: 0.5rem;
+        }
+
+        .success-criteria {
+            background: linear-gradient(135deg, rgba(74, 222, 128, 0.1) 0%, rgba(34, 211, 238, 0.1) 100%);
+            border: 2px solid var(--primary);
+            padding: 2rem;
+            margin: 3rem 0;
+        }
+
+        .success-criteria h3 {
+            margin-top: 0;
+            color: var(--primary);
+        }
+
+        .success-list {
+            list-style: none;
+            padding: 0;
+        }
+
+        .success-list li {
+            padding-left: 2rem;
+            position: relative;
+            margin-bottom: 1rem;
+        }
+
+        .success-list li::before {
+            content: '✓';
+            position: absolute;
+            left: 0;
+            color: var(--primary);
+            font-weight: bold;
+            font-size: 1.2rem;
+        }
+
+        hr {
+            border: none;
+            border-top: 1px solid var(--border);
+            margin: 3rem 0;
+        }
+
+        .bottom-nav {
+            margin-top: 4rem;
+            padding-top: 2rem;
+            border-top: 1px solid var(--border);
+        }
+
+        .nav-links {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .nav-link {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 1rem 1.5rem;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            color: var(--text-primary);
+            text-decoration: none;
+            font-size: 0.85rem;
+            transition: all 0.3s ease;
+        }
+
+        .nav-link:hover {
+            border-color: var(--primary);
+            color: var(--primary);
+        }
+
+        .nav-link svg {
+            width: 18px;
+            height: 18px;
+        }
+
+        .nav-link.prev svg {
+            transition: transform 0.3s ease;
+        }
+
+        .nav-link.prev:hover svg {
+            transform: translateX(-3px);
+        }
+
+        .nav-link.next svg {
+            transition: transform 0.3s ease;
+        }
+
+        .nav-link.next:hover svg {
+            transform: translateX(3px);
+        }
+
+        .back-to-chapter {
+            display: flex;
+            justify-content: center;
+            margin-top: 1.5rem;
+        }
+
+        .back-to-chapter a {
+            color: var(--text-muted);
+            text-decoration: none;
+            font-size: 0.85rem;
+            transition: color 0.3s ease;
+        }
+
+        .back-to-chapter a:hover {
+            color: var(--primary);
+        }
+
+        footer {
+            border-top: 1px solid var(--border);
+            padding: 2rem;
+            text-align: center;
+            background: var(--bg-card);
+        }
+
+        .footer-content {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .footer-logo {
+            font-family: 'Press Start 2P', cursive;
+            font-size: 0.6rem;
+            color: var(--primary);
+            margin-bottom: 0.5rem;
+        }
+
+        footer p {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+        }
+
+        footer a {
+            color: var(--primary);
+            text-decoration: none;
+        }
+
+        footer a:hover {
+            text-decoration: underline;
+        }
+
+        @media (max-width: 768px) {
+            .hero {
+                padding: 3rem 1.5rem 2rem;
+            }
+
+            main {
+                padding: 2rem 1.5rem 3rem;
+            }
+
+            .hero-meta {
+                flex-direction: column;
+                gap: 0.75rem;
+            }
+
+            .nav-links {
+                flex-direction: column;
+            }
+
+            .nav-link {
+                width: 100%;
+                justify-content: center;
+            }
+
+            .comparison {
+                grid-template-columns: 1fr;
+            }
+
+            .template-section, .pixel-quest-document {
+                padding: 1.5rem;
+            }
+        }
+
+        .pixel-corner {
+            position: fixed;
+            width: 8px;
+            height: 8px;
+            background: var(--primary);
+            opacity: 0.5;
+        }
+
+        .pixel-corner.top-left { top: 10px; left: 10px; }
+        .pixel-corner.top-right { top: 10px; right: 10px; }
+        .pixel-corner.bottom-left { bottom: 10px; left: 10px; }
+        .pixel-corner.bottom-right { bottom: 10px; right: 10px; }
+    </style>
+</head>
+<body>
+    <div class="bg-grid"></div>
+    <div class="pixel-corner top-left"></div>
+    <div class="pixel-corner top-right"></div>
+    <div class="pixel-corner bottom-left"></div>
+    <div class="pixel-corner bottom-right"></div>
+
+    <header>
+        <div class="header-content">
+            <a href="index.html" class="back-link">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+                </svg>
+                Home
+            </a>
+            <div class="header-nav">
+                <span class="header-section">SECTION 1.6</span>
+            </div>
+        </div>
+    </header>
+
+    <section class="hero">
+        <div class="section-badge">
+            <span class="section-number">1.6</span>
+            <span class="section-label">Exercise</span>
+        </div>
+        <h1>Create Your Game Concept Document</h1>
+        <div class="hero-meta">
+            <div class="meta-item">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <span>~15 min read</span>
+            </div>
+            <div class="meta-item">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                </svg>
+                <span>3,817 words</span>
+            </div>
+        </div>
+        <div class="learning-goal">
+            <div class="learning-goal-label">Learning Goal</div>
+            <p>Synthesize everything you've learned into a clear, focused one-page Game Concept Document for your game.</p>
+        </div>
+    </section>
+
+    <main>
+        <article class="content">
+            <h2>Putting It All Together</h2>
+            
+            <p>You've made it this far. Let's take a moment to appreciate what you've learned:</p>
+
+            <ul>
+                <li><strong>Section 1.1:</strong> You explored game genres and learned what a strong game concept looks like.</li>
+                <li><strong>Section 1.2:</strong> You practiced brainstorming techniques to generate ideas without fear.</li>
+                <li><strong>Section 1.3:</strong> You defined core gameplay loops—the heartbeat of any game.</li>
+                <li><strong>Section 1.4:</strong> You learned simple story structures to give your game narrative context.</li>
+                <li><strong>Section 1.5:</strong> You designed characters and worlds that enhance your concept.</li>
+            </ul>
+
+            <p>That's a <em>lot</em> of groundwork. But here's the thing: all that knowledge needs a home. You need a <strong>document</strong>—a single, clear reference that captures your game's essence and guides every decision you'll make moving forward.</p>
+
+            <p>That's what this section is about. You're going to create your <strong>Game Concept Document (GCD)</strong>.</p>
+
+            <p>This isn't a massive design doc with every mechanic, level, and art asset planned out. It's a <strong>one-page snapshot</strong> of your game—concise, focused, and actionable. Think of it as your game's mission statement: anyone who reads it (including you, six weeks from now) should immediately understand what your game is and why it matters.</p>
+
+            <p>Ready? Let's do this.</p>
+
+            <hr>
+
+            <h2>What Is a Game Concept Document?</h2>
+
+            <p>A Game Concept Document is a high-level overview of your game. It answers the big questions:</p>
+
+            <ul>
+                <li><strong>What is this game about?</strong></li>
+                <li><strong>What does the player do?</strong></li>
+                <li><strong>Why would someone want to play it?</strong></li>
+                <li><strong>Who is it for?</strong></li>
+            </ul>
+
+            <p>The GCD is your <strong>north star</strong>. When you're deep in development and start second-guessing your ideas or feeling scope creep, you come back to this document. It keeps you honest and focused.</p>
+
+            <h3>Why One Page?</h3>
+
+            <p>Because constraints breed clarity. If you had unlimited space, you'd ramble. One page forces you to prioritize what actually matters. Every sentence has to earn its place.</p>
+
+            <p>Plus, one page is:</p>
+            <ul>
+                <li><strong>Easy to reference</strong> during development.</li>
+                <li><strong>Easy to share</strong> with playtesters, teammates, or mentors.</li>
+                <li><strong>Easy to revise</strong> as your ideas evolve (and they will—that's normal and good).</li>
+            </ul>
+
+            <p>Professional game studios often start with documents just like this before greenlighting full production. You're doing exactly what the pros do.</p>
+
+            <div class="callout tip">
+                <p>This document will evolve. Don't stress about getting it perfect on the first try. Start with what you know, and refine it as you learn more.</p>
+            </div>
+
+            <hr>
+
+            <h2>The Template Structure</h2>
+
+            <p>Your Game Concept Document should include these eight sections:</p>
+
+            <ol>
+                <li><strong>Game Title</strong></li>
+                <li><strong>Genre(s)</strong></li>
+                <li><strong>Core Gameplay Loop</strong> (one sentence)</li>
+                <li><strong>Narrative Hook</strong> (2-3 sentences)</li>
+                <li><strong>Main Character</strong> (3-5 bullet points)</li>
+                <li><strong>Game World</strong> (2-3 sentences)</li>
+                <li><strong>Target Audience</strong> (1-2 sentences)</li>
+                <li><strong>Inspiration</strong> (games/movies/books that influenced your concept)</li>
+            </ol>
+
+            <p>Let's break down each section with guidance on what to include.</p>
+
+            <hr>
+
+            <div class="template-section">
+                <h4>Section 1: Game Title</h4>
+                
+                <p><strong>What to include:</strong> Your game's working title.</p>
+
+                <p>This doesn't have to be final. It just needs to be something memorable and evocative that captures the vibe of your game.</p>
+
+                <div class="template-field">
+                    <p><strong>Good titles:</strong></p>
+                    <ul>
+                        <li>Hint at the concept (Celeste = mountain, Hollow Knight = empty warrior, Undertale = underground tale)</li>
+                        <li>Are short and punchy (2-3 words ideal)</li>
+                        <li>Avoid generic phrases ("Adventure Quest," "Epic Battle")</li>
+                    </ul>
+                </div>
+
+                <div class="example-box">
+                    <h5>Examples:</h5>
+                    <ul>
+                        <li><strong>Pixel Quest</strong> (our running example—hints at digital world and journey)</li>
+                        <li><strong>Clockwork Ascent</strong> (immediately suggests climbing and mechanical themes)</li>
+                        <li><strong>Echoes of the Deep</strong> (mysterious, underwater or subterranean vibe)</li>
+                        <li><strong>Glitch Runner</strong> (fast-paced, digital/tech themed)</li>
+                    </ul>
+                </div>
+
+                <div class="callout tip">
+                    <p>Search your title online to make sure it's not already taken by a famous game. If it is, tweak it slightly. Originality matters for discoverability.</p>
+                </div>
+            </div>
+
+            <div class="template-section">
+                <h4>Section 2: Genre(s)</h4>
+                
+                <p><strong>What to include:</strong> The primary genre, and optionally one secondary genre if you're blending.</p>
+
+                <p>This should match what you explored in Section 1.1. Be specific but concise.</p>
+
+                <div class="template-field">
+                    <p><strong>Format:</strong> Primary Genre, (Secondary Genre if applicable)</p>
+                </div>
+
+                <div class="example-box">
+                    <h5>Examples:</h5>
+                    <ul>
+                        <li><strong>Platformer</strong> (Celeste)</li>
+                        <li><strong>Puzzle</strong> (Portal)</li>
+                        <li><strong>Action RPG</strong> (Hades)</li>
+                        <li><strong>Simulation, RPG</strong> (Stardew Valley)</li>
+                        <li><strong>Platformer, Metroidvania</strong> (Hollow Knight)</li>
+                    </ul>
+                </div>
+
+                <p>Keep it to 1-2 genres max. If you're tempted to list three or more, your scope might be too broad—focus on the primary one.</p>
+            </div>
+
+            <div class="template-section">
+                <h4>Section 3: Core Gameplay Loop (One Sentence)</h4>
+                
+                <p><strong>What to include:</strong> The fundamental repeating action cycle using the formula you learned in Section 1.3.</p>
+
+                <div class="template-field">
+                    <p><strong>Formula:</strong> [Player Action] → [Game Response] → [Reward/Consequence] → [Motivation to Continue]</p>
+                </div>
+
+                <div class="example-box">
+                    <h5>Examples:</h5>
+                    <ul>
+                        <li><strong>Celeste:</strong> "Move, jump, and dash through challenging screens → Navigate obstacles and reach the goal → Unlock next screen and feel accomplishment → Face harder challenges that build on learned skills."</li>
+                        <li><strong>Portal:</strong> "Place portals to solve test chamber puzzles → Experiment and reach the exit → Progress to next chamber and hear GLaDOS's commentary → Face more complex puzzles with new elements."</li>
+                        <li><strong>Pixel Quest:</strong> "Move, jump, and dash through glitching platforms → Navigate digital obstacles and collect data fragments → Unlock next program/level and uncover story → Face new glitch mechanics and escalating anti-virus threat."</li>
+                    </ul>
+                </div>
+
+                <p>Don't overcomplicate it. Focus on what the player will be <em>doing</em> repeatedly. If your sentence is more than two lines, simplify. The loop should be immediately understandable.</p>
+            </div>
+
+            <div class="template-section">
+                <h4>Section 4: Narrative Hook (2-3 Sentences)</h4>
+                
+                <p><strong>What to include:</strong> The story premise—just enough to give context and motivation.</p>
+
+                <p>This is where you apply what you learned in Section 1.4. Answer:</p>
+                <ul>
+                    <li><strong>Who</strong> is the player character?</li>
+                    <li><strong>What</strong> is their situation or goal?</li>
+                    <li><strong>Why</strong> does it matter?</li>
+                </ul>
+
+                <div class="example-box">
+                    <h5>Examples:</h5>
+                    <p><strong>Celeste:</strong> "Madeline is a young woman struggling with anxiety who decides to climb Celeste Mountain to prove something to herself. The mountain is treacherous and constantly challenges her physically and mentally. Can she reach the summit and confront her inner demons?"</p>
+                    
+                    <p><strong>Pixel Quest:</strong> "You are a sentient pixel who gained consciousness during a computer malfunction. The system's anti-virus AI sees you as a glitch and is trying to delete you. Escape by navigating through corrupted programs before you're erased—and discover why you exist in the first place."</p>
+                </div>
+
+                <p>Keep it punchy and intriguing. This is your "elevator pitch"—if someone asks "what's your game about?" this is your answer.</p>
+            </div>
+
+            <div class="template-section">
+                <h4>Section 5: Main Character (3-5 Bullet Points)</h4>
+                
+                <p><strong>What to include:</strong> The key details from Section 1.5's four character questions.</p>
+
+                <p>Use bullet points for clarity. Focus on identity, motivation, obstacle, and what makes them interesting.</p>
+
+                <div class="template-field">
+                    <p><strong>Format:</strong></p>
+                    <ul>
+                        <li><strong>Who:</strong> [Character identity and role]</li>
+                        <li><strong>Want:</strong> [Goal or motivation]</li>
+                        <li><strong>Obstacle:</strong> [What stands in their way]</li>
+                        <li><strong>Hook:</strong> [Relatable trait, unique design, or emotional core]</li>
+                        <li><strong>Visual:</strong> [Brief visual description] (optional but helpful)</li>
+                    </ul>
+                </div>
+
+                <div class="example-box">
+                    <h5>Example (Pixel Quest - Bit):</h5>
+                    <ul>
+                        <li><strong>Who:</strong> A sentient pixel—literally a single square of code—who gained consciousness during a system glitch</li>
+                        <li><strong>Want:</strong> To survive deletion by the anti-virus AI and discover why they became self-aware</li>
+                        <li><strong>Obstacle:</strong> The anti-virus hunting them, hostile corrupted programs, environmental glitches, and their own fragility</li>
+                        <li><strong>Hook:</strong> The ultimate underdog—tiny, vulnerable, unexpected. Represents creativity and chaos in a system designed for order and efficiency.</li>
+                        <li><strong>Visual:</strong> Bright cyan/blue single-pixel sprite with glitch trail effects; contrasts sharply against dark, corrupted environments</li>
+                    </ul>
+                </div>
+
+                <div class="callout tip">
+                    <p>If your game doesn't have a traditional character (e.g., abstract puzzle game), you can skip this or describe the "player role" instead.</p>
+                </div>
+            </div>
+
+            <div class="template-section">
+                <h4>Section 6: Game World (2-3 Sentences)</h4>
+                
+                <p><strong>What to include:</strong> The setting, rules, and how it serves gameplay (from Section 1.5's three world-building questions).</p>
+
+                <div class="example-box">
+                    <h5>Examples:</h5>
+                    <p><strong>Celeste:</strong> "Celeste Mountain is a towering peak in British Columbia. Early areas are natural and beautiful, but as Madeline climbs higher, the environment becomes surreal and abstract—reflecting her mental state. The world serves gameplay by introducing environmental hazards (wind, moving platforms, crumbling paths) that match the increasing difficulty."</p>
+                    
+                    <p><strong>Pixel Quest:</strong> "The game takes place inside a malfunctioning computer system, with each level representing a different program (word processor, image editor, web browser, etc.). Each program has unique glitch-based mechanics tied to its function—text blocks that appear/disappear, color zones with different physics, link nodes to jump between. The world serves gameplay by constantly introducing fresh mechanics while maintaining the digital, glitchy aesthetic."</p>
+                </div>
+
+                <p>Be specific. "A fantasy world" is too vague. "A floating island chain where gravity shifts between islands" is much better.</p>
+            </div>
+
+            <div class="template-section">
+                <h4>Section 7: Target Audience (1-2 Sentences)</h4>
+                
+                <p><strong>What to include:</strong> Who would enjoy this game?</p>
+
+                <p>Think about:</p>
+                <ul>
+                    <li><strong>Age range</strong> (kids, teens, adults, all ages)</li>
+                    <li><strong>Player preferences</strong> (challenge-seekers, story lovers, creative players, casual vs. hardcore)</li>
+                    <li><strong>Similar games' audiences</strong> (fans of X will enjoy this)</li>
+                </ul>
+
+                <div class="example-box">
+                    <h5>Examples:</h5>
+                    <p><strong>Celeste:</strong> "Players who enjoy challenging platformers with tight controls and emotional storytelling. Fans of Super Meat Boy, Ori and the Blind Forest, or anyone who appreciates difficult-but-fair gameplay with heartfelt themes."</p>
+                    
+                    <p><strong>Pixel Quest:</strong> "Players who enjoy fast-paced platformers with unique visual aesthetics and creative concepts. Fans of Celeste, Super Meat Boy, or anyone drawn to digital/glitch art styles and underdog stories."</p>
+                </div>
+
+                <div class="callout tip">
+                    <p>It's okay to say "I'm making this for myself and people like me." Passion projects that scratch a personal itch often resonate with others who share that itch.</p>
+                </div>
+            </div>
+
+            <div class="template-section">
+                <h4>Section 8: Inspiration (Games/Movies/Books)</h4>
+                
+                <p><strong>What to include:</strong> List 3-5 works (games, movies, books, art) that influenced your concept.</p>
+
+                <p>This helps contextualize your game and gives others a reference point. It also reminds <em>you</em> what you're aiming for when you get lost in development.</p>
+
+                <div class="template-field">
+                    <p><strong>Format:</strong> Work Title (what you're borrowing/inspired by)</p>
+                </div>
+
+                <div class="example-box">
+                    <h5>Example (Pixel Quest):</h5>
+                    <ul>
+                        <li><strong>Celeste</strong> (tight platforming, challenging-but-fair difficulty, emotional storytelling)</li>
+                        <li><strong>Tron / Tron: Legacy</strong> (digital aesthetic, AI conflict, glitch visuals)</li>
+                        <li><strong>Inside / Limbo</strong> (atmospheric, minimalist storytelling, environmental storytelling)</li>
+                        <li><strong>Super Meat Boy</strong> (fast-paced platforming, instant respawns, precise controls)</li>
+                    </ul>
+                </div>
+
+                <p>Be specific about <em>what</em> you're taking from each (aesthetic, mechanics, tone, structure). This isn't about copying—it's about standing on the shoulders of giants.</p>
+            </div>
+
+            <hr>
+
+            <h2>The Complete Example: Pixel Quest</h2>
+
+            <p>Let's see a complete Game Concept Document using Pixel Quest as the example. This is what your finished document should look like:</p>
+
+            <div class="pixel-quest-document">
+                <h3>🎮 PIXEL QUEST 🎮<br>Game Concept Document</h3>
+
+                <div class="gcd-field">
+                    <h4>GAME TITLE</h4>
+                    <p>Pixel Quest</p>
+                </div>
+
+                <div class="gcd-field">
+                    <h4>GENRE(S)</h4>
+                    <p>Platformer</p>
+                </div>
+
+                <div class="gcd-field">
+                    <h4>CORE GAMEPLAY LOOP</h4>
+                    <p>Player moves, jumps, and dashes through glitching platforms and digital obstacles → Navigate hazards and collect data fragments → Unlock the next program/level and uncover story pieces → Face new glitch-based mechanics and increasing anti-virus threat → Repeat with higher difficulty and new environments.</p>
+                </div>
+
+                <div class="gcd-field">
+                    <h4>NARRATIVE HOOK</h4>
+                    <p>You are a sentient pixel who gained consciousness during a computer system malfunction. The anti-virus AI sees you as a glitch and is actively trying to delete you. Escape by navigating through corrupted programs (word processor, image editor, browser, etc.) before you're erased forever—and discover why you became self-aware in the first place.</p>
+                </div>
+
+                <div class="gcd-field">
+                    <h4>MAIN CHARACTER</h4>
+                    <ul>
+                        <li><strong>Who:</strong> Bit, a sentient pixel—literally a single square of code—who gained consciousness during a glitch</li>
+                        <li><strong>Want:</strong> To survive deletion and understand why they exist</li>
+                        <li><strong>Obstacle:</strong> The anti-virus AI hunting them, hostile corrupted code, environmental hazards, and their own fragility as a single pixel</li>
+                        <li><strong>Hook:</strong> The ultimate underdog. Bit is tiny, vulnerable, and represents creativity in a system built for conformity. Players root for this scrappy little pixel fighting impossible odds just to exist.</li>
+                        <li><strong>Visual:</strong> Bright cyan/electric blue single-pixel sprite (8x8) with rainbow glitch trail effects; stands out against dark, corrupted environments</li>
+                    </ul>
+                </div>
+
+                <div class="gcd-field">
+                    <h4>GAME WORLD</h4>
+                    <p>The game takes place inside a malfunctioning computer system, with each level representing a different program: word processor (text block platforms), image editor (color-coded zones), web browser (link node navigation), spreadsheet (grid-based puzzles), and music player (rhythm obstacles). Each program has unique glitch-based mechanics tied to its function—platforms flicker in/out, enemies (viruses) patrol zones, and environmental hazards reflect digital corruption. The world serves gameplay by constantly introducing fresh mechanics while maintaining a cohesive digital/glitch aesthetic.</p>
+                </div>
+
+                <div class="gcd-field">
+                    <h4>TARGET AUDIENCE</h4>
+                    <p>Players who enjoy challenging platformers with precise controls and creative visual aesthetics. Fans of Celeste, Super Meat Boy, or anyone drawn to unique art styles (glitch art, digital themes) and underdog narratives. Appeals to both hardcore platforming fans and players interested in experimental indie concepts.</p>
+                </div>
+
+                <div class="gcd-field">
+                    <h4>INSPIRATION</h4>
+                    <ul>
+                        <li><strong>Celeste</strong> (tight platforming, instant respawns, challenging-but-fair difficulty, emotional undertones)</li>
+                        <li><strong>Super Meat Boy</strong> (fast-paced, precision-based platforming with quick retry loops)</li>
+                        <li><strong>Tron / Tron: Legacy</strong> (digital world aesthetic, AI antagonist, neon glitch visuals)</li>
+                        <li><strong>Inside / Limbo</strong> (minimalist storytelling, environmental narrative, atmospheric tension)</li>
+                        <li><strong>Hyper Light Drifter</strong> (glitch effects as visual language, wordless storytelling)</li>
+                    </ul>
+                </div>
+            </div>
+
+            <p>That's it. One page. Clear, focused, actionable. Anyone reading this knows exactly what Pixel Quest is, who it's for, and why it matters.</p>
+
+            <hr>
+
+            <h2>Common Pitfalls to Avoid</h2>
+
+            <div class="pitfall-section">
+                <h3>⚠️ Common Pitfalls</h3>
+                
+                <p>Before you start writing yours, let me show you the three biggest mistakes people make:</p>
+
+                <div class="pitfall">
+                    <h4>Pitfall 1: Too Vague</h4>
+                    
+                    <div class="comparison">
+                        <div class="comparison-bad">
+                            <p>"A fun action game with cool graphics and lots of levels"</p>
+                        </div>
+                        <div class="comparison-good">
+                            <p>"A top-down shooter where you play as a janitor defending an office building from alien invaders using improvised weapons"</p>
+                        </div>
+                    </div>
+
+                    <p>Specificity sells. "Fun" and "cool" mean nothing. What genre? What's the hook? Who's the character?</p>
+                </div>
+
+                <div class="pitfall">
+                    <h4>Pitfall 2: Too Complex</h4>
+                    
+                    <div class="comparison">
+                        <div class="comparison-bad">
+                            <p>"An open-world RPG with base building, romance options, crafting, dynamic weather, branching story, multiplayer, and customizable mechs"</p>
+                        </div>
+                        <div class="comparison-good">
+                            <p>"A story-driven RPG where your choices affect which faction controls the city"</p>
+                        </div>
+                    </div>
+
+                    <p>For your FIRST game, simple is good. One core mechanic executed well beats ten mediocre ones.</p>
+                </div>
+
+                <div class="pitfall">
+                    <h4>Pitfall 3: Not Gameplay-Focused</h4>
+                    
+                    <div class="comparison">
+                        <div class="comparison-bad">
+                            <p>"In the year 3047, humanity has colonized Mars, and you're a detective investigating a conspiracy involving ancient alien artifacts and corrupt corporations..."</p>
+                        </div>
+                        <div class="comparison-good">
+                            <p>"A detective game where you gather clues by interviewing suspects and solving logic puzzles to uncover a conspiracy"</p>
+                        </div>
+                    </div>
+
+                    <p>Story is important, but GAMEPLAY comes first. What does the player DO? Lead with that.</p>
+                </div>
+            </div>
+
+            <hr>
+
+            <h2>Success Criteria</h2>
+
+            <div class="success-criteria">
+                <h3>✓ How to Know Your Document Is Ready</h3>
+                
+                <p>Your Game Concept Document is ready when:</p>
+
+                <ul class="success-list">
+                    <li><strong>Anyone can read it and explain your game back to you</strong> in their own words.</li>
+                    <li><strong>You can describe your game in 30 seconds</strong> using just your narrative hook.</li>
+                    <li><strong>Your gameplay loop is clear and specific</strong>—not vague ("fight enemies") but precise ("dodge attacks, counter with timed parries, defeat enemies to collect resources").</li>
+                    <li><strong>Your character and world feel distinct</strong>—they're not generic hero in generic world.</li>
+                    <li><strong>You're excited about it.</strong> If reading your own document doesn't make you want to start building, something's off. Revise until it does.</li>
+                </ul>
+            </div>
+
+            <hr>
+
+            <h2>Your Assignment</h2>
+
+            <div class="callout exercise">
+                <p><strong>Time to create YOUR Game Concept Document!</strong></p>
+                <p>Use the template provided above and fill out all eight sections for your game. Take your time—this is the foundation for everything that comes next.</p>
+                <p>Use Pixel Quest as a reference if you get stuck, but make sure your concept reflects YOUR unique vision.</p>
+            </div>
+
+            <hr>
+
+            <h2>What Happens Next?</h2>
+
+            <p>Congratulations! You've just completed your <strong>Game Concept Document</strong>. This is a huge milestone. You've gone from "I want to make a game" to "Here's my game, clearly defined and ready to develop."</p>
+
+            <p>This document is now your <strong>north star</strong>. As you move into Chapter 2 (Game Mechanics & Design), you'll reference this constantly. Every mechanic you design, every level you plan, every decision you make—it all needs to serve the concept you've defined here.</p>
+
+            <p>And here's the thing: <strong>this document isn't set in stone.</strong> As you prototype, playtest, and learn, you'll discover things that work and things that don't. Your concept will evolve. That's normal and healthy. Just update this document as you go, so it always reflects your current vision.</p>
+
+            <p>But for now, you're done with the exercise. Take a moment to appreciate that. You've done real game design work.</p>
+
+            <div class="callout tip">
+                <p><strong>Optional but Encouraged:</strong> Share your Game Concept Document with someone—a friend, classmate, family member, or online community. Ask them: "After reading, can you explain the game back to me?" Their answer will help you refine your concept.</p>
+            </div>
+
+        </article>
+
+        <nav class="bottom-nav">
+            <div class="nav-links">
+                <a href="ch1sec5.html" class="nav-link prev">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+                    </svg>
+                    1.5 Character & World-Building
+                </a>
+                <a href="ch1sec7.html" class="nav-link next">
+                    1.7 Resources & Next Steps
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                    </svg>
+                </a>
+            </div>
+            <div class="back-to-chapter">
+                <a href="ch1.html">← Back to Chapter 1</a>
+            </div>
+        </nav>
+    </main>
+
+    <footer>
+        <div class="footer-content">
+            <div class="footer-logo">SLCC GAME DEV WORKSHOP</div>
+            <p><a href="index.html">Home</a> · <a href="ch1.html">Chapter 1</a></p>
+        </div>
+    </footer>
+</body>
+</html>
