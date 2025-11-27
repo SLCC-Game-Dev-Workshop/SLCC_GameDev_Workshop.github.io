@@ -1,0 +1,1115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>2.1 Core vs Secondary Mechanics | SLCC Game Dev Workshop</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #4ade80;
+            --primary-dim: #22c55e;
+            --primary-glow: rgba(74, 222, 128, 0.3);
+            --bg-dark: #0a0a0f;
+            --bg-card: #12121a;
+            --bg-card-hover: #1a1a25;
+            --text-primary: #e4e4e7;
+            --text-muted: #71717a;
+            --border: #27272a;
+            --accent-purple: #a855f7;
+            --accent-cyan: #22d3ee;
+            --accent-pink: #ec4899;
+            --accent-yellow: #facc15;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: 'Space Mono', monospace;
+            background-color: var(--bg-dark);
+            color: var(--text-primary);
+            line-height: 1.8;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* Scanline overlay */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            background: repeating-linear-gradient(
+                0deg,
+                transparent,
+                transparent 2px,
+                rgba(0, 0, 0, 0.1) 2px,
+                rgba(0, 0, 0, 0.1) 4px
+            );
+            z-index: 1000;
+            opacity: 0.3;
+        }
+
+        /* Grid background */
+        .bg-grid {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                linear-gradient(rgba(74, 222, 128, 0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(74, 222, 128, 0.03) 1px, transparent 1px);
+            background-size: 50px 50px;
+            z-index: -1;
+        }
+
+        /* Header */
+        header {
+            padding: 1.5rem 2rem;
+            border-bottom: 1px solid var(--border);
+            background: linear-gradient(180deg, rgba(74, 222, 128, 0.05) 0%, transparent 100%);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            backdrop-filter: blur(10px);
+        }
+
+        .header-content {
+            max-width: 900px;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--text-muted);
+            text-decoration: none;
+            font-size: 0.85rem;
+            transition: all 0.3s ease;
+        }
+
+        .back-link:hover {
+            color: var(--primary);
+        }
+
+        .back-link svg {
+            width: 18px;
+            height: 18px;
+            transition: transform 0.3s ease;
+        }
+
+        .back-link:hover svg {
+            transform: translateX(-3px);
+        }
+
+        .header-nav {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .header-section {
+            font-family: 'Press Start 2P', cursive;
+            font-size: 0.6rem;
+            color: var(--primary);
+            letter-spacing: 0.05em;
+        }
+
+        /* Hero */
+        .hero {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 4rem 2rem 3rem;
+            border-bottom: 1px solid var(--border);
+            animation: fadeInUp 0.6s ease-out;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .section-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .section-number {
+            font-family: 'Press Start 2P', cursive;
+            font-size: 0.9rem;
+            color: var(--bg-dark);
+            background: var(--accent-cyan);
+            padding: 0.5rem 1rem;
+        }
+
+        .section-label {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+        }
+
+        .hero h1 {
+            font-size: clamp(1.5rem, 4vw, 2.25rem);
+            line-height: 1.4;
+            margin-bottom: 1rem;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        .learning-goal {
+            background: var(--bg-card);
+            border-left: 3px solid var(--primary);
+            padding: 1rem 1.5rem;
+            margin-top: 1.5rem;
+        }
+
+        .learning-goal-label {
+            font-size: 0.7rem;
+            color: var(--primary);
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            margin-bottom: 0.5rem;
+            font-weight: 700;
+        }
+
+        .learning-goal p {
+            color: var(--text-muted);
+            font-size: 0.95rem;
+            margin: 0;
+        }
+
+        .hero-meta {
+            display: flex;
+            gap: 2rem;
+            margin-top: 1.5rem;
+        }
+
+        .meta-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+
+        .meta-item svg {
+            width: 16px;
+            height: 16px;
+            color: var(--primary);
+        }
+
+        /* Main Content */
+        main {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 3rem 2rem 4rem;
+        }
+
+        /* Typography */
+        .content h2 {
+            font-family: 'Press Start 2P', cursive;
+            font-size: 0.85rem;
+            color: var(--primary);
+            margin-top: 3rem;
+            margin-bottom: 1.5rem;
+            padding-bottom: 0.75rem;
+            border-bottom: 1px solid var(--border);
+            letter-spacing: 0.05em;
+        }
+
+        .content h2:first-child {
+            margin-top: 0;
+        }
+
+        .content h3 {
+            font-size: 1.25rem;
+            color: var(--text-primary);
+            margin-top: 2.5rem;
+            margin-bottom: 1rem;
+            font-weight: 700;
+        }
+
+        .content h4 {
+            font-size: 1rem;
+            color: var(--accent-cyan);
+            margin-top: 2rem;
+            margin-bottom: 0.75rem;
+            font-weight: 700;
+        }
+
+        .content p {
+            margin-bottom: 1.25rem;
+            color: var(--text-primary);
+            font-size: 0.95rem;
+        }
+
+        .content strong {
+            color: var(--text-primary);
+            font-weight: 700;
+        }
+
+        .content em {
+            color: var(--text-muted);
+            font-style: italic;
+        }
+
+        .content ul, .content ol {
+            margin-bottom: 1.5rem;
+            padding-left: 1.5rem;
+        }
+
+        .content li {
+            margin-bottom: 0.75rem;
+            color: var(--text-primary);
+            font-size: 0.95rem;
+        }
+
+        .content li::marker {
+            color: var(--primary);
+        }
+
+        /* Callout Boxes */
+        .callout {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            padding: 1.25rem 1.5rem;
+            margin: 1.5rem 0;
+            position: relative;
+        }
+
+        .callout::before {
+            font-family: 'Press Start 2P', cursive;
+            font-size: 0.55rem;
+            position: absolute;
+            top: -0.6rem;
+            left: 1rem;
+            padding: 0.2rem 0.5rem;
+            background: var(--bg-dark);
+        }
+
+        .callout p {
+            margin: 0;
+            font-size: 0.9rem;
+        }
+
+        .callout.tip {
+            border-color: var(--primary);
+        }
+
+        .callout.tip::before {
+            content: '💡 TIP';
+            color: var(--primary);
+        }
+
+        .callout.warning {
+            border-color: var(--accent-yellow);
+        }
+
+        .callout.warning::before {
+            content: '⚠️ WARNING';
+            color: var(--accent-yellow);
+        }
+
+        .callout.note {
+            border-color: var(--accent-purple);
+        }
+
+        .callout.note::before {
+            content: '📝 NOTE';
+            color: var(--accent-purple);
+        }
+
+        /* Example boxes */
+        .example-box {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            padding: 1.5rem;
+            margin: 1.5rem 0;
+        }
+
+        .example-box h4 {
+            margin-top: 0;
+            color: var(--accent-cyan);
+        }
+
+        .example-box p:last-child {
+            margin-bottom: 0;
+        }
+
+        /* Horizontal Rule */
+        hr {
+            border: none;
+            border-top: 1px solid var(--border);
+            margin: 3rem 0;
+        }
+
+        /* Bottom Navigation */
+        .bottom-nav {
+            margin-top: 4rem;
+            padding-top: 2rem;
+            border-top: 1px solid var(--border);
+        }
+
+        .nav-links {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .nav-link {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 1rem 1.5rem;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            color: var(--text-primary);
+            text-decoration: none;
+            font-size: 0.85rem;
+            transition: all 0.3s ease;
+        }
+
+        .nav-link:hover {
+            border-color: var(--primary);
+            color: var(--primary);
+        }
+
+        .nav-link svg {
+            width: 18px;
+            height: 18px;
+        }
+
+        .nav-link.prev svg {
+            transition: transform 0.3s ease;
+        }
+
+        .nav-link.prev:hover svg {
+            transform: translateX(-3px);
+        }
+
+        .nav-link.next svg {
+            transition: transform 0.3s ease;
+        }
+
+        .nav-link.next:hover svg {
+            transform: translateX(3px);
+        }
+
+        .back-to-chapter {
+            display: flex;
+            justify-content: center;
+            margin-top: 1.5rem;
+        }
+
+        .back-to-chapter a {
+            color: var(--text-muted);
+            text-decoration: none;
+            font-size: 0.85rem;
+            transition: color 0.3s ease;
+        }
+
+        .back-to-chapter a:hover {
+            color: var(--primary);
+        }
+
+        /* Footer */
+        footer {
+            border-top: 1px solid var(--border);
+            padding: 2rem;
+            text-align: center;
+            background: var(--bg-card);
+        }
+
+        .footer-content {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .footer-logo {
+            font-family: 'Press Start 2P', cursive;
+            font-size: 0.6rem;
+            color: var(--primary);
+            margin-bottom: 0.5rem;
+        }
+
+        footer p {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+        }
+
+        footer a {
+            color: var(--primary);
+            text-decoration: none;
+        }
+
+        footer a:hover {
+            text-decoration: underline;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .hero {
+                padding: 3rem 1.5rem 2rem;
+            }
+
+            main {
+                padding: 2rem 1.5rem 3rem;
+            }
+
+            .hero-meta {
+                flex-direction: column;
+                gap: 0.75rem;
+            }
+
+            .nav-links {
+                flex-direction: column;
+            }
+
+            .nav-link {
+                width: 100%;
+                justify-content: center;
+            }
+        }
+
+        /* Pixel corners */
+        .pixel-corner {
+            position: fixed;
+            width: 8px;
+            height: 8px;
+            background: var(--primary);
+            opacity: 0.5;
+        }
+
+        .pixel-corner.top-left { top: 10px; left: 10px; }
+        .pixel-corner.top-right { top: 10px; right: 10px; }
+        .pixel-corner.bottom-left { bottom: 10px; left: 10px; }
+        .pixel-corner.bottom-right { bottom: 10px; right: 10px; }
+    </style>
+</head>
+<body>
+    <div class="bg-grid"></div>
+    <div class="pixel-corner top-left"></div>
+    <div class="pixel-corner top-right"></div>
+    <div class="pixel-corner bottom-left"></div>
+    <div class="pixel-corner bottom-right"></div>
+
+    <header>
+        <div class="header-content">
+            <a href="index.html" class="back-link">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+                </svg>
+                Home
+            </a>
+            <div class="header-nav">
+                <span class="header-section">SECTION 2.1</span>
+            </div>
+        </div>
+    </header>
+
+    <section class="hero">
+        <div class="section-badge">
+            <span class="section-number">2.1</span>
+            <span class="section-label">Section</span>
+        </div>
+        <h1>Core vs Secondary Mechanics</h1>
+        <div class="hero-meta">
+            <div class="meta-item">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <span>~12 min read</span>
+            </div>
+            <div class="meta-item">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                </svg>
+                <span>2,800 words</span>
+            </div>
+        </div>
+        <div class="learning-goal">
+            <div class="learning-goal-label">Learning Goal</div>
+            <p>Understand the difference between core and secondary mechanics, and learn how to prioritize what to build first.</p>
+        </div>
+    </section>
+
+    <main>
+        <article class="content">
+<h2>Welcome to Chapter 2!</h2>
+
+
+
+<h2>What Are Core Mechanics?</h2>
+
+<strong>Core mechanics are the primary, repeating actions that define your gameplay loop.</strong>
+
+<p>Remember the gameplay loop formula from Chapter 1? The core mechanics are the "player action" and "game response" parts of that loop. They're what you do <em>constantly</em> throughout the gameâ€”the verbs that define the experience.</p>
+
+<p>If someone asks "What do you <em>do</em> in this game?" your answer will be the core mechanics.</p>
+
+<h3>Identifying Core Mechanics</h3>
+
+<p>Ask yourself:</p>
+<ul>
+<li><strong>What actions will the player repeat most often?</strong></li>
+<li><strong>If I removed this mechanic, would the game still work?</strong></li>
+<li><strong>Does this mechanic directly serve the core loop?</strong></li>
+</ul>
+
+<p>If a mechanic is essential to your loop and gets repeated constantly, it's core. Simple as that.</p>
+
+<h3>Examples of Core Mechanics Across Genres</h3>
+
+<ul>
+<li><strong>Super Mario Bros (Platformer):</strong> Run left/right + Jump</li>
+<li><strong>Portal (Puzzle):</strong> Place blue portal + Place orange portal + Walk through portals</li>
+<li><strong>Stardew Valley (Simulation):</strong> Plant seeds + Water crops + Harvest crops + Talk to NPCs</li>
+<li><strong>Doom (Shooter):</strong> Move + Aim/Shoot + Switch weapons</li>
+<li><strong>Celeste (Platformer):</strong> Move + Jump + Mid-air dash</li>
+</ul>
+
+<p>Notice how <strong>simple</strong> these are? Even beloved, complex games have just 2-4 core mechanics. That simplicity is intentional. Core mechanics need to be tight, polished, and satisfying because you'll be using them thousands of times.</p>
+
+<p>> <strong>ðŸ’¡ Tip:</strong> Count the verbs in your gameplay loop. Those verbs are likely your core mechanics. If you have more than 4-5, consider which ones are truly essential.</p>
+
+<hr>
+
+<h2>What Are Secondary Mechanics?</h2>
+
+<strong>Secondary mechanics are features that support or enhance the core mechanics but aren't strictly necessary for the game to function.</strong>
+
+<p>Think of them as the seasoning on a dish. The core mechanics are your main ingredients (protein, vegetables, grains), and secondary mechanics are the spices, sauces, and garnishes that make it interesting. You could eat the meal without them, but they make the experience richer.</p>
+
+<h3>Identifying Secondary Mechanics</h3>
+
+<p>Ask yourself:</p>
+<ul>
+<li><strong>Does this mechanic add variety or depth, but isn't required for every playthrough?</strong></li>
+<li><strong>If I removed this mechanic, would the game still be fun at its core?</strong></li>
+<li><strong>Is this mechanic used occasionally or situationally rather than constantly?</strong></li>
+</ul>
+
+<p>If the answer is yes to these questions, it's probably secondary.</p>
+
+<h3>Examples of Secondary Mechanics</h3>
+
+<ul>
+<li><strong>Super Mario Bros:</strong> Collecting coins, hitting question blocks, using power-ups (Fire Flower, Mushroom), time limit per level</li>
+<li><strong>Portal:</strong> Picking up/placing cubes, dodging turrets, redirecting energy balls, listening to GLaDOS's dialogue</li>
+<li><strong>Stardew Valley:</strong> Fishing, mining, cooking, crafting, attending festivals, decorating your house</li>
+<li><strong>Celeste:</strong> Collecting strawberries (optional collectibles), using assist mode toggles, unlocking B-side/C-side remix levels</li>
+<li><strong>Hollow Knight:</strong> Equipping charms (build customization), resting at benches, buying items from NPCs, unlocking map markers</li>
+</ul>
+
+<p>Notice that in every case, <strong>you could remove these mechanics and the game would still work</strong>. Super Mario would still be a platformer without coins. Portal would still be a puzzle game without cubes. Stardew Valley would still be a farming sim without fishing. But these secondary mechanics add depth, replayability, and flavor.</p>
+
+<p>> âš ï¸ <strong>Common Mistake:</strong> Beginners often prioritize secondary mechanics too early because they're exciting. "My platformer will have 15 power-ups and a crafting system!" Slow down. Build the core first. If jumping doesn't feel good, no amount of power-ups will save your game.</p>
+
+<hr>
+
+<h2>Deep Dive: Breaking Down Game Examples</h2>
+
+<p>Let's analyze some specific games and identify their core vs. secondary mechanics. Pay attention to how <strong>few</strong> core mechanics each game has, and how <strong>many</strong> secondary mechanics layer on top.</p>
+
+<hr>
+
+<h3>Example 1: Super Mario Bros</h3>
+
+<strong>Core Mechanics:</strong>
+<ol>
+<li><strong>Run left/right:</strong> Mario moves horizontally at varying speeds</li>
+<li><strong>Jump:</strong> Mario jumps vertically; holding the button longer = higher jump</li>
+</ol>
+
+<p>That's it. Those two mechanicsâ€”move and jumpâ€”define 90% of what you do in Super Mario Bros. The entire game is built around the feel of momentum, inertia, and precise jump timing.</p>
+
+<strong>Secondary Mechanics:</strong>
+<ul>
+<li><strong>Collecting coins:</strong> Fun, adds score, provides 1-ups at 100 coins</li>
+<li><strong>Question blocks:</strong> Hitting them from below reveals power-ups or coins</li>
+<li><strong>Power-ups:</strong> Mushroom (grow big), Fire Flower (shoot fireballs), Star (invincibility)</li>
+<li><strong>Stomping enemies:</strong> Jump on Goombas/Koopas to defeat them</li>
+<li><strong>Time limit:</strong> Each level has 300 seconds; running out = death</li>
+<li><strong>Pipes:</strong> Enter some pipes to access secret areas</li>
+<li><strong>Flagpole goal:</strong> Reach the end to complete the level</li>
+</ul>
+
+<strong>Why this breakdown works:</strong>
+<p>The core mechanics (run + jump) are so satisfying and polished that even if you removed <em>all</em> the secondary mechanics, the game would still be fun. Mario's movement has <strong>weight</strong>, <strong>momentum</strong>, and <strong>precision</strong>. That's what makes it legendary.</p>
+
+<p>The secondary mechanics add variety (power-ups change tactics), challenge (enemies force creative jumping), and goals (coins, flagpole). But they don't <em>define</em> the gameâ€”they enhance it.</p>
+
+<strong>Takeaway for beginners:</strong> If you're making a platformer, your first milestone is nailing movement and jumping. Get that feeling <em>perfect</em>. Everything else comes later.
+
+<hr>
+
+<h3>Example 2: Portal</h3>
+
+<strong>Core Mechanics:</strong>
+<ol>
+<li><strong>Place blue portal:</strong> Left-click on valid surface â†’ Blue portal appears</li>
+<li><strong>Place orange portal:</strong> Right-click on valid surface â†’ Orange portal appears</li>
+<li><strong>Walk through portals:</strong> Enter one, exit the other; momentum is conserved</li>
+</ol>
+
+<p>That's the entire core. Every puzzle revolves around "where do I put these two portals to solve this challenge?"</p>
+
+<strong>Secondary Mechanics:</strong>
+<ul>
+<li><strong>Picking up/carrying cubes:</strong> Weighted Storage Cubes activate buttons</li>
+<li><strong>Dodging turrets:</strong> Sentries that shoot you if they see you</li>
+<li><strong>Redirecting energy balls:</strong> Projectiles that activate receptacles</li>
+<li><strong>Companion Cube mechanics:</strong> Emotional attachment to an object (narrative, not gameplay)</li>
+<li><strong>GLaDOS commentary:</strong> Story and humor delivered via AI antagonist</li>
+<li><strong>Test chamber goals:</strong> Reach the exit door in each room</li>
+</ul>
+
+<strong>Why this breakdown works:</strong>
+<p>Portal's genius is its <em>restraint</em>. The developers had one core ideaâ€”portals that preserve momentumâ€”and explored it exhaustively. Every test chamber is a variation on that theme. The secondary mechanics (cubes, turrets, energy balls) exist only to create interesting portal puzzles.</p>
+
+<strong>Takeaway for beginners:</strong> One well-explored core mechanic beats five shallow ones. Portal could've added combat, crafting, dialogue trees, etc., but it didn't. It focused.
+
+<hr>
+
+<h3>Example 3: Stardew Valley</h3>
+
+<strong>Core Mechanics:</strong>
+<ol>
+<li><strong>Plant seeds:</strong> Select seeds, till soil, plant them</li>
+<li><strong>Water crops:</strong> Use watering can daily to help crops grow</li>
+<li><strong>Harvest crops:</strong> Collect mature crops for selling/cooking</li>
+<li><strong>Talk to NPCs:</strong> Interact with townsfolk to build relationships</li>
+</ol>
+
+<p>These four actions define your daily loop. Wake up, tend farm, talk to villagers, repeat.</p>
+
+<strong>Secondary Mechanics:</strong>
+<ul>
+<li><strong>Fishing:</strong> Mini-game to catch fish in rivers/ocean</li>
+<li><strong>Mining:</strong> Explore caves, fight monsters, collect ores</li>
+<li><strong>Cooking:</strong> Combine ingredients into meals</li>
+<li><strong>Crafting:</strong> Build kegs, preserve jars, fences, etc.</li>
+<li><strong>Festivals:</strong> Seasonal events with unique mini-games</li>
+<li><strong>House decorating:</strong> Place furniture and customize interior</li>
+<li><strong>Relationships/Romance:</strong> Give gifts, trigger cutscenes, marry NPCs</li>
+<li><strong>Foraging:</strong> Collect wild berries, mushrooms, etc.</li>
+<li><strong>Animal husbandry:</strong> Raise chickens, cows, sheep for produce</li>
+<li><strong>Community center bundles:</strong> Long-term collection goals</li>
+</ol>
+
+<strong>Why this breakdown works:</strong>
+<p>Stardew Valley has <em>tons</em> of secondary mechanicsâ€”way more than most games. But the core loop (plant â†’ water â†’ harvest â†’ socialize) is simple and relaxing. All the secondary mechanics are <strong>optional</strong>. You can ignore fishing entirely and still succeed. You can skip mining. You can avoid cooking. The game lets you engage with what interests you while always having the core loop to fall back on.</p>
+
+<strong>Takeaway for beginners:</strong> Secondary mechanics should be <em>optional</em>, not <em>mandatory</em>. Don't force players to engage with every system. Let them find their fun.
+
+<hr>
+
+<h3>Example 4: Celeste</h3>
+
+<strong>Core Mechanics:</strong>
+<ol>
+<li><strong>Move left/right:</strong> Standard platformer horizontal movement</li>
+<li><strong>Jump:</strong> Single jump with variable height (hold longer = higher)</li>
+<li><strong>Mid-air dash:</strong> One dash per jump in any direction (up, diagonal, horizontal)</li>
+<li><strong>Wall-cling:</strong> Grab onto walls, slide slowly, can jump off</li>
+</ol>
+
+<p>These four mechanics combine to create insanely deep movement. The entire game is about mastering the nuances of dash timing, wall-jump angles, and momentum preservation.</p>
+
+<strong>Secondary Mechanics:</strong>
+<ul>
+<li><strong>Strawberries:</strong> Optional collectibles in hard-to-reach spots</li>
+<li><strong>Cassette tapes:</strong> Unlock B-side (harder remix) levels</li>
+<li><strong>Crystal hearts:</strong> Hidden collectibles requiring puzzle-solving</li>
+<li><strong>Assist mode:</strong> Toggles like invincibility, infinite stamina, game speed adjustments</li>
+<li><strong>Dash refill crystals:</strong> Restore your dash mid-air (situational, not always present)</li>
+<li><strong>Moving platforms:</strong> Environmental obstacles that require timing</li>
+<li><strong>Feather power-up:</strong> Fly freely for a short section (rare, special moments)</li>
+</ul>
+
+<strong>Why this breakdown works:</strong>
+<p>Celeste's core mechanics are simple but have <strong>massive skill depth</strong>. You can spend 50+ hours mastering movement tech like wavedashing, hyper-jumps, and corner-boostsâ€”all emergent from the core four mechanics. The secondary mechanics add challenge (strawberries for skilled players), accessibility (assist mode), and variety (environmental obstacles), but the heart of the game is movement mastery.</p>
+
+<strong>Takeaway for beginners:</strong> Core mechanics with high skill ceilings keep players engaged for hundreds of hours. Simple inputs, deep execution.
+
+<hr>
+
+<h3>Example 5: Hollow Knight</h3>
+
+<strong>Core Mechanics:</strong>
+<ol>
+<li><strong>Move left/right + Jump:</strong> Standard platformer movement</li>
+<li><strong>Attack with nail (sword):</strong> Press button to swing melee weapon</li>
+<li><strong>Dodge/avoid attacks:</strong> No dodge buttonâ€”positioning is key</li>
+<li><strong>Explore interconnected world:</strong> Walk/jump/ability-gate through map</li>
+</ol>
+
+<strong>Secondary Mechanics:</strong>
+<ul>
+<li><strong>Equipping charms:</strong> Passive abilities you can mix and match (build customization)</li>
+<li><strong>Spells:</strong> Offensive/utility magic (fireball, dive attack, scream)</li>
+<li><strong>Collecting Geo (currency):</strong> Dropped by enemies, used to buy items</li>
+<li><strong>Resting at benches:</strong> Saves game, refills health, but respawns enemies</li>
+<li><strong>Soul meter:</strong> Attacking enemies fills meter, which powers spells or healing</li>
+<li><strong>Upgrading nail and abilities:</strong> Permanent stat boosts and new traversal moves</li>
+<li><strong>Mapping system:</strong> Buy maps, place pins, reveal areas</li>
+<li><strong>Boss fights:</strong> Unique encounters with special attack patterns</li>
+</ul>
+
+<strong>Why this breakdown works:</strong>
+<p>Hollow Knight's core is "explore and fight." The combat is deceptively simple (one attack button), but enemy variety and positioning challenges create depth. The secondary mechanics add RPG-like progression (charms, upgrades), player choice (build variety), and goals (mapping completion, boss challenges), but you're always just walking, jumping, and swinging your nail at the core.</p>
+
+<strong>Takeaway for beginners:</strong> You don't need complex combo systems to have engaging combat. One attack button + good enemy design = fun.
+
+<hr>
+
+<h2>Why This Distinction Matters for Beginners</h2>
+
+Okay, so why spend all this time breaking down core vs. secondary? Because <strong>scope management is the #1 killer of beginner projects.</strong>
+
+<p>Here's what happens when you don't prioritize:</p>
+
+<h3>The Scope Creep Nightmare</h3>
+
+<p>You start with a simple platformer concept. Then you think, "It'd be cool if the player could also collect power-ups. Oh, and a crafting system! And NPCs with dialogue trees! And a pet that follows you! And online leaderboards! And procedurally generated levels!"</p>
+
+<p>Three months later, you have:</p>
+<ul>
+<li>Half-working movement that doesn't feel good</li>
+<li>A broken crafting UI</li>
+<li>Two NPC dialogue trees that go nowhere</li>
+<li>No finished levels</li>
+<li>Burnout</li>
+<li>An abandoned project</li>
+</ul>
+
+<p>Sound dramatic? It happens constantly. We've all been there.</p>
+
+<h3>The Right Way: Build Core First</h3>
+
+<p>Instead, do this:</p>
+
+<strong>Phase 1: Core Mechanics Only (Weeks 1-4)</strong>
+<ul>
+<li>Build movement and jumping</li>
+<li>Playtest until it feels <strong>great</strong></li>
+<li>Create 3-5 test levels using only core mechanics</li>
+<li>If it's not fun with just the core, it won't be fun with extras</li>
+</ul>
+
+<strong>Phase 2: Essential Secondary Mechanics (Weeks 5-6)</strong>
+<ul>
+<li>Add the <em>one or two</em> secondary mechanics that directly enhance the core</li>
+<li>For a platformer: Maybe add enemies that require jumping on, or collectibles that encourage exploration</li>
+<li>Test again: Does this make the game more fun, or more cluttered?</li>
+</ul>
+
+<strong>Phase 3: Polish and Optional Secondary Mechanics (Weeks 7-8+)</strong>
+<ul>
+<li>Only nowâ€”when the core is solidâ€”add nice-to-haves</li>
+<li>Power-ups, cosmetic unlocks, extra levels, achievements, etc.</li>
+<li>These are bonuses, not essentials</li>
+</ul>
+
+<strong>Phase 4: If You Have Time</strong>
+<ul>
+<li>More secondary mechanics</li>
+<li>But honestly? By this point, you probably have a complete, fun game. Ship it and move to your next project.</li>
+</ul>
+
+<p>> <strong>ðŸ’¡ Tip:</strong> A game with 2 polished core mechanics beats a game with 10 half-baked mechanics every time. Players will forgive a lack of features if what's there feels great.</p>
+
+<hr>
+
+<h2>Pixel Quest Example: Core vs. Secondary</h2>
+
+<p>Let's return to Pixel Quest, our running example. In Chapter 1, you saw the concept. Now let's break down its mechanics and prioritize.</p>
+
+<h3>Pixel Quest's Core Mechanics</h3>
+
+<strong>Mechanic 1: Horizontal Movement (Left/Right)</strong>
+<ul>
+<li>Player input: Arrow keys or WASD</li>
+<li>Game response: Bit (the pixel) moves horizontally with responsive acceleration</li>
+<li>Why it's core: Platformers live and die on movement feel. This is non-negotiable.</li>
+</ul>
+
+<strong>Mechanic 2: Jump</strong>
+<ul>
+<li>Player input: Spacebar</li>
+<li>Game response: Bit jumps 3-4 tile-units high; variable height (hold longer = higher)</li>
+<li>Why it's core: Jumping is the primary way to navigate obstacles in a platformer. Without this, there's no game.</li>
+</ul>
+
+<strong>Mechanic 3: Wall-Cling</strong>
+<ul>
+<li>Player input: Hold direction into wall while airborne</li>
+<li>Game response: Bit sticks to wall, slides slowly, can jump off wall</li>
+<li>Why it's core: Enables vertical navigation and recovery from falls. Adds depth to movement without overwhelming complexity.</li>
+</ul>
+
+<strong>Mechanic 4: Glitch-Phase (Unlockable Mid-Game)</strong>
+<ul>
+<li>Player input: Hold Shift while moving</li>
+<li>Game response: Bit phases through solid objects for 2 seconds, then must recharge on stable ground</li>
+<li>Why it's core: Thematically fits (glitching through reality), enables puzzle-solving, allows skilled players to sequence-break. But <strong>not needed for MVP</strong>.</li>
+</ul>
+
+<strong>MVP Scope Decision:</strong> Build Mechanics 1-3 first. Glitch-Phase is "core-ish," but you can finish Zone 1 (Text Editor) without it. Add it before Zone 2 if time allows.
+
+<hr>
+
+<h3>Pixel Quest's Secondary Mechanics</h3>
+
+<strong>Mechanic A: Data Fragment Collection</strong>
+<ul>
+<li>Collectibles scattered in levels (like Celeste's strawberries)</li>
+<li>Collecting them unlocks lore entries and story bits</li>
+<li><strong>Why it's secondary:</strong> Totally optional. Doesn't affect core loop. Adds replay value for completionists.</li>
+</ul>
+
+<strong>Mechanic B: Checkpoint System</strong>
+<ul>
+<li>Hit a checkpoint â†’ Respawn there on death</li>
+<li><strong>Why it's secondary:</strong> Technically core to avoid frustration, but simple to implement. Add this early, but it's not a "gameplay" mechanicâ€”it's a quality-of-life feature.</li>
+</ul>
+
+<strong>Mechanic C: Glitch Trail Visual Effect</strong>
+<ul>
+<li>Bit leaves a rainbow RGB trail when moving fast</li>
+<li><strong>Why it's secondary:</strong> Pure visual flair. Adds juice and aesthetic, but has zero gameplay impact. Add this during polish phase.</li>
+</ul>
+
+<strong>Mechanic D: Anti-Virus Enemy Patrols</strong>
+<ul>
+<li>Enemies that move in patterns; touching them kills Bit</li>
+<li><strong>Why it's secondary:</strong> Adds challenge and threat, but early levels can just use static hazards (spikes, pits). Add enemies in Zone 2 or later once movement is solid.</li>
+</ul>
+
+<strong>Mechanic E: Environmental Glitch Hazards</strong>
+<ul>
+<li>Platforms that flicker in/out, disappearing paths, cursor sweeps (in Text Editor zone)</li>
+<li><strong>Why it's secondary:</strong> Adds variety and challenge, but early prototypes can use static platforms. Introduce glitch mechanics gradually.</li>
+</ul>
+
+<hr>
+
+<h3>Development Priority for Pixel Quest</h3>
+
+<strong>Week 1-2: Core Mechanics Only</strong>
+<ul>
+<li>Movement (left/right) + Jump + Wall-Cling</li>
+<li>No enemies, no collectibles, no glitch effects</li>
+<li>Goal: Movement feels responsive and fun</li>
+</ul>
+
+<strong>Week 3: Essential Secondary + First Level</strong>
+<ul>
+<li>Add checkpoint system (QoL, but essential)</li>
+<li>Build 3-5 simple test levels using static platforms</li>
+<li>Goal: Confirm core loop is fun (move â†’ jump â†’ reach goal â†’ repeat)</li>
+</ul>
+
+<strong>Week 4: Secondary Mechanics (If Core Feels Good)</strong>
+<ul>
+<li>Add data fragments (collectibles)</li>
+<li>Add simple enemies or hazards</li>
+<li>Goal: Add challenge and goals beyond "reach the end"</li>
+</ul>
+
+<strong>Week 5-6: Polish + Glitch-Phase (If Time Allows)</strong>
+<ul>
+<li>Implement Glitch-Phase ability</li>
+<li>Add glitch trail visual effects</li>
+<li>Build more levels using new mechanics</li>
+<li>Goal: Depth and visual appeal</li>
+</ul>
+
+<strong>Week 7-8: More Content (If Still Going Strong)</strong>
+<ul>
+<li>Additional zones (Image Editor, Web Browser)</li>
+<li>More enemy types</li>
+<li>Story cutscenes</li>
+<li>Goal: Complete experience</li>
+</ul>
+
+<p>Notice how we <strong>don't start with everything</strong>. We build the foundation, test it, then add layers only if the foundation is solid.</p>
+
+<hr>
+
+<h2>Your Turn: Identify Your Core vs. Secondary Mechanics</h2>
+
+<p>Grab your Game Concept Document from Chapter 1. Look at your core gameplay loop. Now let's identify your mechanics.</p>
+
+<h3>Step 1: List All Potential Mechanics</h3>
+
+<p>Brainstorm every mechanic you've imagined for your game. Don't filter yetâ€”just list them.</p>
+
+<p>Examples:</p>
+<ul>
+<li>Move left/right</li>
+<li>Jump</li>
+<li>Shoot</li>
+<li>Collect coins</li>
+<li>Talk to NPCs</li>
+<li>Open doors</li>
+<li>Solve puzzles</li>
+<li>Dodge roll</li>
+<li>Equip weapons</li>
+<li>Craft items</li>
+<li>Place blocks</li>
+<li>Fly</li>
+<li>Etc.</li>
+</ol>
+
+<p>Write down 8-12 potential mechanics.</p>
+
+<hr>
+
+<h3>Step 2: Identify Core Mechanics (2-4 Maximum)</h3>
+
+<p>Now filter ruthlessly. Ask for each mechanic:</p>
+<ul>
+<li><strong>Is this action repeated constantly throughout the game?</strong></li>
+<li><strong>If I removed this, would the game still function?</strong></li>
+</ul>
+
+<p>Circle the 2-4 mechanics that are absolutely essential. These are your core.</p>
+
+<hr>
+
+<h3>Step 3: Label Everything Else as Secondary</h3>
+
+<p>All the remaining mechanics? Secondary. They might be cool, but they're not the foundation.</p>
+
+<hr>
+
+<h3>Step 4: Prioritize Your Build Order</h3>
+
+<p>Now rank your secondary mechanics by importance:</p>
+<ol>
+<li><strong>Essential secondary:</strong> Needed for a complete experience (like checkpoints, basic enemies)</li>
+<li><strong>Nice-to-have secondary:</strong> Adds depth but not required (collectibles, power-ups)</li>
+<li><strong>Polish secondary:</strong> Pure flavor (visual effects, cosmetic unlocks, achievements)</li>
+</ol>
+
+<p>You'll build in this order: Core â†’ Essential secondary â†’ Nice-to-have â†’ Polish.</p>
+
+<hr>
+
+<h3>Example Exercise Result</h3>
+
+<strong>Game:</strong> A puzzle platformer where you control time to solve challenges
+
+<strong>Core Mechanics:</strong>
+<ol>
+<li>Move left/right + Jump</li>
+<li>Rewind time (hold button to reverse last 5 seconds of movement and environment changes)</li>
+</ol>
+
+<strong>Essential Secondary:</strong>
+<ol>
+<li>Pressure plates (activate doors/platforms)</li>
+<li>Moving obstacles (require timing to avoid)</li>
+</ol>
+
+<strong>Nice-to-Have Secondary:</strong>
+<ol>
+<li>Collectible time shards (extend rewind duration)</li>
+<li>Environmental hazards (spikes, pits)</li>
+</ol>
+
+<strong>Polish Secondary:</strong>
+<ol>
+<li>Time-rewind visual effects (ghosting, trails)</li>
+<li>Speedrun timer</li>
+<li>Cosmetic character skins</li>
+</ol>
+
+<strong>Build Order:</strong> 1-2 first (test if time rewind feels good) â†’ Then 3-4 (add puzzle elements) â†’ Then 5-6 if time allows â†’ 7-9 are bonus.
+
+<hr>
+
+<h2>Summary</h2>
+
+<p>Let's recap what we've covered:</p>
+
+<ul>
+<li><strong>Core mechanics</strong> are the primary, repeating actions that define your gameplay loop. They're what you do constantly.</li>
+<li><strong>Secondary mechanics</strong> enhance or support core mechanics but aren't strictly necessary. They add depth, variety, and flavor.</li>
+<li>We analyzed <strong>5 games</strong> (Mario, Portal, Stardew, Celeste, Hollow Knight) and broke down their core vs. secondary mechanics. Notice how few core mechanics each has (2-4), yet how rich the games feel.</li>
+<li><strong>Scope management</strong> is critical for beginners. Build core first, test it, polish it, then layer on secondary mechanics only if the core is fun.</li>
+<li><strong>Pixel Quest example</strong> shows how to prioritize: Movement + Jump + Wall-Cling are MVP. Glitch-Phase, collectibles, and enemies come later.</li>
+<li><strong>Your turn:</strong> Identify 2-4 core mechanics for your game, label the rest as secondary, and create a build-order priority list.</li>
+</ul>
+
+<p>Remember: <strong>Simple core, polished execution</strong>. That's the mantra. A game with two mechanics that feel <em>incredible</em> will beat a game with ten mechanics that feel <em>okay</em> every single time.</p>
+
+<p>Don't try to build everything at once. Start small, prove the fun, then expand.</p>
+
+<hr>
+
+<strong>Next:</strong> [Chapter 2.2 - Player Agency and Decision-Making](2.2-player-agency-and-decision-making.md)
+
+<p>You've identified your core mechanicsâ€”the actions players will take. Now let's talk about <em>choice</em>: What decisions do players make? How much control do they have? And how do you design meaningful agency without overwhelming them? Let's explore player empowerment.</p>
+        </article>
+
+        <!-- Bottom Navigation -->
+        <nav class="bottom-nav">
+            <div class="nav-links">
+                <a href="ch2.html" class="nav-link prev">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+                    </svg>
+                    Chapter Overview
+                </a>
+                <a href="ch2sec2.html" class="nav-link next">
+                    2.2 Player Agency & Decision-Making
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                    </svg>
+                </a>
+            </div>
+            <div class="back-to-chapter">
+                <a href="ch2.html">← Back to Chapter 2</a>
+            </div>
+        </nav>
+    </main>
+
+    <footer>
+        <div class="footer-content">
+            <div class="footer-logo">SLCC GAME DEV WORKSHOP</div>
+            <p><a href="index.html">Home</a> · <a href="ch2.html">Chapter 2</a></p>
+        </div>
+    </footer>
+</body>
+</html>
