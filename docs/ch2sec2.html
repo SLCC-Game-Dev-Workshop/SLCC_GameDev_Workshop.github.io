@@ -1,0 +1,1113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>2.2 Player Agency & Decision-Making | SLCC Game Dev Workshop</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #4ade80;
+            --primary-dim: #22c55e;
+            --primary-glow: rgba(74, 222, 128, 0.3);
+            --bg-dark: #0a0a0f;
+            --bg-card: #12121a;
+            --bg-card-hover: #1a1a25;
+            --text-primary: #e4e4e7;
+            --text-muted: #71717a;
+            --border: #27272a;
+            --accent-purple: #a855f7;
+            --accent-cyan: #22d3ee;
+            --accent-pink: #ec4899;
+            --accent-yellow: #facc15;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: 'Space Mono', monospace;
+            background-color: var(--bg-dark);
+            color: var(--text-primary);
+            line-height: 1.8;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            background: repeating-linear-gradient(
+                0deg,
+                transparent,
+                transparent 2px,
+                rgba(0, 0, 0, 0.1) 2px,
+                rgba(0, 0, 0, 0.1) 4px
+            );
+            z-index: 1000;
+            opacity: 0.3;
+        }
+
+        .bg-grid {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                linear-gradient(rgba(74, 222, 128, 0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(74, 222, 128, 0.03) 1px, transparent 1px);
+            background-size: 50px 50px;
+            z-index: -1;
+        }
+
+        header {
+            padding: 1.5rem 2rem;
+            border-bottom: 1px solid var(--border);
+            background: linear-gradient(180deg, rgba(74, 222, 128, 0.05) 0%, transparent 100%);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            backdrop-filter: blur(10px);
+        }
+
+        .header-content {
+            max-width: 900px;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--text-muted);
+            text-decoration: none;
+            font-size: 0.85rem;
+            transition: all 0.3s ease;
+        }
+
+        .back-link:hover {
+            color: var(--primary);
+        }
+
+        .back-link svg {
+            width: 18px;
+            height: 18px;
+            transition: transform 0.3s ease;
+        }
+
+        .back-link:hover svg {
+            transform: translateX(-3px);
+        }
+
+        .header-nav {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .header-section {
+            font-family: 'Press Start 2P', cursive;
+            font-size: 0.6rem;
+            color: var(--primary);
+            letter-spacing: 0.05em;
+        }
+
+        .hero {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 4rem 2rem 3rem;
+            border-bottom: 1px solid var(--border);
+            animation: fadeInUp 0.6s ease-out;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .section-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .section-number {
+            font-family: 'Press Start 2P', cursive;
+            font-size: 0.9rem;
+            color: var(--bg-dark);
+            background: var(--accent-cyan);
+            padding: 0.5rem 1rem;
+        }
+
+        .section-label {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+        }
+
+        .hero h1 {
+            font-size: clamp(1.5rem, 4vw, 2.25rem);
+            line-height: 1.4;
+            margin-bottom: 1rem;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        .learning-goal {
+            background: var(--bg-card);
+            border-left: 3px solid var(--primary);
+            padding: 1rem 1.5rem;
+            margin-top: 1.5rem;
+        }
+
+        .learning-goal-label {
+            font-size: 0.7rem;
+            color: var(--primary);
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            margin-bottom: 0.5rem;
+            font-weight: 700;
+        }
+
+        .learning-goal p {
+            color: var(--text-muted);
+            font-size: 0.95rem;
+            margin: 0;
+        }
+
+        .hero-meta {
+            display: flex;
+            gap: 2rem;
+            margin-top: 1.5rem;
+        }
+
+        .meta-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+
+        .meta-item svg {
+            width: 16px;
+            height: 16px;
+            color: var(--primary);
+        }
+
+        main {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 3rem 2rem 4rem;
+        }
+
+        .content h2 {
+            font-family: 'Press Start 2P', cursive;
+            font-size: 0.85rem;
+            color: var(--primary);
+            margin-top: 3rem;
+            margin-bottom: 1.5rem;
+            padding-bottom: 0.75rem;
+            border-bottom: 1px solid var(--border);
+            letter-spacing: 0.05em;
+        }
+
+        .content h2:first-child {
+            margin-top: 0;
+        }
+
+        .content h3 {
+            font-size: 1.25rem;
+            color: var(--text-primary);
+            margin-top: 2.5rem;
+            margin-bottom: 1rem;
+            font-weight: 700;
+        }
+
+        .content h4 {
+            font-size: 1rem;
+            color: var(--accent-cyan);
+            margin-top: 2rem;
+            margin-bottom: 0.75rem;
+            font-weight: 700;
+        }
+
+        .content p {
+            margin-bottom: 1.25rem;
+            color: var(--text-primary);
+            font-size: 0.95rem;
+        }
+
+        .content strong {
+            color: var(--text-primary);
+            font-weight: 700;
+        }
+
+        .content em {
+            color: var(--text-muted);
+            font-style: italic;
+        }
+
+        .content ul, .content ol {
+            margin-bottom: 1.5rem;
+            padding-left: 1.5rem;
+        }
+
+        .content li {
+            margin-bottom: 0.75rem;
+            color: var(--text-primary);
+            font-size: 0.95rem;
+        }
+
+        .content li::marker {
+            color: var(--primary);
+        }
+
+        .callout {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            padding: 1.25rem 1.5rem;
+            margin: 1.5rem 0;
+            position: relative;
+        }
+
+        .callout::before {
+            font-family: 'Press Start 2P', cursive;
+            font-size: 0.55rem;
+            position: absolute;
+            top: -0.6rem;
+            left: 1rem;
+            padding: 0.2rem 0.5rem;
+            background: var(--bg-dark);
+        }
+
+        .callout p {
+            margin: 0;
+            font-size: 0.9rem;
+        }
+
+        .callout.tip {
+            border-color: var(--primary);
+        }
+
+        .callout.tip::before {
+            content: '💡 TIP';
+            color: var(--primary);
+        }
+
+        .callout.warning {
+            border-color: var(--accent-yellow);
+        }
+
+        .callout.warning::before {
+            content: '⚠️ WARNING';
+            color: var(--accent-yellow);
+        }
+
+        .callout.note {
+            border-color: var(--accent-purple);
+        }
+
+        .callout.note::before {
+            content: '📝 NOTE';
+            color: var(--accent-purple);
+        }
+
+        .example-box {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            padding: 1.5rem;
+            margin: 1.5rem 0;
+        }
+
+        .example-box h4 {
+            margin-top: 0;
+            color: var(--accent-cyan);
+        }
+
+        .example-box p:last-child {
+            margin-bottom: 0;
+        }
+
+        hr {
+            border: none;
+            border-top: 1px solid var(--border);
+            margin: 3rem 0;
+        }
+
+        .bottom-nav {
+            margin-top: 4rem;
+            padding-top: 2rem;
+            border-top: 1px solid var(--border);
+        }
+
+        .nav-links {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .nav-link {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 1rem 1.5rem;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            color: var(--text-primary);
+            text-decoration: none;
+            font-size: 0.85rem;
+            transition: all 0.3s ease;
+        }
+
+        .nav-link:hover {
+            border-color: var(--primary);
+            color: var(--primary);
+        }
+
+        .nav-link svg {
+            width: 18px;
+            height: 18px;
+        }
+
+        .nav-link.prev svg {
+            transition: transform 0.3s ease;
+        }
+
+        .nav-link.prev:hover svg {
+            transform: translateX(-3px);
+        }
+
+        .nav-link.next svg {
+            transition: transform 0.3s ease;
+        }
+
+        .nav-link.next:hover svg {
+            transform: translateX(3px);
+        }
+
+        .back-to-chapter {
+            display: flex;
+            justify-content: center;
+            margin-top: 1.5rem;
+        }
+
+        .back-to-chapter a {
+            color: var(--text-muted);
+            text-decoration: none;
+            font-size: 0.85rem;
+            transition: color 0.3s ease;
+        }
+
+        .back-to-chapter a:hover {
+            color: var(--primary);
+        }
+
+        footer {
+            border-top: 1px solid var(--border);
+            padding: 2rem;
+            text-align: center;
+            background: var(--bg-card);
+        }
+
+        .footer-content {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .footer-logo {
+            font-family: 'Press Start 2P', cursive;
+            font-size: 0.6rem;
+            color: var(--primary);
+            margin-bottom: 0.5rem;
+        }
+
+        footer p {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+        }
+
+        footer a {
+            color: var(--primary);
+            text-decoration: none;
+        }
+
+        footer a:hover {
+            text-decoration: underline;
+        }
+
+        @media (max-width: 768px) {
+            .hero {
+                padding: 3rem 1.5rem 2rem;
+            }
+
+            main {
+                padding: 2rem 1.5rem 3rem;
+            }
+
+            .hero-meta {
+                flex-direction: column;
+                gap: 0.75rem;
+            }
+
+            .nav-links {
+                flex-direction: column;
+            }
+
+            .nav-link {
+                width: 100%;
+                justify-content: center;
+            }
+        }
+
+        .pixel-corner {
+            position: fixed;
+            width: 8px;
+            height: 8px;
+            background: var(--primary);
+            opacity: 0.5;
+        }
+
+        .pixel-corner.top-left { top: 10px; left: 10px; }
+        .pixel-corner.top-right { top: 10px; right: 10px; }
+        .pixel-corner.bottom-left { bottom: 10px; left: 10px; }
+        .pixel-corner.bottom-right { bottom: 10px; right: 10px; }
+    </style>
+</head>
+<body>
+    <div class="bg-grid"></div>
+    <div class="pixel-corner top-left"></div>
+    <div class="pixel-corner top-right"></div>
+    <div class="pixel-corner bottom-left"></div>
+    <div class="pixel-corner bottom-right"></div>
+
+    <header>
+        <div class="header-content">
+            <a href="index.html" class="back-link">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+                </svg>
+                Home
+            </a>
+            <div class="header-nav">
+                <span class="header-section">SECTION 2.2</span>
+            </div>
+        </div>
+    </header>
+
+    <section class="hero">
+        <div class="section-badge">
+            <span class="section-number">2.2</span>
+            <span class="section-label">Section</span>
+        </div>
+        <h1>Player Agency & Decision-Making</h1>
+        <div class="hero-meta">
+            <div class="meta-item">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <span>~12 min read</span>
+            </div>
+            <div class="meta-item">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                </svg>
+                <span>3,400 words</span>
+            </div>
+        </div>
+        <div class="learning-goal">
+            <div class="learning-goal-label">Learning Goal</div>
+            <p>Understand what player agency means, how to create meaningful choices, and how to balance freedom with structure.</p>
+        </div>
+    </section>
+
+    <main>
+        <article class="content">
+
+
+<h2>Why Player Agency Matters</h2>
+
+<p>Player agency is one of the core appeals of games as a medium. Unlike movies or books where you passively consume a story, games let you <strong>participate</strong> in shaping the experience.</p>
+
+<p>Good player agency makes you feel:</p>
+<ul>
+<li><strong>Empowered:</strong> "I solved this my way, not the designer's way."</li>
+<li><strong>Creative:</strong> "I came up with a strategy no one else might use."</li>
+<li><strong>Invested:</strong> "My choices matter, so I care about the outcome."</li>
+<li><strong>Responsible:</strong> "I succeeded (or failed) because of my decisions."</li>
+</ul>
+
+<p>Bad or absent player agency makes you feel:</p>
+<ul>
+<li><strong>Bored:</strong> "I'm just going through the motions."</li>
+<li><strong>Frustrated:</strong> "Why won't the game let me do the obvious thing?"</li>
+<li><strong>Detached:</strong> "Nothing I do changes anything, so why bother?"</li>
+</ul>
+
+<p>Here's the thing, though: <strong>not all games need maximum agency</strong>, and that's okay. Some of the best games are highly linear. The key is understanding <em>what kind</em> of agency your game offers and designing intentionally around that.</p>
+
+<p>---</p>
+
+<h2>The Agency Spectrum: High to Low</h2>
+
+<p>Player agency exists on a spectrum. Neither extreme is inherently betterâ€”it depends on your game's goals.</p>
+
+<h3>High Agency Games (Sandbox/Open-Ended)</h3>
+
+<strong>Characteristics:</strong>
+<ul>
+<li>Minimal restrictions on player actions</li>
+<li>Multiple solutions to problems</li>
+<li>Player-driven goals ("What do I want to do today?")</li>
+<li>Emergent gameplay (systems interact in unexpected ways)</li>
+</ul>
+
+<strong>Examples:</strong>
+<ul>
+<li><strong>Minecraft:</strong> You can build anything, go anywhere, set your own goals</li>
+<li><strong>The Legend of Zelda: Breath of the Wild:</strong> Approach challenges from any angle, use physics creatively</li>
+<li><strong>Dishonored:</strong> Every mission has multiple paths (stealth, combat, creative powers)</li>
+<li><strong>Hades:</strong> Choose your weapon, upgrade build, approach each run differently</li>
+</ul>
+
+<strong>Pros:</strong>
+<ul>
+<li>Incredibly replayable</li>
+<li>Players feel empowered and creative</li>
+<li>Emergent stories ("Remember when I accidentally...?")</li>
+</ul>
+
+<strong>Cons:</strong>
+<ul>
+<li>Harder to design (must account for many player approaches)</li>
+<li>Can feel overwhelming ("What should I do?")</li>
+<li>Requires robust systems that interact well</li>
+</ul>
+
+<p>---</p>
+
+<h3>Medium Agency Games (Guided Choices)</h3>
+
+<strong>Characteristics:</strong>
+<ul>
+<li>Clear structure and goals, but multiple approaches</li>
+<li>Linear progression with branching paths or solutions</li>
+<li>Player chooses <em>how</em> to reach goals, not <em>what</em> goals to pursue</li>
+</ul>
+
+<strong>Examples:</strong>
+<ul>
+<li><strong>Hollow Knight:</strong> Linear-ish progression, but you choose exploration order, combat style (charm builds)</li>
+<li><strong>Portal:</strong> One solution per puzzle, but you figure it out through experimentation</li>
+<li><strong>Celeste:</strong> Fixed levels, but you choose when to attempt hard challenges (strawberries, B-sides)</li>
+<li><strong>Fire Emblem:</strong> Mission objectives are fixed, but you control unit placement, tactics, and builds</li>
+</ul>
+
+<strong>Pros:</strong>
+<ul>
+<li>Balances freedom with direction</li>
+<li>Players feel clever without being lost</li>
+<li>Easier to design and balance than high agency</li>
+</ul>
+
+<strong>Cons:</strong>
+<ul>
+<li>Less replayability than sandbox games</li>
+<li>Some players may want more freedom</li>
+</ul>
+
+<p>---</p>
+
+<h3>Low Agency Games (Linear/Directed)</h3>
+
+<strong>Characteristics:</strong>
+<ul>
+<li>Single path or solution to most challenges</li>
+<li>Story-driven experiences with minimal player choice</li>
+<li>Clear goals and directions at all times</li>
+</ul>
+
+<strong>Examples:</strong>
+<ul>
+<li><strong>Journey:</strong> Beautiful, emotional experience with minimal choicesâ€”mostly just moving forward</li>
+<li><strong>Inside/Limbo:</strong> Environmental puzzles with one intended solution</li>
+<li><strong>Uncharted series:</strong> Linear action-adventure with set-piece moments and scripted sequences</li>
+<li><strong>Many visual novels:</strong> Story unfolds with occasional dialogue choices</li>
+</ul>
+
+<strong>Pros:</strong>
+<ul>
+<li>Tight pacing and emotional beats (designers control the experience)</li>
+<li>Easier to develop (fewer branching paths)</li>
+<li>Great for narrative-focused games</li>
+</ul>
+
+<strong>Cons:</strong>
+<ul>
+<li>Less replayability (same experience each time)</li>
+<li>Some players feel restricted</li>
+</ul>
+
+<p>---</p>
+
+<h2>Important Truth: Low Agency Isn't Bad</h2>
+
+<p>Let's address a common misconception: <strong>low agency doesn't mean bad design.</strong></p>
+
+<p>Some players <em>want</em> a guided experience. They want to follow a carefully crafted story, solve the designer's clever puzzles, or experience a specific emotional journey. Games like Portal, Journey, and The Last of Us are linear by design, and they're beloved <em>because</em> of their focus, not in spite of it.</p>
+
+<p>The key is <strong>intentionality</strong>. Ask yourself:</p>
+<ul>
+<li>Does your game's design goal require high agency, or would it benefit from focused direction?</li>
+<li>Are you limiting player choice because it serves the experience, or because it's easier to develop?</li>
+</ul>
+
+<p>If your game is about creative expression (like Minecraft), high agency is essential. If your game is a tightly paced emotional narrative (like Journey), low agency might be perfect.</p>
+
+<strong>There's no right answerâ€”only the right answer for your game.</strong>
+
+<p>> <strong>ðŸ’¡ Tip:</strong> For your first game, consider medium-to-low agency. High agency requires complex systems and tons of testing. Start focused, then expand in future projects.</p>
+
+<p>---</p>
+
+<h2>Types of Player Decisions</h2>
+
+<p>Now let's break down <em>what kinds</em> of decisions players make. Understanding these categories will help you design choices intentionally.</p>
+
+<p>---</p>
+
+<h3>1. Tactical Decisions (Moment-to-Moment)</h3>
+
+<strong>Definition:</strong> Immediate, fast decisions made during active gameplay.
+
+<strong>Examples:</strong>
+<ul>
+<li>"Do I dodge left or right to avoid this attack?"</li>
+<li>"Which enemy do I target first?"</li>
+<li>"Do I jump now or wait for the platform to move closer?"</li>
+<li>"Do I heal now or save my health potion?"</li>
+</ul>
+
+<strong>Why they matter:</strong>
+<p>These decisions create <strong>moment-to-moment engagement</strong>. Players stay focused because every second requires active thought and reaction. Tactical decisions are the backbone of action games, platformers, and real-time strategy.</p>
+
+<strong>Design tips:</strong>
+<ul>
+<li>Make consequences immediate and clear (you dodge wrong = you get hit)</li>
+<li>Give players time to learn patterns (enemy telegraph attacks before striking)</li>
+<li>Reward good decisions visibly (successful dodge â†’ enemy misses â†’ opening to counter-attack)</li>
+</ul>
+
+<strong>Example (Celeste):</strong>
+<p>You see a spike pit, a moving platform, and a dash crystal. Do you:</p>
+<ul>
+<li>Dash immediately and risk overshooting?</li>
+<li>Wait for the platform to get closer?</li>
+<li>Jump first, then dash mid-air?</li>
+</ul>
+
+<p>The decision happens in 1-2 seconds, but it's <em>your</em> decision, and it feels meaningful.</p>
+
+<p>---</p>
+
+<h3>2. Strategic Decisions (Long-Term Planning)</h3>
+
+<strong>Definition:</strong> Decisions that affect gameplay over minutes, hours, or entire playthroughs.
+
+<strong>Examples:</strong>
+<ul>
+<li>"Which skill tree path do I invest in?"</li>
+<li>"Do I explore this area now or come back later when I'm stronger?"</li>
+<li>"Do I use resources now or save them for a tough boss fight?"</li>
+<li>"Which character should I bring into this mission?"</li>
+</ul>
+
+<strong>Why they matter:</strong>
+<p>Strategic decisions create <strong>depth and replayability</strong>. Players think ahead, plan builds, and experiment with different approaches across playthroughs.</p>
+
+<strong>Design tips:</strong>
+<ul>
+<li>Make choices meaningful but not irreversible (players hate feeling locked into bad decisions)</li>
+<li>Show players the consequences before they commit (skill tree previews, stat comparisons)</li>
+<li>Allow experimentation (respec options, multiple save files)</li>
+</ul>
+
+<strong>Example (Hades):</strong>
+<p>Before a run, you choose your weapon (affects playstyle), then during the run, you choose upgrades (boons from gods). Do you focus on high-risk melee builds or safer ranged builds? Do you specialize (all Zeus lightning) or diversify (mix gods)? These decisions shape your entire run.</p>
+
+<p>---</p>
+
+<h3>3. Moral/Narrative Decisions (Story Choices)</h3>
+
+<strong>Definition:</strong> Choices that affect the story, character relationships, or ending.
+
+<strong>Examples:</strong>
+<ul>
+<li>"Do I spare this enemy or kill them?"</li>
+<li>"Do I trust this NPC or betray them?"</li>
+<li>"Which faction do I support?"</li>
+<li>"Do I tell the truth or lie?"</li>
+</ul>
+
+<strong>Why they matter:</strong>
+<p>Moral decisions create <strong>emotional investment</strong>. Players care about outcomes because they feel responsible for them.</p>
+
+<strong>Design tips:</strong>
+<ul>
+<li>Make both choices defensible (no obvious "good" or "bad" if you want tension)</li>
+<li>Show consequences (NPCs react, world changes, story branches)</li>
+<li>Don't punish players for choosingâ€”respect their agency</li>
+</ul>
+
+<strong>Example (Undertale):</strong>
+<p>Every enemy encounter offers a choice: FIGHT or ACT/MERCY. Kill enemies and you gain power, but the world becomes darker. Spare them and you're weaker, but the story becomes hopeful. The game remembers <em>everything</em>, and the ending reflects your choices.</p>
+
+<p>This isn't just a binary choiceâ€”it's a philosophy the game asks you to commit to.</p>
+
+<p>---</p>
+
+<h3>4. Creative Decisions (Player Expression)</h3>
+
+<strong>Definition:</strong> Choices that let players express themselves without affecting gameplay outcomes.
+
+<strong>Examples:</strong>
+<ul>
+<li>Building structures in Minecraft</li>
+<li>Customizing character appearance</li>
+<li>Decorating your house in The Sims or Stardew Valley</li>
+<li>Choosing dialogue tone (sarcastic, serious, friendly) even if outcomes are the same</li>
+</ul>
+
+<strong>Why they matter:</strong>
+<p>Creative decisions create <strong>personal connection</strong> and <strong>ownership</strong>. "This is <em>my</em> character, <em>my</em> base, <em>my</em> playthrough."</p>
+
+<strong>Design tips:</strong>
+<ul>
+<li>Give options without overwhelming (5-10 color choices, not 500)</li>
+<li>Make customization visible (if I choose a red cape, I see it in-game)</li>
+<li>Respect player creativity (don't force one "correct" aesthetic)</li>
+</ul>
+
+<strong>Example (Minecraft):</strong>
+<p>You can beat the game by building a simple dirt shelter. Or you can build a castle. Or a functioning computer. Or a scale model of your hometown. The game doesn't careâ€”but <em>you</em> do, because it's <em>yours</em>.</p>
+
+<p>---</p>
+
+<h2>False Choices vs. Meaningful Choices</h2>
+
+<p>Here's a critical distinction: not all choices are created equal.</p>
+
+<h3>False Choices (Illusion of Agency)</h3>
+
+<strong>Definition:</strong> Choices that <em>seem</em> meaningful but ultimately don't affect anything significant.
+
+<strong>Examples of false choices:</strong>
+<ul>
+<li>Dialogue options that all lead to the same response</li>
+<li>Multiple paths through a level that converge immediately</li>
+<li>"Choose your character!" but all characters play identically</li>
+<li>Three different weapons that have identical stats with different skins</li>
+</ul>
+
+<strong>Why false choices are problematic:</strong>
+<p>Players notice. When they realize their "choices" don't matter, they feel <strong>tricked</strong> and <strong>disrespected</strong>. Trust erodes. If you're going to offer choices, they need to mean somethingâ€”or players would rather you just be upfront about the linearity.</p>
+
+<strong>Exception:</strong> Sometimes false choices are <em>intentional</em> for narrative effect. Games like The Stanley Parable and BioShock use fake choices to make meta-commentary about player agency itself. But that's advanced designâ€”if you're doing it accidentally, it's a problem.
+
+<p>---</p>
+
+<h3>Meaningful Choices (True Agency)</h3>
+
+<strong>Definition:</strong> Choices that create genuinely different experiences, outcomes, or feelings.
+
+<strong>Examples of meaningful choices:</strong>
+<ul>
+<li>Dialogue options that change NPC relationships or story outcomes</li>
+<li>Multiple paths through a level with different challenges and rewards</li>
+<li>Character builds that enable entirely different playstyles</li>
+<li>Moral decisions that branch the narrative significantly</li>
+</ul>
+
+<strong>What makes a choice meaningful:</strong>
+<ol>
+<li><strong>Different outcomes:</strong> The results diverge based on your choice</li>
+<li><strong>Clear consequences:</strong> You understand what you're choosing</li>
+<li><strong>Appropriate stakes:</strong> The importance matches the decision (life-or-death vs. cosmetic)</li>
+<li><strong>Player values:</strong> The choice lets you express <em>who you are</em> or <em>how you play</em></li>
+</ol>
+
+<strong>Example (Dishonored):</strong>
+<p>You can complete every mission using stealth (non-lethal) or combat (lethal). Your choice affects:</p>
+<ul>
+<li><strong>Gameplay:</strong> Stealth requires patience and planning; combat is direct and fast</li>
+<li><strong>Story:</strong> High chaos (lots of killing) leads to darker ending and more enemies</li>
+<li><strong>World state:</strong> NPCs react differently, environments decay or thrive</li>
+</ul>
+
+<p>That's meaningful. Your choice shapes your experience in multiple dimensions.</p>
+
+<p>---</p>
+
+<h2>Balancing Freedom and Overwhelm</h2>
+
+<p>Here's a beginner trap: thinking "more choices = better game."</p>
+
+<p>Too many choices can <strong>paralyze</strong> players. This is called "analysis paralysis" or "choice overload." When faced with 50 options, players may freeze, feel stressed, or disengage entirely.</p>
+
+<h3>The Paradox of Choice</h3>
+
+<p>Research shows that people are happiest with a <em>small number</em> of meaningful choices, not infinite options.</p>
+
+<strong>Good:</strong> 3-5 weapon types with distinct playstyles
+<strong>Overwhelming:</strong> 50 weapons with tiny stat differences
+
+<strong>Good:</strong> 2-3 clear dialogue options per conversation
+<strong>Overwhelming:</strong> 10 dialogue options that feel redundant
+
+<strong>Good:</strong> Open world with 6-8 major areas to explore
+<strong>Overwhelming:</strong> Open world with 200 identical checkpoints to clear
+
+<h3>How to Avoid Overwhelming Players</h3>
+
+<strong>1. Limit active choices at any given time</strong>
+<p>Don't present all options at once. Introduce mechanics gradually.</p>
+
+<strong>Example (Hades):</strong> You choose one weapon before a run. During the run, you choose from 2-3 boons at a time, not all 40+ at once.
+
+<strong>2. Make choices visually/conceptually distinct</strong>
+<p>If options feel the same, they're not really choices.</p>
+
+<strong>Bad:</strong> Fire Sword, Flame Blade, Burning Weapon (confusing similarity)
+<strong>Good:</strong> Fire Sword (offense), Ice Shield (defense), Wind Bow (ranged)
+
+<strong>3. Provide defaults and recommendations</strong>
+<p>Many players want guidance. Offer a "recommended" build or path for first-timers.</p>
+
+<strong>Example (Dark Souls):</strong> Starting classes give new players archetypes (Knight, Mage, Thief) instead of forcing them to allocate stats manually.
+
+<strong>4. Let players revisit choices</strong>
+<p>Reducing stakes makes players more willing to experiment.</p>
+
+<strong>Example (Hollow Knight):</strong> You can swap equipped charms at any bench. Trying a new build doesn't lock you in forever.
+
+<p>---</p>
+
+<h2>Pixel Quest Example: Player Agency</h2>
+
+<p>Let's apply these concepts to Pixel Quest and identify what kinds of agency it offers.</p>
+
+<h3>Pixel Quest's Agency Profile</h3>
+
+<strong>Overall Level:</strong> Medium agency (guided structure with tactical freedom)
+
+<p>---</p>
+
+<strong>Tactical Decisions (High):</strong>
+<ul>
+<li>Moment-to-moment platforming: When to jump, dash, cling to walls</li>
+<li>Navigating glitch hazards: Timing flickers, avoiding cursor sweeps</li>
+<li>Choosing routes through levels: Take the safe path or risky shortcut?</li>
+</ul>
+
+<strong>Strategic Decisions (Low-Medium):</strong>
+<ul>
+<li>Whether to collect data fragments now or return later when skilled</li>
+<li>When to use glitch-phase ability (once unlocked): Save meter for puzzle or use for safety?</li>
+<li>Choosing to speedrun vs. explore (both playstyles supported)</li>
+</ul>
+
+<strong>Moral/Narrative Decisions (Low):</strong>
+<ul>
+<li>Pixel Quest is mostly linear narrative</li>
+<li>Possible late-game choice: Escape vs. accept deletion vs. convince anti-virus (endings)</li>
+<li>But 95% of game has no story branches</li>
+</ul>
+
+<strong>Creative Decisions (Minimal):</strong>
+<ul>
+<li>No character customization (you're a pixelâ€”can't change much!)</li>
+<li>Possibly unlock color/trail cosmetics via collectibles</li>
+<li>Speedrunning routes allow creative self-expression</li>
+</ul>
+
+<p>---</p>
+
+<h3>What This Means for Design</h3>
+
+<p>Pixel Quest prioritizes <strong>tactical agency</strong> (the core platforming challenges) over strategic or narrative agency. That's appropriate because:</p>
+<ol>
+<li>Platformers thrive on moment-to-moment decisions</li>
+<li>The core loop (move â†’ jump â†’ navigate obstacles) is inherently tactical</li>
+<li>Linear structure keeps development scope manageable</li>
+</ol>
+
+<p>The game <em>doesn't</em> need:</p>
+<ul>
+<li>Deep character customization</li>
+<li>Branching storylines</li>
+<li>Open-world exploration</li>
+<li>Moral dilemmas</li>
+</ul>
+
+<p>Those would distract from the core appeal: tight, challenging platforming. By limiting agency in non-core areas, the game can focus on making the platforming feel incredible.</p>
+
+<p>> <strong>ðŸ’¡ Tip:</strong> High agency in your core mechanics, low agency in supporting systems. Don't spread yourself thin trying to offer choice everywhere.</p>
+
+<p>---</p>
+
+<h2>Your Turn: Define Player Agency in Your Game</h2>
+
+<p>Grab your Game Concept Document. Let's identify what kinds of decisions players make in <em>your</em> game.</p>
+
+<h3>Exercise: Map Your Player Decisions</h3>
+
+<strong>Step 1: List 5-10 decisions players will make in your game</strong>
+
+<p>Examples:</p>
+<ul>
+<li>Which enemy to attack first</li>
+<li>Where to explore next</li>
+<li>Which skill to upgrade</li>
+<li>Whether to talk to an NPC</li>
+<li>Which item to craft</li>
+<li>How to solve a puzzle</li>
+</ul>
+
+<p>---</p>
+
+<strong>Step 2: Categorize each decision</strong>
+
+<p>Label each as:</p>
+<ul>
+<li><strong>Tactical</strong> (immediate, second-to-second)</li>
+<li><strong>Strategic</strong> (long-term, affects progression)</li>
+<li><strong>Moral/Narrative</strong> (story impact)</li>
+<li><strong>Creative</strong> (self-expression)</li>
+</ul>
+
+<p>---</p>
+
+<strong>Step 3: Identify your agency focus</strong>
+
+<p>Which category has the most decisions? That's your agency focus.</p>
+
+<p>Examples:</p>
+<ul>
+<li>Platformer â†’ Mostly tactical</li>
+<li>RPG â†’ Mix of strategic and narrative</li>
+<li>Sandbox â†’ Creative and strategic</li>
+<li>Puzzle â†’ Tactical (within puzzles) and strategic (which puzzle to solve)</li>
+</ul>
+
+<p>---</p>
+
+<strong>Step 4: Check for meaningful vs. false choices</strong>
+
+<p>For each decision, ask:</p>
+<ul>
+<li><strong>Does this choice create a genuinely different experience?</strong></li>
+<li><strong>Will the player notice the difference?</strong></li>
+<li><strong>Does it matter, or is it cosmetic?</strong></li>
+</ul>
+
+<p>If a choice is purely cosmetic (like color), that's fineâ€”just don't pretend it's gameplay-impactful.</p>
+
+<p>---</p>
+
+<strong>Step 5: Assess your agency level</strong>
+
+<p>Where does your game fall on the spectrum?</p>
+<ul>
+<li><strong>High Agency:</strong> Player creates their own goals and approaches</li>
+<li><strong>Medium Agency:</strong> Clear goals, multiple approaches</li>
+<li><strong>Low Agency:</strong> Linear path, focused experience</li>
+</ul>
+
+<strong>Is this intentional, or are you limiting choice due to scope/skill?</strong>
+
+<p>If it's intentional (e.g., "I want a tightly paced narrative game"), great. If it's accidental (e.g., "I couldn't figure out how to add branching paths"), that's okay tooâ€”just be aware of it. You can add agency in future projects as your skills grow.</p>
+
+<p>---</p>
+
+<h2>Summary</h2>
+
+<p>Let's recap what we've covered:</p>
+
+<ul>
+<li><strong>Player agency</strong> is the degree to which players make meaningful choices that impact their experience.</li>
+<li>Agency exists on a <strong>spectrum</strong>: High (sandbox), Medium (guided), Low (linear). None is inherently betterâ€”it depends on your goals.</li>
+<li><strong>Low agency isn't bad</strong>â€”games like Portal and Journey are linear by design and beloved for it.</li>
+<li>There are <strong>four types of decisions</strong>: Tactical (moment-to-moment), Strategic (long-term), Moral/Narrative (story), and Creative (expression).</li>
+<li><strong>False choices</strong> (illusion of agency) erode trust. <strong>Meaningful choices</strong> (real impact) create engagement.</li>
+<li><strong>Too many choices</strong> can overwhelm players. Balance freedom with clarity.</li>
+<li><strong>Pixel Quest example</strong> focuses on tactical agency (platforming decisions) with minimal narrative branching, which fits its genre and scope.</li>
+</ul>
+
+<p>When designing your game, ask: What decisions do players make? Do those decisions matter? And do they serve your core experience?</p>
+
+<p>Player agency is a tool, not a goal. Use it intentionally.</p>
+
+<p>---</p>
+
+<strong>Next:</strong> [Chapter 2.3 - Challenge, Progression, and Balancing](2.3-challenge-progression-and-balancing.md)
+
+<p>You've defined your mechanics and the choices players make. Now let's talk about difficulty: How do you keep players challenged without frustrating them? How does your game get harder over time? And how do you balance it so it's fair? Let's explore the art of challenge design.</p>
+        </article>
+
+        <nav class="bottom-nav">
+            <div class="nav-links">
+                <a href="ch2sec1.html" class="nav-link prev">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+                    </svg>
+                    2.1 Core vs Secondary Mechanics
+                </a>
+                <a href="ch2sec3.html" class="nav-link next">
+                    2.3 Challenge, Progression & Balancing
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                    </svg>
+                </a>
+            </div>
+            <div class="back-to-chapter">
+                <a href="ch2.html">← Back to Chapter 2</a>
+            </div>
+        </nav>
+    </main>
+
+    <footer>
+        <div class="footer-content">
+            <div class="footer-logo">SLCC GAME DEV WORKSHOP</div>
+            <p><a href="index.html">Home</a> · <a href="ch2.html">Chapter 2</a></p>
+        </div>
+    </footer>
+</body>
+</html>
