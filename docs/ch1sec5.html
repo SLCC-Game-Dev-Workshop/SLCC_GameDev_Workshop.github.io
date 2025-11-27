@@ -1,0 +1,1136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>1.5 Character & World-Building | SLCC Game Dev Workshop</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #4ade80;
+            --primary-dim: #22c55e;
+            --primary-glow: rgba(74, 222, 128, 0.3);
+            --bg-dark: #0a0a0f;
+            --bg-card: #12121a;
+            --bg-card-hover: #1a1a25;
+            --text-primary: #e4e4e7;
+            --text-muted: #71717a;
+            --border: #27272a;
+            --accent-purple: #a855f7;
+            --accent-cyan: #22d3ee;
+            --accent-pink: #ec4899;
+            --accent-yellow: #facc15;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: 'Space Mono', monospace;
+            background-color: var(--bg-dark);
+            color: var(--text-primary);
+            line-height: 1.8;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            background: repeating-linear-gradient(
+                0deg,
+                transparent,
+                transparent 2px,
+                rgba(0, 0, 0, 0.1) 2px,
+                rgba(0, 0, 0, 0.1) 4px
+            );
+            z-index: 1000;
+            opacity: 0.3;
+        }
+
+        .bg-grid {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                linear-gradient(rgba(74, 222, 128, 0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(74, 222, 128, 0.03) 1px, transparent 1px);
+            background-size: 50px 50px;
+            z-index: -1;
+        }
+
+        header {
+            padding: 1.5rem 2rem;
+            border-bottom: 1px solid var(--border);
+            background: linear-gradient(180deg, rgba(74, 222, 128, 0.05) 0%, transparent 100%);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            backdrop-filter: blur(10px);
+        }
+
+        .header-content {
+            max-width: 900px;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--text-muted);
+            text-decoration: none;
+            font-size: 0.85rem;
+            transition: all 0.3s ease;
+        }
+
+        .back-link:hover {
+            color: var(--primary);
+        }
+
+        .back-link svg {
+            width: 18px;
+            height: 18px;
+            transition: transform 0.3s ease;
+        }
+
+        .back-link:hover svg {
+            transform: translateX(-3px);
+        }
+
+        .header-nav {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .header-section {
+            font-family: 'Press Start 2P', cursive;
+            font-size: 0.6rem;
+            color: var(--primary);
+            letter-spacing: 0.05em;
+        }
+
+        .hero {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 4rem 2rem 3rem;
+            border-bottom: 1px solid var(--border);
+            animation: fadeInUp 0.6s ease-out;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .section-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .section-number {
+            font-family: 'Press Start 2P', cursive;
+            font-size: 0.9rem;
+            color: var(--bg-dark);
+            background: var(--accent-pink);
+            padding: 0.5rem 1rem;
+        }
+
+        .section-label {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+        }
+
+        .hero h1 {
+            font-size: clamp(1.5rem, 4vw, 2.25rem);
+            line-height: 1.4;
+            margin-bottom: 1rem;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        .learning-goal {
+            background: var(--bg-card);
+            border-left: 3px solid var(--primary);
+            padding: 1rem 1.5rem;
+            margin-top: 1.5rem;
+        }
+
+        .learning-goal-label {
+            font-size: 0.7rem;
+            color: var(--primary);
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            margin-bottom: 0.5rem;
+            font-weight: 700;
+        }
+
+        .learning-goal p {
+            color: var(--text-muted);
+            font-size: 0.95rem;
+            margin: 0;
+        }
+
+        .hero-meta {
+            display: flex;
+            gap: 2rem;
+            margin-top: 1.5rem;
+        }
+
+        .meta-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+
+        .meta-item svg {
+            width: 16px;
+            height: 16px;
+            color: var(--primary);
+        }
+
+        main {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 3rem 2rem 4rem;
+        }
+
+        .content h2 {
+            font-family: 'Press Start 2P', cursive;
+            font-size: 0.85rem;
+            color: var(--primary);
+            margin-top: 3rem;
+            margin-bottom: 1.5rem;
+            padding-bottom: 0.75rem;
+            border-bottom: 1px solid var(--border);
+            letter-spacing: 0.05em;
+        }
+
+        .content h2:first-child {
+            margin-top: 0;
+        }
+
+        .content h3 {
+            font-size: 1.25rem;
+            color: var(--text-primary);
+            margin-top: 2.5rem;
+            margin-bottom: 1rem;
+            font-weight: 700;
+        }
+
+        .content h4 {
+            font-size: 1rem;
+            color: var(--accent-cyan);
+            margin-top: 2rem;
+            margin-bottom: 0.75rem;
+            font-weight: 700;
+        }
+
+        .content p {
+            margin-bottom: 1.25rem;
+            color: var(--text-primary);
+            font-size: 0.95rem;
+        }
+
+        .content strong {
+            color: var(--text-primary);
+            font-weight: 700;
+        }
+
+        .content em {
+            color: var(--text-muted);
+            font-style: italic;
+        }
+
+        .content ul, .content ol {
+            margin-bottom: 1.5rem;
+            padding-left: 1.5rem;
+        }
+
+        .content li {
+            margin-bottom: 0.75rem;
+            color: var(--text-primary);
+            font-size: 0.95rem;
+        }
+
+        .content li::marker {
+            color: var(--primary);
+        }
+
+        .callout {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            padding: 1.25rem 1.5rem;
+            margin: 1.5rem 0;
+            position: relative;
+        }
+
+        .callout::before {
+            font-family: 'Press Start 2P', cursive;
+            font-size: 0.55rem;
+            position: absolute;
+            top: -0.6rem;
+            left: 1rem;
+            padding: 0.2rem 0.5rem;
+            background: var(--bg-dark);
+        }
+
+        .callout p {
+            margin: 0;
+            font-size: 0.9rem;
+        }
+
+        .callout.tip {
+            border-color: var(--primary);
+        }
+
+        .callout.tip::before {
+            content: '💡 TIP';
+            color: var(--primary);
+        }
+
+        .callout.warning {
+            border-color: var(--accent-yellow);
+        }
+
+        .callout.warning::before {
+            content: '⚠️ WARNING';
+            color: var(--accent-yellow);
+        }
+
+        .callout.note {
+            border-color: var(--accent-purple);
+        }
+
+        .callout.note::before {
+            content: '📝 NOTE';
+            color: var(--accent-purple);
+        }
+
+        .part-header {
+            background: linear-gradient(135deg, rgba(236, 72, 153, 0.1) 0%, rgba(168, 85, 247, 0.1) 100%);
+            border: 2px solid var(--accent-pink);
+            padding: 1.5rem 2rem;
+            margin: 3rem 0 2rem;
+            text-align: center;
+        }
+
+        .part-header h2 {
+            margin: 0;
+            padding: 0;
+            border: none;
+            font-family: 'Press Start 2P', cursive;
+            font-size: 0.9rem;
+            color: var(--accent-pink);
+        }
+
+        .question-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            padding: 2rem;
+            margin: 2rem 0;
+            transition: all 0.3s ease;
+        }
+
+        .question-card:hover {
+            border-color: var(--accent-pink);
+        }
+
+        .question-card h4 {
+            margin-top: 0;
+            color: var(--accent-pink);
+        }
+
+        .question-card .examples {
+            background: rgba(74, 222, 128, 0.05);
+            border-left: 2px solid var(--primary);
+            padding: 1rem;
+            margin: 1rem 0;
+        }
+
+        .silhouette-test {
+            background: linear-gradient(135deg, rgba(34, 211, 238, 0.1) 0%, rgba(168, 85, 247, 0.1) 100%);
+            border: 2px solid var(--accent-cyan);
+            padding: 2rem;
+            margin: 2rem 0;
+        }
+
+        .silhouette-test h3 {
+            margin-top: 0;
+            color: var(--accent-cyan);
+        }
+
+        .visual-tips {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            padding: 2rem;
+            margin: 2rem 0;
+        }
+
+        .visual-tips h4 {
+            margin-top: 0;
+            color: var(--accent-cyan);
+        }
+
+        .visual-tip-item {
+            margin: 1.5rem 0;
+            padding: 1rem;
+            border-left: 2px solid var(--accent-purple);
+        }
+
+        .visual-tip-item h5 {
+            color: var(--accent-pink);
+            font-size: 0.9rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .world-question-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            padding: 2rem;
+            margin: 2rem 0;
+            transition: all 0.3s ease;
+        }
+
+        .world-question-card:hover {
+            border-color: var(--accent-cyan);
+        }
+
+        .world-question-card h4 {
+            margin-top: 0;
+            color: var(--accent-cyan);
+        }
+
+        .less-is-more {
+            background: linear-gradient(135deg, rgba(250, 204, 21, 0.1) 0%, rgba(236, 72, 153, 0.1) 100%);
+            border: 2px solid var(--accent-yellow);
+            padding: 2rem;
+            margin: 2rem 0;
+        }
+
+        .less-is-more h3 {
+            margin-top: 0;
+            color: var(--accent-yellow);
+        }
+
+        .less-is-more .principle {
+            text-align: center;
+            font-family: 'Press Start 2P', cursive;
+            font-size: 0.75rem;
+            color: var(--accent-yellow);
+            margin: 1.5rem 0;
+            padding: 1rem;
+            background: rgba(250, 204, 21, 0.1);
+        }
+
+        .pixel-quest-box {
+            background: var(--bg-card);
+            border: 2px solid var(--accent-purple);
+            padding: 2rem;
+            margin: 2rem 0;
+        }
+
+        .pixel-quest-box h3 {
+            margin-top: 0;
+            color: var(--accent-purple);
+        }
+
+        .pixel-quest-box h4 {
+            color: var(--accent-cyan);
+        }
+
+        .character-profile {
+            background: rgba(236, 72, 153, 0.05);
+            border: 1px solid var(--accent-pink);
+            padding: 1.5rem;
+            margin: 1rem 0;
+        }
+
+        .world-profile {
+            background: rgba(34, 211, 238, 0.05);
+            border: 1px solid var(--accent-cyan);
+            padding: 1.5rem;
+            margin: 1rem 0;
+        }
+
+        hr {
+            border: none;
+            border-top: 1px solid var(--border);
+            margin: 3rem 0;
+        }
+
+        .bottom-nav {
+            margin-top: 4rem;
+            padding-top: 2rem;
+            border-top: 1px solid var(--border);
+        }
+
+        .nav-links {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .nav-link {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 1rem 1.5rem;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            color: var(--text-primary);
+            text-decoration: none;
+            font-size: 0.85rem;
+            transition: all 0.3s ease;
+        }
+
+        .nav-link:hover {
+            border-color: var(--primary);
+            color: var(--primary);
+        }
+
+        .nav-link svg {
+            width: 18px;
+            height: 18px;
+        }
+
+        .nav-link.prev svg {
+            transition: transform 0.3s ease;
+        }
+
+        .nav-link.prev:hover svg {
+            transform: translateX(-3px);
+        }
+
+        .nav-link.next svg {
+            transition: transform 0.3s ease;
+        }
+
+        .nav-link.next:hover svg {
+            transform: translateX(3px);
+        }
+
+        .back-to-chapter {
+            display: flex;
+            justify-content: center;
+            margin-top: 1.5rem;
+        }
+
+        .back-to-chapter a {
+            color: var(--text-muted);
+            text-decoration: none;
+            font-size: 0.85rem;
+            transition: color 0.3s ease;
+        }
+
+        .back-to-chapter a:hover {
+            color: var(--primary);
+        }
+
+        footer {
+            border-top: 1px solid var(--border);
+            padding: 2rem;
+            text-align: center;
+            background: var(--bg-card);
+        }
+
+        .footer-content {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .footer-logo {
+            font-family: 'Press Start 2P', cursive;
+            font-size: 0.6rem;
+            color: var(--primary);
+            margin-bottom: 0.5rem;
+        }
+
+        footer p {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+        }
+
+        footer a {
+            color: var(--primary);
+            text-decoration: none;
+        }
+
+        footer a:hover {
+            text-decoration: underline;
+        }
+
+        @media (max-width: 768px) {
+            .hero {
+                padding: 3rem 1.5rem 2rem;
+            }
+
+            main {
+                padding: 2rem 1.5rem 3rem;
+            }
+
+            .hero-meta {
+                flex-direction: column;
+                gap: 0.75rem;
+            }
+
+            .nav-links {
+                flex-direction: column;
+            }
+
+            .nav-link {
+                width: 100%;
+                justify-content: center;
+            }
+
+            .question-card, .world-question-card {
+                padding: 1.5rem;
+            }
+        }
+
+        .pixel-corner {
+            position: fixed;
+            width: 8px;
+            height: 8px;
+            background: var(--primary);
+            opacity: 0.5;
+        }
+
+        .pixel-corner.top-left { top: 10px; left: 10px; }
+        .pixel-corner.top-right { top: 10px; right: 10px; }
+        .pixel-corner.bottom-left { bottom: 10px; left: 10px; }
+        .pixel-corner.bottom-right { bottom: 10px; right: 10px; }
+    </style>
+</head>
+<body>
+    <div class="bg-grid"></div>
+    <div class="pixel-corner top-left"></div>
+    <div class="pixel-corner top-right"></div>
+    <div class="pixel-corner bottom-left"></div>
+    <div class="pixel-corner bottom-right"></div>
+
+    <header>
+        <div class="header-content">
+            <a href="index.html" class="back-link">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+                </svg>
+                Home
+            </a>
+            <div class="header-nav">
+                <span class="header-section">SECTION 1.5</span>
+            </div>
+        </div>
+    </header>
+
+    <section class="hero">
+        <div class="section-badge">
+            <span class="section-number">1.5</span>
+            <span class="section-label">Section</span>
+        </div>
+        <h1>Character and World-Building</h1>
+        <div class="hero-meta">
+            <div class="meta-item">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <span>~12 min read</span>
+            </div>
+            <div class="meta-item">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                </svg>
+                <span>4,213 words</span>
+            </div>
+        </div>
+        <div class="learning-goal">
+            <div class="learning-goal-label">Learning Goal</div>
+            <p>Learn how to create memorable characters and compelling game worlds without needing massive budgets or months of development time.</p>
+        </div>
+    </section>
+
+    <main>
+        <article class="content">
+            <h2>Why Characters and Worlds Matter</h2>
+            
+            <p>Here's a question: Why do you remember certain games years after playing them?</p>
+
+            <p>Chances are, it's not <em>just</em> the mechanics. Sure, tight controls and clever puzzles matter. But what sticks with you—what makes you <em>feel</em> something—is often the characters and the worlds they inhabit.</p>
+
+            <p>Think about it:</p>
+            <ul>
+                <li>You remember <strong>Hollow Knight</strong> not just for its challenging combat, but for the haunting, decayed kingdom of Hallownest and the mysterious Knight you play as.</li>
+                <li>You remember <strong>Celeste</strong> not just for its platforming, but for Madeline's struggle with anxiety and the mountain that represents her inner demons.</li>
+                <li>You remember <strong>Undertale</strong> not just for its bullet-hell RPG mechanics, but for Papyrus's goofy optimism, Sans's lazy charm, and Toriel's motherly warmth.</li>
+            </ul>
+
+            <p>Characters and worlds turn mechanics into experiences. They give context, create emotional stakes, and make your game feel like a <em>place</em> rather than just a series of challenges.</p>
+
+            <p>The good news? You don't need a massive team or a Hollywood writer to create compelling characters and worlds. You just need clarity, focus, and a few key questions answered.</p>
+
+            <p>Let's break it down.</p>
+
+            <hr>
+
+            <div class="part-header">
+                <h2>PART A: CHARACTER DEVELOPMENT</h2>
+            </div>
+
+            <h3>The Role of Characters in Games</h3>
+
+            <p>In games, characters serve a few key functions:</p>
+
+            <ol>
+                <li><strong>Player Avatar:</strong> The character you control—your "eyes and hands" in the game world. This is the player character (PC).</li>
+                <li><strong>Allies and Mentors:</strong> Characters who help, guide, or accompany the player. They provide information, emotional support, or gameplay assistance.</li>
+                <li><strong>Antagonists:</strong> Characters who oppose the player—villains, rivals, or obstacles with personalities.</li>
+                <li><strong>World-Building NPCs:</strong> Background characters who make the world feel lived-in (shopkeepers, townsfolk, random encounters).</li>
+            </ol>
+
+            <p>For your first game, <strong>focus on the player character</strong> and maybe <strong>one or two supporting characters</strong>. Don't try to populate an entire universe yet. A few well-defined characters beat dozens of forgettable ones.</p>
+
+            <div class="callout tip">
+                <p>If your game doesn't need characters (like Tetris or abstract puzzle games), that's fine! But if you're building any kind of narrative or world, even a simple character helps players connect emotionally.</p>
+            </div>
+
+            <hr>
+
+            <h2>Four Key Questions for Character Design</h2>
+
+            <p>When designing a character, answer these four questions. They'll give you everything you need for a focused, effective character—especially for a beginner project.</p>
+
+            <div class="question-card">
+                <h4>Question 1: Who Is the Character?</h4>
+                
+                <p>This is their <strong>basic identity</strong>—their role, appearance, and essence in one or two sentences.</p>
+
+                <p>You're not writing a biography. You're establishing the core concept: "This is a [X] who [Y]."</p>
+
+                <div class="examples">
+                    <p><strong>Examples:</strong></p>
+                    <ul>
+                        <li><strong>Mario:</strong> A plumber who adventures through fantastical worlds to rescue Princess Peach.</li>
+                        <li><strong>Madeline (Celeste):</strong> A young woman struggling with anxiety who's determined to climb a mountain.</li>
+                        <li><strong>The Knight (Hollow Knight):</strong> A small, silent bug-warrior exploring a decayed underground kingdom.</li>
+                        <li><strong>Chell (Portal):</strong> A test subject trapped in a sinister research facility, armed with a portal gun.</li>
+                        <li><strong>Bit (Pixel Quest):</strong> A sentient pixel who gained consciousness and is being hunted by the system's anti-virus.</li>
+                    </ul>
+                </div>
+
+                <p>Notice how simple these are? No life stories, no complex backstories (yet)—just a clear, immediate identity.</p>
+
+                <p><strong>Your Turn:</strong> For your game, answer: <strong>"My character is a [ROLE/TYPE] who [DEFINING TRAIT or SITUATION]."</strong></p>
+            </div>
+
+            <div class="question-card">
+                <h4>Question 2: What Do They Want?</h4>
+                
+                <p>This is their <strong>motivation</strong>—their goal, desire, or need. It's the driving force behind their actions.</p>
+
+                <p>In games, motivation often aligns with the gameplay goal. The character wants what the player is trying to achieve. This creates harmony between mechanics and narrative.</p>
+
+                <div class="examples">
+                    <p><strong>Examples:</strong></p>
+                    <ul>
+                        <li><strong>Mario wants</strong> to rescue Princess Peach from Bowser.</li>
+                        <li><strong>Madeline wants</strong> to reach the summit of Celeste Mountain (and, deeper down, to prove something to herself).</li>
+                        <li><strong>The Knight wants</strong> to uncover the secrets of Hallownest and stop the infection.</li>
+                        <li><strong>Chell wants</strong> to escape the Aperture Science facility.</li>
+                        <li><strong>Bit wants</strong> to survive deletion and discover why they became sentient.</li>
+                    </ul>
+                </div>
+
+                <p>See how each want directly connects to gameplay? You rescue Peach by beating levels. You reach the summit by platforming. You escape by solving puzzles. The character's goal <em>is</em> the player's goal.</p>
+
+                <p><strong>Your Turn:</strong> Answer: <strong>"My character wants to [GOAL] because [REASON]."</strong></p>
+            </div>
+
+            <div class="question-card">
+                <h4>Question 3: What Stands in Their Way?</h4>
+                
+                <p>This is the <strong>obstacle</strong>—the challenge, opposition, or barrier preventing them from achieving their goal.</p>
+
+                <p>Obstacles create conflict, and conflict drives stories. In games, obstacles are often literal (enemies, puzzles, hazards), but they can also be emotional or internal (fear, doubt, moral dilemmas).</p>
+
+                <div class="examples">
+                    <p><strong>Examples:</strong></p>
+                    <ul>
+                        <li><strong>Mario's obstacle:</strong> Bowser's forces, hazardous levels, and distance.</li>
+                        <li><strong>Madeline's obstacle:</strong> The mountain's physical challenges, her own anxiety and self-doubt, and a shadowy manifestation of her inner demons.</li>
+                        <li><strong>The Knight's obstacle:</strong> Infected creatures, hostile environments, powerful bosses, and the mystery of what happened.</li>
+                        <li><strong>Chell's obstacle:</strong> GLaDOS, deadly test chambers, and the facility's security systems.</li>
+                        <li><strong>Bit's obstacle:</strong> The anti-virus AI hunting them, glitching programs, and hostile corrupted code.</li>
+                    </ul>
+                </div>
+
+                <p>Notice how obstacles can be external (enemies, environment) and internal (fear, doubt). Both work. The key is that the obstacle creates resistance—something the player must overcome.</p>
+
+                <p><strong>Your Turn:</strong> Answer: <strong>"What stands in their way is [OBSTACLE]."</strong></p>
+            </div>
+
+            <div class="question-card">
+                <h4>Question 4: What Makes Them Interesting?</h4>
+                
+                <p>This is the <strong>hook</strong>—the trait, quirk, or emotional core that makes players care about or remember the character.</p>
+
+                <p>This can be:</p>
+                <ul>
+                    <li>A personality trait (brave, clumsy, sarcastic, curious, stubborn)</li>
+                    <li>A unique ability or design (portal gun, double-jump, shapeshifting, invisibility)</li>
+                    <li>An emotional core (overcoming fear, seeking revenge, protecting someone, finding belonging)</li>
+                    <li>A visual or conceptual distinctiveness (a sentient pixel, a robot with a flower growing out of it, a knight the size of an ant)</li>
+                </ul>
+
+                <div class="examples">
+                    <p><strong>Examples:</strong></p>
+                    <ul>
+                        <li><strong>Mario:</strong> Relentlessly cheerful and heroic. Visually iconic (red hat, mustache). His optimism is infectious.</li>
+                        <li><strong>Madeline:</strong> Vulnerable and human. She struggles with mental health, which many players relate to. She's not a superhero—she's someone trying her best.</li>
+                        <li><strong>The Knight:</strong> Silent and mysterious. Players project their own interpretations. Visually distinct (white mask, small size, lone wanderer vibe).</li>
+                        <li><strong>Bit:</strong> Literally the smallest character ever (a single pixel). Gained consciousness by accident. Represents creativity and chaos in a sterile, ordered system.</li>
+                    </ul>
+                </div>
+
+                <p><strong>Your Turn:</strong> Answer: <strong>"My character is interesting because [TRAIT, ABILITY, or EMOTIONAL CORE]."</strong></p>
+            </div>
+
+            <hr>
+
+            <h2>Visual Distinctiveness: The Silhouette Test</h2>
+
+            <div class="silhouette-test">
+                <h3>The Silhouette Test</h3>
+                
+                <p>In games, characters are often recognized by their <strong>silhouette</strong>—the outline of their shape. If you can identify a character from just their shadow, they're visually distinct.</p>
+
+                <p>This matters even in simple or low-budget games. Visual clarity helps players instantly identify characters and creates iconic, memorable designs.</p>
+
+                <h4>Iconic Silhouettes:</h4>
+                <ul>
+                    <li><strong>Mario:</strong> Short, round, big nose, cap with "M"</li>
+                    <li><strong>Sonic:</strong> Spiky hair, long limbs, pointy shoes</li>
+                    <li><strong>Link (Zelda):</strong> Pointed hat, shield, sword</li>
+                    <li><strong>Celeste's Madeline:</strong> Pink hair, backpack, determined posture</li>
+                    <li><strong>Hollow Knight's Knight:</strong> Horns, small body, cloak, nail (sword)</li>
+                </ul>
+
+                <p>Each is instantly recognizable from their outline alone.</p>
+
+                <h4>How to Apply This:</h4>
+                <p>Even if you're working with pixel art or simple sprites, aim for a distinct shape:</p>
+                <ul>
+                    <li><strong>Exaggerate a feature:</strong> Big head, long limbs, oversized weapon, unique hat.</li>
+                    <li><strong>Use a strong posture:</strong> Hunched, upright, slouched, floating.</li>
+                    <li><strong>Add a signature accessory:</strong> Cape, backpack, tool, mask, antennae.</li>
+                </ul>
+
+                <p>If your character is just "generic person standing," they'll blend in. Give them one or two visual traits that make them pop.</p>
+            </div>
+
+            <div class="visual-tips">
+                <h4>Visual Design Quick Tips</h4>
+
+                <div class="visual-tip-item">
+                    <h5>1. Color Palette</h5>
+                    <p>Pick 2-3 main colors for your character. Make sure they contrast with your environments so the character doesn't get lost visually.</p>
+                    <ul>
+                        <li><strong>Mario:</strong> Red and blue (warm, heroic)</li>
+                        <li><strong>Celeste's Madeline:</strong> Pink hair (stands out against snowy mountain)</li>
+                        <li><strong>Hollow Knight's Knight:</strong> White mask against dark environments</li>
+                    </ul>
+                </div>
+
+                <div class="visual-tip-item">
+                    <h5>2. Exaggerate Key Features</h5>
+                    <p>Big eyes convey emotion. Large hands show action capability. Exaggeration makes characters expressive and readable.</p>
+                </div>
+
+                <div class="visual-tip-item">
+                    <h5>3. Keep It Readable at Small Size</h5>
+                    <p>Your character will often be small on screen. Can you still tell it's them? Simplify details. Bold shapes win.</p>
+                </div>
+            </div>
+
+            <div class="callout tip">
+                <p>Remember: simple character > complex character for your first game. You can always add complexity later.</p>
+            </div>
+
+            <hr>
+
+            <div class="part-header">
+                <h2>PART B: WORLD-BUILDING</h2>
+            </div>
+
+            <h3>What Is a Game World?</h3>
+
+            <p>Your game world is the <strong>setting</strong> where gameplay happens. It can be:</p>
+
+            <ul>
+                <li><strong>Literal and grounded:</strong> A farm, a city, a forest, a spaceship</li>
+                <li><strong>Abstract:</strong> A series of puzzle rooms, a geometric void, a dream space</li>
+                <li><strong>Fantastical:</strong> A magical kingdom, an alien planet, a digital realm</li>
+            </ul>
+
+            <p>Even abstract games like Tetris technically have a "world" (a black screen with falling blocks), but most narrative-driven games benefit from a world that feels cohesive and purposeful.</p>
+
+            <p>A strong game world does three things:</p>
+
+            <ol>
+                <li><strong>Supports gameplay:</strong> The environment is designed around the mechanics (platforming worlds have platforms, stealth worlds have hiding spots, racing worlds have tracks).</li>
+                <li><strong>Establishes mood and tone:</strong> Bright colors = cheerful, dark corridors = tense, decaying ruins = melancholy.</li>
+                <li><strong>Tells a story:</strong> Even without words, the world can communicate history, conflict, and theme.</li>
+            </ol>
+
+            <p>You don't need to build an open-world epic. You need a setting that serves your game and feels intentional.</p>
+
+            <hr>
+
+            <h2>Three Key Questions for World-Building</h2>
+
+            <p>Just like with characters, we'll keep this focused. Answer these three questions, and you'll have a solid foundation.</p>
+
+            <div class="world-question-card">
+                <h4>Question 1: Where Does This Take Place?</h4>
+                
+                <p>This is the <strong>setting</strong>—the physical or conceptual location where your game happens.</p>
+
+                <p>Be specific. "A fantasy world" is too vague. "A mountain" is better. "A cursed mountain where the weather changes based on your emotions" is even better.</p>
+
+                <div class="examples">
+                    <p><strong>Examples:</strong></p>
+                    <ul>
+                        <li><strong>Celeste:</strong> A mountain in British Columbia. Natural, beautiful, but increasingly surreal and abstract as you climb higher (reflecting Madeline's mental state).</li>
+                        <li><strong>Hollow Knight:</strong> The underground kingdom of Hallownest—a vast, interconnected network of caverns, cities, and ruins inhabited by bug-like creatures.</li>
+                        <li><strong>Stardew Valley:</strong> A small rural valley with a farm, a town, mines, and seasonal changes.</li>
+                        <li><strong>Portal:</strong> The Aperture Science Enrichment Center—a sterile, white research facility full of test chambers and hidden backstage areas.</li>
+                        <li><strong>Pixel Quest:</strong> Inside a malfunctioning computer system—different programs (word processor, image editor, web browser, etc.) serve as distinct levels.</li>
+                    </ul>
+                </div>
+
+                <p>Notice how each setting is specific and immediately visual. You can picture it.</p>
+
+                <p><strong>Your Turn:</strong> Answer: <strong>"My game takes place in/on [LOCATION], which is [BRIEF DESCRIPTION]."</strong></p>
+            </div>
+
+            <div class="world-question-card">
+                <h4>Question 2: What Are the Rules of This World?</h4>
+                
+                <p>This is about <strong>internal logic</strong>—how the world works. Does gravity exist? Can objects talk? Is magic real? What's possible and what's not?</p>
+
+                <p>Consistency matters more than realism. If your world has its own weird rules, that's fine—just stick to them. Players will accept almost anything if it's presented clearly and consistently.</p>
+
+                <div class="examples">
+                    <p><strong>Examples:</strong></p>
+                    <ul>
+                        <li><strong>Celeste:</strong> Mostly realistic physics, but Madeline can air-dash once per jump. This is just accepted as part of the world's logic—no explanation needed.</li>
+                        <li><strong>Hollow Knight:</strong> It's a world of sentient bugs. That's the premise. Bugs wield weapons, build cities, and have souls. Once you accept that, everything else follows.</li>
+                        <li><strong>Portal:</strong> Portals exist and preserve momentum. That's the one rule. The rest is physics-based puzzles built on that foundation.</li>
+                        <li><strong>Minecraft:</strong> Blocks float, you can carry infinite weight, punching trees gives you wood. The world has video game logic, and that's fine—it's consistent.</li>
+                        <li><strong>Pixel Quest:</strong> Digital physics. Platforms can glitch in and out of existence, data fragments can be collected, and viruses are enemies. It's not realistic, but it's internally consistent (everything follows "computer logic").</li>
+                    </ul>
+                </div>
+
+                <p><strong>Your Turn:</strong> Answer: <strong>"In this world, [KEY RULE or LOGIC] exists, which means [IMPLICATION for GAMEPLAY]."</strong></p>
+            </div>
+
+            <div class="world-question-card">
+                <h4>Question 3: How Does the World Serve Gameplay?</h4>
+                
+                <p>This is the most important question: <strong>Why does this world exist?</strong> How does it support, enhance, or challenge the player?</p>
+
+                <p>Your world shouldn't just be a backdrop—it should be an active part of the experience.</p>
+
+                <div class="examples">
+                    <p><strong>Examples:</strong></p>
+                    <ul>
+                        <li><strong>Celeste's mountain:</strong> The environment reflects Madeline's mental state. Early levels are bright and natural; later levels become abstract, surreal, and hostile. The world IS the internal struggle.</li>
+                        <li><strong>Hollow Knight's ruins:</strong> The decaying kingdom creates a sense of mystery and melancholy. Exploration feels like archaeology—you're uncovering a lost civilization. The world tells the story of collapse and infection.</li>
+                        <li><strong>Portal's test chambers:</strong> The sterile, modular chambers emphasize isolation and control. The behind-the-scenes areas (when you escape) reveal the facility's decay and danger. The world shifts from "safe test" to "desperate escape."</li>
+                        <li><strong>Stardew Valley's farm:</strong> The farm is YOUR space—you shape it, build it, and make it yours. The world's seasonal cycle creates natural pacing (plant in spring, harvest in summer, prepare for winter).</li>
+                        <li><strong>Pixel Quest's programs:</strong> Each program (word processor, image editor, browser, etc.) introduces unique mechanics tied to its theme. The world isn't just flavor—it's the source of gameplay variety.</li>
+                    </ul>
+                </div>
+
+                <p><strong>Your Turn:</strong> Answer: <strong>"The world serves gameplay by [FUNCTION]."</strong></p>
+            </div>
+
+            <hr>
+
+            <div class="less-is-more">
+                <h3>The "Less Is More" Principle</h3>
+                
+                <div class="principle">
+                    ✨ LESS IS MORE ✨
+                </div>
+
+                <p>Here's a hard truth: <strong>your first game's world should be small and focused.</strong></p>
+
+                <p>It's tempting to design sprawling continents, intricate political systems, and deep histories. Resist that urge. Scope creep kills beginner projects.</p>
+
+                <p>Instead, focus on ONE distinctive aspect of your world and do it well:</p>
+
+                <ul>
+                    <li><strong>Portal:</strong> One facility. That's it. But it's memorable, cohesive, and perfectly designed for the gameplay.</li>
+                    <li><strong>Celeste:</strong> One mountain. But each area feels unique, and the theming is strong.</li>
+                    <li><strong>Undertale:</strong> One underground. But every area has personality, and NPCs make it feel alive.</li>
+                </ul>
+
+                <h4>For your first game, aim for:</h4>
+                <ul>
+                    <li><strong>One primary setting</strong> (a tower, a forest, a spaceship, a computer, a town).</li>
+                    <li><strong>3-5 areas or levels</strong> with distinct visual or mechanical themes.</li>
+                    <li><strong>A unified aesthetic</strong> (pixel art, hand-drawn, low-poly, monochrome, neon, etc.).</li>
+                </ul>
+
+                <p>You're not building Skyrim. You're building a tight, focused experience that showcases your concept.</p>
+            </div>
+
+            <div class="callout warning">
+                <p>Don't design 20 levels before building one. Create one great level that captures your world's essence, playtest it, and <em>then</em> expand.</p>
+            </div>
+
+            <hr>
+
+            <h2>Putting It All Together: Pixel Quest Example</h2>
+
+            <div class="pixel-quest-box">
+                <h3>🎮 Pixel Quest: Character & World</h3>
+                
+                <div class="character-profile">
+                    <h4>Character: Bit</h4>
+                    <ul>
+                        <li><strong>Who:</strong> A sentient pixel—literally a single square of code—who gained consciousness during a system glitch</li>
+                        <li><strong>Want:</strong> To survive deletion by the anti-virus AI and discover why they became self-aware</li>
+                        <li><strong>Obstacle:</strong> The anti-virus hunting them, hostile corrupted programs, environmental glitches, and their own fragility</li>
+                        <li><strong>Hook:</strong> The ultimate underdog—tiny, vulnerable, unexpected. Represents creativity and chaos in a system designed for order and efficiency.</li>
+                        <li><strong>Visual:</strong> Bright cyan/blue single-pixel sprite with glitch trail effects; contrasts sharply against dark, corrupted environments</li>
+                    </ul>
+                </div>
+
+                <div class="world-profile">
+                    <h4>World: The Corrupted System</h4>
+                    
+                    <p><strong>Where:</strong> Inside a failing computer operating system / digital landscape</p>
+
+                    <p><strong>Rules:</strong></p>
+                    <ul>
+                        <li>Glitches create/destroy platforms randomly</li>
+                        <li>Deleted files leave void spaces</li>
+                        <li>Corrupted areas have visual distortion</li>
+                        <li>Error messages appear as obstacles</li>
+                    </ul>
+
+                    <p><strong>Serves gameplay how:</strong></p>
+                    <ul>
+                        <li><strong>Desktop Zone:</strong> Tutorial area, basic platforming</li>
+                        <li><strong>File System:</strong> Maze-like exploration</li>
+                        <li><strong>Memory Banks:</strong> Glitching platforms that vanish</li>
+                        <li><strong>System Core:</strong> Final challenge, most corrupted area</li>
+                    </ul>
+
+                    <p><strong>Visual consistency:</strong></p>
+                    <ul>
+                        <li>Color palette: Dark blues/blacks (corrupted) with neon cyan/pink/green (data)</li>
+                        <li>Aesthetic: Retro computer UI meets glitch art</li>
+                        <li>Mood: Nostalgic but unsettling</li>
+                    </ul>
+                </div>
+
+                <p>See how character and world fit together? Bit is small—world has tiny gaps. World glitches—Bit's story is about corruption. Everything connects.</p>
+            </div>
+
+            <hr>
+
+            <h2>Summary</h2>
+
+            <p>Let's recap what we've covered:</p>
+
+            <h3>Character Development:</h3>
+            <ul>
+                <li>Answer four key questions: <strong>Who are they? What do they want? What stands in their way? What makes them interesting?</strong></li>
+                <li>Focus on <strong>visual distinctiveness</strong>: silhouette, color palette, signature features.</li>
+                <li>Keep it simple: one well-defined protagonist beats a cast of forgettable characters.</li>
+            </ul>
+
+            <h3>World-Building:</h3>
+            <ul>
+                <li>Answer three key questions: <strong>Where does it take place? What are the rules? How does it serve gameplay?</strong></li>
+                <li>Apply the <strong>"less is more" principle</strong>: one focused setting beats a sprawling, half-finished world.</li>
+                <li>Maintain <strong>visual consistency</strong>: unified art style, coherent color palette, intentional details.</li>
+            </ul>
+
+            <h3>For your first game:</h3>
+            <ul>
+                <li>One protagonist, 3-5 key traits/details.</li>
+                <li>One primary setting, 3-5 distinct areas.</li>
+                <li>Focus on what serves your gameplay and story.</li>
+                <li>Consistency and clarity beat complexity.</li>
+            </ul>
+
+            <p>Characters and worlds don't need to be perfect. They need to be <strong>clear, intentional, and memorable</strong>. Even simple designs—like a single pixel or a mountain—can become iconic when executed with purpose.</p>
+
+        </article>
+
+        <nav class="bottom-nav">
+            <div class="nav-links">
+                <a href="ch1sec4.html" class="nav-link prev">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+                    </svg>
+                    1.4 Basic Story Structure
+                </a>
+                <a href="ch1sec6.html" class="nav-link next">
+                    1.6 Exercise: Game Concept Document
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                    </svg>
+                </a>
+            </div>
+            <div class="back-to-chapter">
+                <a href="ch1.html">← Back to Chapter 1</a>
+            </div>
+        </nav>
+    </main>
+
+    <footer>
+        <div class="footer-content">
+            <div class="footer-logo">SLCC GAME DEV WORKSHOP</div>
+            <p><a href="index.html">Home</a> · <a href="ch1.html">Chapter 1</a></p>
+        </div>
+    </footer>
+</body>
+</html>
