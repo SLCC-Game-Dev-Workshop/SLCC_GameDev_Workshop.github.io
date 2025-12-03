@@ -1,0 +1,1284 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>2.6 Exercise - Design Three Core Mechanics | SLCC Game Dev Workshop</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #4ade80;
+            --primary-dim: #22c55e;
+            --primary-glow: rgba(74, 222, 128, 0.3);
+            --bg-dark: #0a0a0f;
+            --bg-card: #12121a;
+            --bg-card-hover: #1a1a25;
+            --text-primary: #e4e4e7;
+            --text-muted: #71717a;
+            --border: #27272a;
+            --accent-purple: #a855f7;
+            --accent-cyan: #22d3ee;
+            --accent-pink: #ec4899;
+            --accent-yellow: #facc15;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: 'Space Mono', monospace;
+            background-color: var(--bg-dark);
+            color: var(--text-primary);
+            line-height: 1.8;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            background: repeating-linear-gradient(
+                0deg,
+                transparent,
+                transparent 2px,
+                rgba(0, 0, 0, 0.1) 2px,
+                rgba(0, 0, 0, 0.1) 4px
+            );
+            z-index: 1000;
+            opacity: 0.3;
+        }
+
+        .bg-grid {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                linear-gradient(rgba(74, 222, 128, 0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(74, 222, 128, 0.03) 1px, transparent 1px);
+            background-size: 50px 50px;
+            z-index: -1;
+        }
+
+        header {
+            padding: 1.5rem 2rem;
+            border-bottom: 1px solid var(--border);
+            background: linear-gradient(180deg, rgba(74, 222, 128, 0.05) 0%, transparent 100%);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            backdrop-filter: blur(10px);
+        }
+
+        .header-content {
+            max-width: 900px;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--text-muted);
+            text-decoration: none;
+            font-size: 0.85rem;
+            transition: all 0.3s ease;
+        }
+
+        .back-link:hover {
+            color: var(--primary);
+        }
+
+        .back-link svg {
+            width: 18px;
+            height: 18px;
+            transition: transform 0.3s ease;
+        }
+
+        .back-link:hover svg {
+            transform: translateX(-3px);
+        }
+
+        .header-nav {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .header-section {
+            font-family: 'Press Start 2P', cursive;
+            font-size: 0.6rem;
+            color: var(--primary);
+            letter-spacing: 0.05em;
+        }
+
+        .hero {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 4rem 2rem 3rem;
+            border-bottom: 1px solid var(--border);
+            animation: fadeInUp 0.6s ease-out;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .section-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .section-number {
+            font-family: 'Press Start 2P', cursive;
+            font-size: 0.9rem;
+            color: var(--bg-dark);
+            background: var(--accent-pink);
+            padding: 0.5rem 1rem;
+        }
+
+        .section-label {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+        }
+
+        .hero h1 {
+            font-size: clamp(1.5rem, 4vw, 2.25rem);
+            line-height: 1.4;
+            margin-bottom: 1rem;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        .learning-goal {
+            background: var(--bg-card);
+            border-left: 3px solid var(--primary);
+            padding: 1rem 1.5rem;
+            margin-top: 1.5rem;
+        }
+
+        .learning-goal-label {
+            font-size: 0.7rem;
+            color: var(--primary);
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            margin-bottom: 0.5rem;
+            font-weight: 700;
+        }
+
+        .learning-goal p {
+            color: var(--text-muted);
+            font-size: 0.95rem;
+            margin: 0;
+        }
+
+        .hero-meta {
+            display: flex;
+            gap: 2rem;
+            margin-top: 1.5rem;
+        }
+
+        .meta-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+
+        .meta-item svg {
+            width: 16px;
+            height: 16px;
+            color: var(--primary);
+        }
+
+        main {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 3rem 2rem 4rem;
+        }
+
+        .content h2 {
+            font-family: 'Press Start 2P', cursive;
+            font-size: 0.85rem;
+            color: var(--primary);
+            margin-top: 3rem;
+            margin-bottom: 1.5rem;
+            padding-bottom: 0.75rem;
+            border-bottom: 1px solid var(--border);
+            letter-spacing: 0.05em;
+        }
+
+        .content h2:first-child {
+            margin-top: 0;
+        }
+
+        .content h3 {
+            font-size: 1.25rem;
+            color: var(--text-primary);
+            margin-top: 2.5rem;
+            margin-bottom: 1rem;
+            font-weight: 700;
+        }
+
+        .content h4 {
+            font-size: 1rem;
+            color: var(--accent-cyan);
+            margin-top: 2rem;
+            margin-bottom: 0.75rem;
+            font-weight: 700;
+        }
+
+        .content p {
+            margin-bottom: 1.25rem;
+            color: var(--text-primary);
+            font-size: 0.95rem;
+        }
+
+        .content strong {
+            color: var(--text-primary);
+            font-weight: 700;
+        }
+
+        .content em {
+            color: var(--text-muted);
+            font-style: italic;
+        }
+
+        .content ul, .content ol {
+            margin-bottom: 1.5rem;
+            padding-left: 1.5rem;
+        }
+
+        .content li {
+            margin-bottom: 0.75rem;
+            color: var(--text-primary);
+            font-size: 0.95rem;
+        }
+
+        .content li::marker {
+            color: var(--primary);
+        }
+
+        .callout {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            padding: 1.25rem 1.5rem;
+            margin: 1.5rem 0;
+            position: relative;
+        }
+
+        .callout::before {
+            font-family: 'Press Start 2P', cursive;
+            font-size: 0.55rem;
+            position: absolute;
+            top: -0.6rem;
+            left: 1rem;
+            padding: 0.2rem 0.5rem;
+            background: var(--bg-dark);
+        }
+
+        .callout p {
+            margin: 0;
+            font-size: 0.9rem;
+        }
+
+        .callout.tip {
+            border-color: var(--primary);
+        }
+
+        .callout.tip::before {
+            content: '💡 TIP';
+            color: var(--primary);
+        }
+
+        .callout.warning {
+            border-color: var(--accent-yellow);
+        }
+
+        .callout.warning::before {
+            content: '⚠️ WARNING';
+            color: var(--accent-yellow);
+        }
+
+        hr {
+            border: none;
+            border-top: 1px solid var(--border);
+            margin: 3rem 0;
+        }
+
+        .template-box {
+            background: var(--bg-card);
+            border: 2px solid var(--accent-purple);
+            padding: 2rem;
+            margin: 2rem 0;
+        }
+
+        .template-box h4 {
+            color: var(--accent-purple);
+            margin-top: 0;
+        }
+
+        .bottom-nav {
+            margin-top: 4rem;
+            padding-top: 2rem;
+            border-top: 1px solid var(--border);
+        }
+
+        .nav-links {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .nav-link {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 1rem 1.5rem;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            color: var(--text-primary);
+            text-decoration: none;
+            font-size: 0.85rem;
+            transition: all 0.3s ease;
+        }
+
+        .nav-link:hover {
+            border-color: var(--primary);
+            color: var(--primary);
+        }
+
+        .nav-link svg {
+            width: 18px;
+            height: 18px;
+        }
+
+        .nav-link.prev svg {
+            transition: transform 0.3s ease;
+        }
+
+        .nav-link.prev:hover svg {
+            transform: translateX(-3px);
+        }
+
+        .nav-link.next svg {
+            transition: transform 0.3s ease;
+        }
+
+        .nav-link.next:hover svg {
+            transform: translateX(3px);
+        }
+
+        .back-to-chapter {
+            display: flex;
+            justify-content: center;
+            margin-top: 1.5rem;
+        }
+
+        .back-to-chapter a {
+            color: var(--text-muted);
+            text-decoration: none;
+            font-size: 0.85rem;
+            transition: color 0.3s ease;
+        }
+
+        .back-to-chapter a:hover {
+            color: var(--primary);
+        }
+
+        footer {
+            border-top: 1px solid var(--border);
+            padding: 2rem;
+            text-align: center;
+            background: var(--bg-card);
+        }
+
+        .footer-content {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .footer-logo {
+            font-family: 'Press Start 2P', cursive;
+            font-size: 0.6rem;
+            color: var(--primary);
+            margin-bottom: 0.5rem;
+        }
+
+        footer p {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+        }
+
+        footer a {
+            color: var(--primary);
+            text-decoration: none;
+        }
+
+        footer a:hover {
+            text-decoration: underline;
+        }
+
+        @media (max-width: 768px) {
+            .hero {
+                padding: 3rem 1.5rem 2rem;
+            }
+
+            main {
+                padding: 2rem 1.5rem 3rem;
+            }
+
+            .hero-meta {
+                flex-direction: column;
+                gap: 0.75rem;
+            }
+
+            .nav-links {
+                flex-direction: column;
+            }
+
+            .nav-link {
+                width: 100%;
+                justify-content: center;
+            }
+        }
+
+        .pixel-corner {
+            position: fixed;
+            width: 8px;
+            height: 8px;
+            background: var(--primary);
+            opacity: 0.5;
+        }
+
+        .pixel-corner.top-left { top: 10px; left: 10px; }
+        .pixel-corner.top-right { top: 10px; right: 10px; }
+        .pixel-corner.bottom-left { bottom: 10px; left: 10px; }
+        .pixel-corner.bottom-right { bottom: 10px; right: 10px; }
+    </style>
+</head>
+<body>
+    <div class="bg-grid"></div>
+    <div class="pixel-corner top-left"></div>
+    <div class="pixel-corner top-right"></div>
+    <div class="pixel-corner bottom-left"></div>
+    <div class="pixel-corner bottom-right"></div>
+
+    <header>
+        <div class="header-content">
+            <a href="index.html" class="back-link">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+                </svg>
+                Home
+            </a>
+            <div class="header-nav">
+                <span class="header-section">SECTION 2.6</span>
+            </div>
+        </div>
+    </header>
+
+    <section class="hero">
+        <div class="section-badge">
+            <span class="section-number">2.6</span>
+            <span class="section-label">Exercise</span>
+        </div>
+        <h1>Exercise - Design Three Core Mechanics</h1>
+        <div class="hero-meta">
+            <div class="meta-item">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <span>~16 min read</span>
+            </div>
+            <div class="meta-item">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                </svg>
+                <span>4,500 words</span>
+            </div>
+        </div>
+        <div class="learning-goal">
+            <div class="learning-goal-label">Learning Goal</div>
+            <p>Apply everything you've learned in Chapter 2 to design three core mechanics for your game using a simplified GDD template.</p>
+        </div>
+    </section>
+
+    <main>
+        <article class="content">
+
+
+<h2>Exercise Overview</h2>
+
+<p>Here's what you're going to do:</p>
+
+<ol>
+<li><strong>Review your Game Concept Document</strong> from Chapter 1 and identify your game's core loop.</li>
+<li><strong>Identify 2-4 potential core mechanics</strong> and narrow them down to the <strong>3 most essential</strong>.</li>
+<li><strong>Document each mechanic thoroughly</strong> using a simplified GDD template.</li>
+<li><strong>Consider how your mechanics interact</strong> and create interesting gameplay.</li>
+<li><strong>Sketch progression</strong> and how mechanics unlock or combine over time.</li>
+</ol>
+
+<p>By the end, you'll have a <strong>Mechanics Design Document</strong>â€”a focused, 2-5 page document that explains exactly what players will <em>do</em> in your game and <em>how</em> it will work.</p>
+
+<p>Let's get started.</p>
+
+<p>---</p>
+
+<h2>Step 1: Review Your Game Concept Document</h2>
+
+<p>Pull out your Game Concept Document from Chapter 1.6. Let's revisit the key sections:</p>
+
+<strong>What to look at:</strong>
+<ul>
+<li><strong>Core Gameplay Loop:</strong> What repeating actions define your game?</li>
+<li><strong>Genre:</strong> What's expected from your genre? (Platformers need jumping; puzzles need problem-solving; RPGs need progression)</li>
+<li><strong>Main Character:</strong> What abilities or actions make sense for your character?</li>
+</ul>
+
+<strong>Ask yourself:</strong>
+<ul>
+<li><strong>What verbs appear in my gameplay loop?</strong> (Move, jump, shoot, collect, solve, build, dodge, etc.)</li>
+<li><strong>Which verbs are repeated most often?</strong> (Those are likely core mechanics)</li>
+<li><strong>Which verbs are essential to the experience?</strong> (Remove them and the game doesn't workâ€”those are definitely core)</li>
+</ul>
+
+<h3>Example: Pixel Quest Review</h3>
+
+<strong>Core Loop (from Chapter 1):</strong>
+<p>"Player moves, jumps, and dashes through glitching platforms â†’ Navigate hazards and collect data fragments â†’ Unlock next program/level â†’ Face new glitch-based mechanics â†’ Repeat."</p>
+
+<strong>Verbs identified:</strong>
+<ul>
+<li>Move (left/right)</li>
+<li>Jump</li>
+<li>Dash (later clarified as "Glitch-Phase")</li>
+<li>Navigate (combination of movement verbs)</li>
+<li>Collect (secondaryâ€”not core to loop)</li>
+</ul>
+
+<strong>Essential verbs:</strong> Move, Jump, Dash/Phase
+
+<p>These become the foundation for Pixel Quest's core mechanics.</p>
+
+<p>---</p>
+
+<h2>Step 2: Identify 2-4 Potential Core Mechanics</h2>
+
+<p>Brainstorm a list of mechanics that could be core to your game. Don't filter yetâ€”just list possibilities.</p>
+
+<strong>Remember from Section 2.1:</strong>
+<ul>
+<li>Core mechanics are <strong>repeated constantly</strong> throughout the game</li>
+<li>They <strong>define the gameplay loop</strong></li>
+<li>Removing them would make the game not work</li>
+</ul>
+
+<strong>How many core mechanics should you have?</strong>
+<ul>
+<li><strong>Minimum:</strong> 1 (very rareâ€”think Flappy Bird)</li>
+<li><strong>Sweet spot for beginners:</strong> 2-3</li>
+<li><strong>Maximum for beginners:</strong> 4</li>
+<li><strong>More than 4?</strong> You're probably listing secondary mechanics or overcomplcating</li>
+</ul>
+
+<h3>Example: Pixel Quest Brainstorm</h3>
+
+<strong>Potential Core Mechanics:</strong>
+<ol>
+<li>Horizontal movement (left/right)</li>
+<li>Jump (vertical navigation)</li>
+<li>Wall-cling (vertical navigation + recovery)</li>
+<li>Glitch-Phase (phase through walls)</li>
+<li>Dash (quick horizontal boost)</li>
+<li>Collect data fragments (gathering)</li>
+</ol>
+
+<strong>Waitâ€”that's 6! Time to filter.</strong>
+
+<strong>Analysis:</strong>
+<ul>
+<li><strong>Movement + Jump:</strong> Absolutely core. No platformer works without these.</li>
+<li><strong>Wall-Cling:</strong> Adds depth to vertical navigation. Core for Pixel Quest's design.</li>
+<li><strong>Glitch-Phase:</strong> Thematic and enables puzzles. Core, but could be unlockable (not needed for MVP).</li>
+<li><strong>Dash:</strong> Overlaps with movement and Glitch-Phase. Could be combined or removed.</li>
+<li><strong>Collect fragments:</strong> Secondary. Optional collectibles don't define core loop.</li>
+</ul>
+
+<strong>Narrowed to 3 Core Mechanics:</strong>
+<ol>
+<li><strong>Horizontal Movement</strong> (foundational)</li>
+<li><strong>Jump</strong> (foundational)</li>
+<li><strong>Wall-Cling</strong> (depth mechanic)</li>
+</ol>
+
+<strong>Bonus Core Mechanic (Unlockable):</strong>
+<ol>
+<li><strong>Glitch-Phase</strong> (mid-game unlock, core to later levels)</li>
+</ol>
+
+<strong>Decision:</strong> Start with 3, add Glitch-Phase as a stretch goal after MVP is tested.
+
+<p>---</p>
+
+<h3>Your Turn: Brainstorm and Filter</h3>
+
+<strong>Action:</strong> List 4-6 potential mechanics for your game. Then answer for each:
+
+<ul>
+<li>Is this action repeated constantly? (Yes = potential core, No = secondary)</li>
+<li>Does the game work without it? (No = core, Yes = secondary)</li>
+<li>Does it directly support the core loop? (Yes = core, No = secondary)</li>
+</ul>
+
+<p>Circle your <strong>top 3</strong> core mechanics. These are what you'll focus on.</p>
+
+<p>> <strong>ðŸ’¡ Tip:</strong> If you're torn between two mechanics, ask: "Which one is more fun?" or "Which one do I want to prototype first?" That's your core. The other can be secondary.</p>
+
+<p>---</p>
+
+<h2>Step 3: Document Each Mechanic Using the Template</h2>
+
+<p>Now let's document your three core mechanics in detail. For each mechanic, you'll answer five key questions:</p>
+
+<p>---</p>
+
+<h3>Mechanic Documentation Template</h3>
+
+<p>For each of your 3 core mechanics, fill out the following:</p>
+
+<p>---</p>
+
+<strong>MECHANIC NAME:</strong> [Clear, descriptive name]
+
+<p>---</p>
+
+<strong>Player Input:</strong>
+<ul>
+<li>What button(s) or action(s) trigger this mechanic?</li>
+<li>Are there variations? (e.g., tap vs. hold, directional input)</li>
+</ul>
+
+<strong>Game Response:</strong>
+<ul>
+<li>What happens when the player activates this mechanic?</li>
+<li>How does the game world react?</li>
+<li>What are the mechanical details? (speed, distance, duration, cooldown, etc.)</li>
+</ul>
+
+<strong>Why Is This Fun/Engaging?:</strong>
+<ul>
+<li>What's the appeal of this mechanic?</li>
+<li>What skill does it require or reward?</li>
+<li>How does it serve the core loop?</li>
+</ul>
+
+<strong>Example from Another Game:</strong>
+<ul>
+<li>Reference a similar mechanic from a well-known game.</li>
+<li>What can you learn from how they implemented it?</li>
+</ul>
+
+<strong>Implementation Notes (Optional):</strong>
+<ul>
+<li>Any technical considerations?</li>
+<li>Edge cases or interactions with other mechanics?</li>
+</ul>
+
+<p>---</p>
+
+<p>Let's see this template in action with Pixel Quest's three core mechanics.</p>
+
+<p>---</p>
+
+<h2>Full Pixel Quest Example: Three Core Mechanics</h2>
+
+<p>Here's Pixel Quest's complete mechanics design, documented thoroughly.</p>
+
+<p>---</p>
+
+<h3><strong>PIXEL QUEST - MECHANICS DESIGN DOCUMENT</strong></h3>
+
+<p>---</p>
+
+<h4><strong>MECHANIC 1: Basic Movement (Left/Right + Jump)</strong></h4>
+
+<p>---</p>
+
+<strong>Player Input:</strong>
+<ul>
+<li><strong>Horizontal Movement:</strong> Arrow keys (Left/Right) or WASD (A/D)</li>
+<li><strong>Jump:</strong> Spacebar (tap for short jump, hold for high jump)</li>
+</ul>
+
+<strong>Game Response:</strong>
+<ul>
+<li><strong>Movement:</strong> Bit moves horizontally at 150 pixels/second with smooth acceleration (0.2-second ramp-up to max speed). Can change direction instantly mid-air.</li>
+<li><strong>Jump:</strong> Tap = 3 tile-units high (enough to clear single-tile gaps). Hold = 5 tile-units high (clears larger obstacles). Jump has slight floatiness (low gravity) to emphasize Bit being lightweight (it's a single pixel).</li>
+<li><strong>Visual/Audio:</strong> Bit leaves faint RGB glitch trail during movement. Jump has "boop" sound on takeoff, soft "tap" sound on landing.</li>
+</ul>
+
+<strong>Why Is This Fun/Engaging?:</strong>
+<ul>
+<li><strong>Foundational feel:</strong> Responsive controls are the backbone of platformers. Bit's movement needs to feel tight and precise so players trust their inputs.</li>
+<li><strong>Skill expression:</strong> Variable jump height allows skilled players to optimize (short jumps for speed, high jumps for safety).</li>
+<li><strong>Low gravity float:</strong> Makes Bit feel "light" and thematically appropriate (a single pixel wouldn't have much weight). Also gives players more air-control for precise landings.</li>
+</ul>
+
+<strong>Example from Another Game:</strong>
+<ul>
+<li><strong>Celeste:</strong> Movement is pixel-perfect responsive with instant direction changes. Jump has variable height based on button hold. Bit's movement should feel similarly tight.</li>
+<li><strong>Super Meat Boy:</strong> Floaty, high jumps with excellent air control. Players can adjust trajectory mid-air for precision.</li>
+</ul>
+
+<strong>Implementation Notes:</strong>
+<ul>
+<li>Test jump height extensively (3 and 5 tiles are starting pointsâ€”may need adjustment).</li>
+<li>Ensure movement feels good at 60 FPS (smooth acceleration curve).</li>
+<li>Air control is essentialâ€”players should be able to steer mid-jump without feeling "locked in."</li>
+</ul>
+
+<p>---</p>
+
+<h4><strong>MECHANIC 2: Wall-Cling</strong></h4>
+
+<p>---</p>
+
+<strong>Player Input:</strong>
+<ul>
+<li>Hold directional input (Left or Right) toward a wall while airborne.</li>
+<li>Jump (Spacebar) while clinging to perform a wall-jump.</li>
+</ul>
+
+<strong>Game Response:</strong>
+<ul>
+<li><strong>Cling:</strong> Bit sticks to wall and slides downward slowly (50 pixels/secondâ€”slow enough to plan next move, fast enough to feel urgent).</li>
+<li><strong>Wall-Jump:</strong> Pressing Spacebar while clinging launches Bit upward and away from the wall (diagonal trajectory, 4 tile-units up, 2 tile-units away). Can immediately cling to opposite wall (enables wall-jump chaining).</li>
+<li><strong>Visual/Audio:</strong> Clinging produces subtle "magnetic hum" sound. Wall-jump has sharper "kick" sound. RGB trail intensifies briefly on wall-jump.</li>
+</ul>
+
+<strong>Why Is This Fun/Engaging?:</strong>
+<ul>
+<li><strong>Verticality:</strong> Opens up vertical level design. Players can climb tall structures without needing ladders or elevators.</li>
+<li><strong>Recovery mechanic:</strong> Missing a jump doesn't mean deathâ€”if you hit a wall, you can cling and wall-jump to safety. Feels forgiving and skill-rewarding.</li>
+<li><strong>Skill ceiling:</strong> Advanced players can chain wall-jumps to climb quickly or reach hidden areas. Satisfying to master.</li>
+</ul>
+
+<strong>Example from Another Game:</strong>
+<ul>
+<li><strong>Celeste:</strong> Wall-slide and wall-jump are core to verticality. Bit's system is nearly identicalâ€”proven design that works.</li>
+<li><strong>Hollow Knight:</strong> Similar wall-cling with slower slide speed. Emphasizes methodical climbing vs. Celeste's fast-paced approach. Pixel Quest leans toward Celeste's speed.</li>
+</ul>
+
+<strong>Implementation Notes:</strong>
+<ul>
+<li>Wall-jump angle is critical: too steep (straight up) = feels weak, too shallow (mostly horizontal) = doesn't gain height. Test 45-60 degree angles.</li>
+<li>Ensure players can cling to any vertical surface (not just designated "wall" objects).</li>
+<li>Edge case: What happens if player clings to a moving wall? (Likely: move with the wall, but deprioritize for MVP.)</li>
+</ul>
+
+<p>---</p>
+
+<h4><strong>MECHANIC 3: Glitch-Phase (Unlock)</strong></h4>
+
+<p>---</p>
+
+<strong>Player Input:</strong>
+<ul>
+<li>Hold Shift while moving (any direction).</li>
+<li>Phase meter drains while active; releases Shift or meter depletes = phase ends.</li>
+</ul>
+
+<strong>Game Response:</strong>
+<ul>
+<li><strong>Activation:</strong> Bit becomes semi-transparent (50% opacity) with intense RGB separation glitch effect. Trails become rainbow-streaked.</li>
+<li><strong>Effect:</strong> Bit can pass through solid objects (walls, platforms, hazards) as if they don't exist. However, moving platforms and enemies still affect Bit (can't phase through everythingâ€”only static geometry).</li>
+<li><strong>Duration:</strong> 2 seconds at full meter. Meter recharges when standing on stable ground (recharges fully in 3 seconds).</li>
+<li><strong>Visual/Audio:</strong> Static hum during phase. Rainbow particle trail. Phase meter UI element pulses and drains visually.</li>
+</ul>
+
+<strong>Why Is This Fun/Engaging?:</strong>
+<ul>
+<li><strong>Puzzle-solving:</strong> Enables creative solutions. See a wall blocking your path? Phase through it. Glitching platform about to disappear? Phase through and land safely below.</li>
+<li><strong>Thematic fit:</strong> Bit is a glitch. This ability embodies that identityâ€”you're exploiting the system's instability.</li>
+<li><strong>Risk-reward:</strong> Limited duration means players must plan usage. Do you phase now to skip a hazard, or save meter for an upcoming puzzle?</li>
+<li><strong>Sequence-breaking potential:</strong> Skilled players can phase through entire sections, enabling speedruns and alternate routes.</li>
+</ul>
+
+<strong>Example from Another Game:</strong>
+<ul>
+<li><strong>Dishonored (Blink ability):</strong> Short-range teleport that lets you bypass obstacles. Limited by mana meter. Feels empowering and skill-expressive. Glitch-Phase is similar but focused on phasing, not teleporting.</li>
+<li><strong>Hollow Knight (Shade Cloak):</strong> Dash through enemies and hazards invincibly. Limited by cooldown. Pixel Quest's phase has similar invincibility + utility, but with meter management instead of cooldown.</li>
+</ul>
+
+<strong>Implementation Notes:</strong>
+<ul>
+<li>Meter management is critical. Too long = trivializes challenges. Too short = feels useless. Start with 2 seconds, adjust based on playtesting.</li>
+<li>Visual clarity: Phased Bit must be visually distinct so players know when active.</li>
+<li>Collision detection: Need robust system to handle phasing through geometry without glitching out.</li>
+<li>Unlockable timing: Introduce after Zone 1 is complete, unlock at end of Zone 2. Zone 3+ levels designed with phasing in mind.</li>
+</ul>
+
+<p>---</p>
+
+<h2>Step 4: Consider How Mechanics Interact</h2>
+
+<p>Great mechanics don't exist in isolationâ€”they combine in interesting ways. Let's think about how your three mechanics interact.</p>
+
+<h3>Interaction Questions to Ask:</h3>
+
+<ol>
+<li><strong>Can mechanics be combined?</strong> (e.g., wall-jump + dash, phase + jump)</li>
+<li><strong>Do mechanics create interesting choices?</strong> (e.g., use phase now or save it?)</li>
+<li><strong>Do mechanics enable emergent strategies?</strong> (e.g., unintended shortcuts or creative solutions)</li>
+</ol>
+
+<p>---</p>
+
+<h3>Pixel Quest: Mechanic Interactions</h3>
+
+<strong>Movement + Wall-Cling:</strong>
+<ul>
+<li>Players can chain wall-jumps to climb vertical sections quickly (speed-running strategy).</li>
+<li>Wall-cling allows recovery from failed jumps (forgiving, skill-rewarding).</li>
+</ul>
+
+<strong>Wall-Cling + Glitch-Phase:</strong>
+<ul>
+<li>Players can phase through walls while clinging (enables secret areas hidden inside walls).</li>
+<li>Skilled players can phase, then immediately wall-cling on the other side (advanced tech).</li>
+</ul>
+
+<strong>Jump + Glitch-Phase:</strong>
+<ul>
+<li>Players can phase mid-air to pass through hazards while maintaining momentum (high-skill maneuver).</li>
+<li>Phasing resets fall speed (acts as a mini-air-brake)â€”can be used to adjust landings.</li>
+</ul>
+
+<strong>All Three Combined:</strong>
+<ul>
+<li>Wall-climb section with glitching platforms: Players must wall-jump between platforms, phase through disappearing obstacles, and manage phase meter carefully.</li>
+<li>This creates high-skill challenges that reward mastery of all mechanics.</li>
+</ul>
+
+<p>---</p>
+
+<h3>Your Turn: Map Interactions</h3>
+
+<p>For your three mechanics, answer:</p>
+
+<strong>Question 1:</strong> Can players combine mechanics A + B to create interesting strategies? (e.g., dash while jumping)
+
+<strong>Question 2:</strong> Do mechanics create meaningful choices? (e.g., use ability now or save it?)
+
+<strong>Question 3:</strong> Can skilled players discover emergent strategies? (e.g., unintended shortcuts)
+
+<p>Write 2-3 interaction examples for your mechanics.</p>
+
+<p>---</p>
+
+<h2>Step 5: Sketch Progression</h2>
+
+<p>How do players learn and master your mechanics over time? Let's plan the progression.</p>
+
+<h3>Progression Planning Questions:</h3>
+
+<ol>
+<li><strong>Which mechanic do players learn first?</strong></li>
+<li><strong>How many levels/challenges to master each mechanic before introducing the next?</strong></li>
+<li><strong>When do mechanics combine?</strong></li>
+<li><strong>What's the final mastery test?</strong></li>
+</ol>
+
+<p>---</p>
+
+<h3>Pixel Quest: Mechanic Progression</h3>
+
+<strong>Zone 1: Text Editor (Screens 1-10)</strong>
+
+<strong>Screens 1-3: Movement Only</strong>
+<ul>
+<li>Teach: Left/right movement, basic jumps across platforms</li>
+<li>No hazards, no enemiesâ€”just safe exploration</li>
+<li>Goal: Players feel comfortable with controls</li>
+</ul>
+
+<strong>Screens 4-6: Jump Mastery</strong>
+<ul>
+<li>Introduce: Gaps requiring precise jumps, variable height jumps</li>
+<li>Minimal hazards (safe landing zones)</li>
+<li>Goal: Players master jump timing and variable height</li>
+</ul>
+
+<strong>Screens 7-9: Wall-Cling Introduction</strong>
+<ul>
+<li>Introduce: Vertical walls, wall-cling mechanic tutorial</li>
+<li>Challenge: Climb simple vertical sections with wall-jumps</li>
+<li>Goal: Players understand wall-cling and wall-jumping</li>
+</ul>
+
+<strong>Screen 10: Combination Test</strong>
+<ul>
+<li>Combine: All three mechanics (movement, jump, wall-cling)</li>
+<li>Challenge: Navigate platforming section requiring all skills</li>
+<li>No new mechanicsâ€”pure mastery test</li>
+</ul>
+
+<p>---</p>
+
+<strong>Zone 2: Image Editor (Screens 11-20)</strong>
+
+<strong>Screens 11-15: Advanced Movement</strong>
+<ul>
+<li>Introduce: RGB layer switching (new environmental mechanic, not player mechanic)</li>
+<li>Test: Movement + jump + wall-cling in color-shifting environments</li>
+<li>Goal: Solidify core mechanics with environmental variety</li>
+</ul>
+
+<strong>Screens 16-19: Glitch-Phase Introduction</strong>
+<ul>
+<li>Introduce: Glitch-Phase unlock at screen 16</li>
+<li>Tutorial: Safe environment to practice phasing (no punishment for failure)</li>
+<li>Challenge: Puzzles requiring phase (walls blocking paths, disappearing platforms)</li>
+<li>Goal: Players learn phase timing and meter management</li>
+</ul>
+
+<strong>Screen 20: Zone 2 Boss/Gauntlet</strong>
+<ul>
+<li>Combine: All four mechanics (movement, jump, wall-cling, phase)</li>
+<li>Challenge: Timed gauntlet with enemies, hazards, phase-required sections</li>
+<li>Goal: Mastery test before Zone 3</li>
+</ul>
+
+<p>---</p>
+
+<strong>Zone 3+: Complexity</strong>
+<ul>
+<li>Assume competence with all mechanics</li>
+<li>Challenges combine mechanics in creative ways</li>
+<li>Difficulty ramps through level design, not new mechanics</li>
+</ul>
+
+<p>---</p>
+
+<h3>Your Turn: Sketch Progression</h3>
+
+<p>Break your game into 3-5 sections (levels, chapters, zones). For each:</p>
+
+<strong>Section 1 (Tutorial):</strong>
+<ul>
+<li>Which mechanic is introduced?</li>
+<li>How do players learn it (safe environment)?</li>
+</ul>
+
+<strong>Section 2 (Testing):</strong>
+<ul>
+<li>Which mechanic is tested?</li>
+<li>What challenges require competence?</li>
+</ul>
+
+<strong>Section 3 (Combination):</strong>
+<ul>
+<li>Which mechanics combine?</li>
+<li>What's the mastery test?</li>
+</ul>
+
+<p>Write a brief progression outline (3-5 sentences per section).</p>
+
+<p>---</p>
+
+<h2>Common Mechanic Design Pitfalls</h2>
+
+<p>Before you finalize your mechanics, watch out for these common mistakes:</p>
+
+<p>---</p>
+
+<h3>Pitfall 1: Too Many Mechanics</h3>
+
+<strong>Problem:</strong> You designed 6 core mechanics for your first game.
+
+<strong>Why it's bad:</strong> Each mechanic requires implementation, testing, balancing, level design, and polish. Six mechanics = 6Ã— the work.
+
+<strong>Fix:</strong> Ruthlessly cut. Pick the <strong>3 most essential</strong>. Save the rest for a sequel or secondary status.
+
+<p>---</p>
+
+<h3>Pitfall 2: Mechanics Don't Interact</h3>
+
+<strong>Problem:</strong> Mechanic A has nothing to do with Mechanic B. They exist in silos.
+
+<strong>Why it's bad:</strong> Players learn mechanics independently but never combine them. Gameplay feels shallow.
+
+<strong>Fix:</strong> Design interactions. How can players use A + B together? If they can't, one might be unnecessary.
+
+<p>---</p>
+
+<h3>Pitfall 3: Unclear Purpose</h3>
+
+<strong>Problem:</strong> You have a mechanic because "it's cool," but it doesn't serve the core loop.
+
+<strong>Why it's bad:</strong> Every mechanic should have a <em>reason</em>. If players ask "Why do I need this?" you haven't justified it.
+
+<strong>Fix:</strong> Answer: "This mechanic enables ______." (e.g., "Phasing enables puzzle-solving and sequence-breaking.")
+
+<p>---</p>
+
+<h3>Pitfall 4: Overcomplication</h3>
+
+<strong>Problem:</strong> One mechanic has 10 rules and 5 edge cases.
+
+<strong>Why it's bad:</strong> Players won't remember complex rules. Simple mechanics with depth > complex mechanics with confusion.
+
+<strong>Fix:</strong> Simplify. Can you explain the mechanic in one sentence? If not, it's too complex.
+
+<strong>Example:</strong>
+<ul>
+<li><strong>Too complex:</strong> "Press A to charge jump (hold 1-3 seconds for height scaling), release to jump, but if you're on ice it charges 50% faster, and if you're crouching it charges 20% slower, and if..."</li>
+<li><strong>Simple:</strong> "Hold A to charge jump, release to jump higher."</li>
+</ul>
+
+<p>---</p>
+
+<h3>Pitfall 5: Not Playtesting Feel</h3>
+
+<strong>Problem:</strong> You designed a mechanic on paper but never prototyped it.
+
+<strong>Why it's bad:</strong> Some mechanics sound great but feel awful. Jump height might be mathematically correct but feel "off."
+
+<strong>Fix:</strong> Prototype early. Get a rough version working in-engine ASAP and playtest. Adjust based on feel, not theory.
+
+<p>---</p>
+
+<h2>Success Criteria: Is Your Mechanics Design Ready?</h2>
+
+<p>Your Mechanics Design Document is ready when:</p>
+
+<p>✅ <strong>You have 2-4 core mechanics</strong> clearly documented (not 10, not 1).</p>
+
+<p>✅ <strong>Each mechanic has a clear purpose</strong> (you can explain why it exists in one sentence).</p>
+
+<p>✅ <strong>Mechanics interact in interesting ways</strong> (players can combine them creatively).</p>
+
+<p>✅ <strong>Progression is mapped</strong> (you know which mechanic is introduced when, and how they combine).</p>
+
+<p>✅ <strong>You're excited to prototype</strong> (you can't wait to build these mechanics and playtest them).</p>
+
+<p>If you hit all five criteria, you're ready to move to Chapter 3 and start building.</p>
+
+<p>---</p>
+
+<h2>Your Turn: Create Your Mechanics Design Document</h2>
+
+<p>Alright, it's time. Use the template below to document your three core mechanics.</p>
+
+<p>---</p>
+
+<h3><strong>[YOUR GAME TITLE] - MECHANICS DESIGN DOCUMENT</strong></h3>
+
+<p>---</p>
+
+<strong>Game Overview:</strong>
+<ul>
+<li>Title: [Your game title]</li>
+<li>Genre: [Your genre]</li>
+<li>Core Loop: [One-sentence loop from Chapter 1]</li>
+</ul>
+
+<p>---</p>
+
+<h4><strong>MECHANIC 1: [Name]</strong></h4>
+
+<strong>Player Input:</strong>
+<p>[What buttons/actions trigger this?]</p>
+
+<strong>Game Response:</strong>
+<p>[What happens? Include specifics: speed, distance, duration, etc.]</p>
+
+<strong>Why Is This Fun/Engaging?:</strong>
+<p>[What's the appeal? What skill does it reward?]</p>
+
+<strong>Example from Another Game:</strong>
+<p>[Reference a similar mechanic and what you can learn from it]</p>
+
+<strong>Implementation Notes (Optional):</strong>
+<p>[Any technical considerations or edge cases]</p>
+
+<p>---</p>
+
+<h4><strong>MECHANIC 2: [Name]</strong></h4>
+
+<p>[Repeat template above]</p>
+
+<p>---</p>
+
+<h4><strong>MECHANIC 3: [Name]</strong></h4>
+
+<p>[Repeat template above]</p>
+
+<p>---</p>
+
+<h4><strong>Mechanic Interactions:</strong></h4>
+
+<strong>Interaction 1:</strong> [How do Mechanic A + B combine?]
+
+<strong>Interaction 2:</strong> [How do Mechanic A + C combine?]
+
+<strong>Interaction 3:</strong> [How do Mechanic B + C combine?]
+
+<p>---</p>
+
+<h4><strong>Progression Outline:</strong></h4>
+
+<strong>Section 1 (Tutorial):</strong>
+<p>[Which mechanic introduced? How learned?]</p>
+
+<strong>Section 2 (Testing):</strong>
+<p>[Which mechanic tested? What challenges?]</p>
+
+<strong>Section 3 (Combination):</strong>
+<p>[Which mechanics combine? What's the mastery test?]</p>
+
+<p>[Add more sections as needed]</p>
+
+<p>---</p>
+
+<h2>Tips for Filling Out Your Document</h2>
+
+<strong>Tip 1:</strong> Don't overthink it. This is a living documentâ€”it will evolve.
+
+<strong>Tip 2:</strong> Be specific with numbers. "Jump 3 tiles high" is better than "Jump pretty high."
+
+<strong>Tip 3:</strong> Reference other games liberally. You're standing on the shoulders of giants.
+
+<strong>Tip 4:</strong> Keep it under 5 pages. If it's longer, you're over-documenting.
+
+<strong>Tip 5:</strong> Share with a friend. If they can't explain your mechanics back to you, revise for clarity.
+
+<p>---</p>
+
+<h2>What Happens Next?</h2>
+
+<p>Congratulations! You've just completed the core exercise of Chapter 2. You now have:</p>
+
+<p>✅ <strong>A Game Concept Document</strong> (from Chapter 1)</p>
+<p>✅ <strong>A Mechanics Design Document</strong> (from Chapter 2)</p>
+
+<p>These two documents are your <strong>blueprint</strong>. In Chapter 3, you'll use them to:</p>
+<ul>
+<li>Set up your development environment (Godot or Unity)</li>
+<li>Prototype your first mechanic</li>
+<li>Test how it feels and iterate</li>
+</ul>
+
+<p>You're not just dreaming about making a game anymore. You're not just conceptualizing. You've <strong>designed</strong> your game's mechanics with intention and clarity.</p>
+
+<p>That's real game design work. Be proud of that.</p>
+
+<p>---</p>
+
+<h2>Mini-Exercise: Share and Get Feedback (Optional but Encouraged)</h2>
+
+<p>Before moving to Chapter 3, consider sharing your Mechanics Design Document with:</p>
+<ul>
+<li>A classmate or friend</li>
+<li>An online game dev community (Reddit's r/gamedev, Discord servers)</li>
+<li>A mentor or instructor</li>
+</ul>
+
+<p>Ask them:</p>
+<ol>
+<li><strong>Are the mechanics clear?</strong> Can you explain them back to me?</li>
+<li><strong>Do they sound fun?</strong> Would you want to play this?</li>
+<li><strong>Do you see any issues?</strong> (overcomplexity, unclear purpose, poor interactions)</li>
+</ol>
+
+<p>Feedback now saves hours of wasted work later. Don't take criticism personallyâ€”it's how great games get better.</p>
+
+<p>---</p>
+
+<h2>Summary</h2>
+
+<p>Let's recap what you accomplished:</p>
+
+<ul>
+<li>You <strong>reviewed your concept</strong> and identified the verbs/actions that define your game.</li>
+<li>You <strong>brainstormed and filtered</strong> to find your 2-4 core mechanics.</li>
+<li>You <strong>documented each mechanic thoroughly</strong> using the template (input, response, why it's fun, examples, notes).</li>
+<li>You <strong>mapped mechanic interactions</strong> to ensure they combine in interesting ways.</li>
+<li>You <strong>sketched progression</strong> to plan how players learn and master mechanics over time.</li>
+<li>You <strong>created a Mechanics Design Document</strong> that will guide your development in Chapter 3.</li>
+</ul>
+
+<p>You're no longer a beginner fumbling in the dark. You're a designer with a clear vision and a documented plan.</p>
+
+<p>Now it's time to build.</p>
+
+<p>---</p>
+
+<strong>Next:</strong> [Chapter 2.7 - Resources and Next Steps](2.7-resources-and-next-steps.md)
+
+<p>You've designed your mechanics. Chapter 2 is almost complete. In the final section, we'll point you toward additional resources for learning game design, give you a Chapter 2 checklist, and preview Chapter 3: Development Tools & Getting Started. Let's finish strong!</p>
+        </article>
+
+        <nav class="bottom-nav">
+            <div class="nav-links">
+                <a href="ch2sec5.html" class="nav-link prev">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+                    </svg>
+                    2.5 Introduction to Game Design Documents
+                </a>
+                <a href="ch2sec7.html" class="nav-link next">
+                    2.7 Resources & Next Steps
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                    </svg>
+                </a>
+            </div>
+            <div class="back-to-chapter">
+                <a href="ch2.html">← Back to Chapter 2</a>
+            </div>
+        </nav>
+    </main>
+
+    <footer>
+        <div class="footer-content">
+            <div class="footer-logo">SLCC GAME DEV WORKSHOP</div>
+            <p><a href="index.html">Home</a> · <a href="ch2.html">Chapter 2</a></p>
+        </div>
+    </footer>
+</body>
+</html>
