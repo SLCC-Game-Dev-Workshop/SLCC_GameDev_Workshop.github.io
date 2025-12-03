@@ -1,0 +1,1036 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>2.7 Resources & Next Steps | SLCC Game Dev Workshop</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #4ade80;
+            --primary-dim: #22c55e;
+            --primary-glow: rgba(74, 222, 128, 0.3);
+            --bg-dark: #0a0a0f;
+            --bg-card: #12121a;
+            --bg-card-hover: #1a1a25;
+            --text-primary: #e4e4e7;
+            --text-muted: #71717a;
+            --border: #27272a;
+            --accent-purple: #a855f7;
+            --accent-cyan: #22d3ee;
+            --accent-pink: #ec4899;
+            --accent-yellow: #facc15;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: 'Space Mono', monospace;
+            background-color: var(--bg-dark);
+            color: var(--text-primary);
+            line-height: 1.8;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            background: repeating-linear-gradient(
+                0deg,
+                transparent,
+                transparent 2px,
+                rgba(0, 0, 0, 0.1) 2px,
+                rgba(0, 0, 0, 0.1) 4px
+            );
+            z-index: 1000;
+            opacity: 0.3;
+        }
+
+        .bg-grid {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                linear-gradient(rgba(74, 222, 128, 0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(74, 222, 128, 0.03) 1px, transparent 1px);
+            background-size: 50px 50px;
+            z-index: -1;
+        }
+
+        header {
+            padding: 1.5rem 2rem;
+            border-bottom: 1px solid var(--border);
+            background: linear-gradient(180deg, rgba(74, 222, 128, 0.05) 0%, transparent 100%);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            backdrop-filter: blur(10px);
+        }
+
+        .header-content {
+            max-width: 900px;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--text-muted);
+            text-decoration: none;
+            font-size: 0.85rem;
+            transition: all 0.3s ease;
+        }
+
+        .back-link:hover {
+            color: var(--primary);
+        }
+
+        .back-link svg {
+            width: 18px;
+            height: 18px;
+            transition: transform 0.3s ease;
+        }
+
+        .back-link:hover svg {
+            transform: translateX(-3px);
+        }
+
+        .header-nav {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .header-section {
+            font-family: 'Press Start 2P', cursive;
+            font-size: 0.6rem;
+            color: var(--primary);
+            letter-spacing: 0.05em;
+        }
+
+        .hero {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 4rem 2rem 3rem;
+            border-bottom: 1px solid var(--border);
+            animation: fadeInUp 0.6s ease-out;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .section-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .section-number {
+            font-family: 'Press Start 2P', cursive;
+            font-size: 0.9rem;
+            color: var(--bg-dark);
+            background: var(--accent-yellow);
+            padding: 0.5rem 1rem;
+        }
+
+        .section-label {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+        }
+
+        .hero h1 {
+            font-size: clamp(1.5rem, 4vw, 2.25rem);
+            line-height: 1.4;
+            margin-bottom: 1rem;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        .learning-goal {
+            background: var(--bg-card);
+            border-left: 3px solid var(--primary);
+            padding: 1rem 1.5rem;
+            margin-top: 1.5rem;
+        }
+
+        .learning-goal-label {
+            font-size: 0.7rem;
+            color: var(--primary);
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            margin-bottom: 0.5rem;
+            font-weight: 700;
+        }
+
+        .learning-goal p {
+            color: var(--text-muted);
+            font-size: 0.95rem;
+            margin: 0;
+        }
+
+        .hero-meta {
+            display: flex;
+            gap: 2rem;
+            margin-top: 1.5rem;
+        }
+
+        .meta-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+
+        .meta-item svg {
+            width: 16px;
+            height: 16px;
+            color: var(--primary);
+        }
+
+        main {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 3rem 2rem 4rem;
+        }
+
+        .content h2 {
+            font-family: 'Press Start 2P', cursive;
+            font-size: 0.85rem;
+            color: var(--primary);
+            margin-top: 3rem;
+            margin-bottom: 1.5rem;
+            padding-bottom: 0.75rem;
+            border-bottom: 1px solid var(--border);
+            letter-spacing: 0.05em;
+        }
+
+        .content h2:first-child {
+            margin-top: 0;
+        }
+
+        .content h3 {
+            font-size: 1.25rem;
+            color: var(--text-primary);
+            margin-top: 2.5rem;
+            margin-bottom: 1rem;
+            font-weight: 700;
+        }
+
+        .content h4 {
+            font-size: 1rem;
+            color: var(--accent-cyan);
+            margin-top: 2rem;
+            margin-bottom: 0.75rem;
+            font-weight: 700;
+        }
+
+        .content p {
+            margin-bottom: 1.25rem;
+            color: var(--text-primary);
+            font-size: 0.95rem;
+        }
+
+        .content strong {
+            color: var(--text-primary);
+            font-weight: 700;
+        }
+
+        .content em {
+            color: var(--text-muted);
+            font-style: italic;
+        }
+
+        .content ul, .content ol {
+            margin-bottom: 1.5rem;
+            padding-left: 1.5rem;
+        }
+
+        .content li {
+            margin-bottom: 0.75rem;
+            color: var(--text-primary);
+            font-size: 0.95rem;
+        }
+
+        .content li::marker {
+            color: var(--primary);
+        }
+
+        .callout {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            padding: 1.25rem 1.5rem;
+            margin: 1.5rem 0;
+            position: relative;
+        }
+
+        .callout::before {
+            font-family: 'Press Start 2P', cursive;
+            font-size: 0.55rem;
+            position: absolute;
+            top: -0.6rem;
+            left: 1rem;
+            padding: 0.2rem 0.5rem;
+            background: var(--bg-dark);
+        }
+
+        .callout p {
+            margin: 0;
+            font-size: 0.9rem;
+        }
+
+        .callout.tip {
+            border-color: var(--primary);
+        }
+
+        .callout.tip::before {
+            content: '💡 TIP';
+            color: var(--primary);
+        }
+
+        hr {
+            border: none;
+            border-top: 1px solid var(--border);
+            margin: 3rem 0;
+        }
+
+        .checklist {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            padding: 1.5rem;
+            margin: 1.5rem 0;
+        }
+
+        .checklist h4 {
+            margin-top: 0;
+            color: var(--accent-purple);
+        }
+
+        .bottom-nav {
+            margin-top: 4rem;
+            padding-top: 2rem;
+            border-top: 1px solid var(--border);
+        }
+
+        .nav-links {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .nav-link {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 1rem 1.5rem;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            color: var(--text-primary);
+            text-decoration: none;
+            font-size: 0.85rem;
+            transition: all 0.3s ease;
+        }
+
+        .nav-link:hover {
+            border-color: var(--primary);
+            color: var(--primary);
+        }
+
+        .nav-link svg {
+            width: 18px;
+            height: 18px;
+        }
+
+        .nav-link.prev svg {
+            transition: transform 0.3s ease;
+        }
+
+        .nav-link.prev:hover svg {
+            transform: translateX(-3px);
+        }
+
+        .nav-link.chapter-complete {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--accent-cyan) 100%);
+            border: none;
+            color: var(--bg-dark);
+            font-weight: 700;
+            justify-content: center;
+            width: 100%;
+            padding: 1.5rem;
+        }
+
+        .nav-link.chapter-complete:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px var(--primary-glow);
+        }
+
+        .back-to-chapter {
+            display: flex;
+            justify-content: center;
+            margin-top: 1.5rem;
+        }
+
+        .back-to-chapter a {
+            color: var(--text-muted);
+            text-decoration: none;
+            font-size: 0.85rem;
+            transition: color 0.3s ease;
+        }
+
+        .back-to-chapter a:hover {
+            color: var(--primary);
+        }
+
+        footer {
+            border-top: 1px solid var(--border);
+            padding: 2rem;
+            text-align: center;
+            background: var(--bg-card);
+        }
+
+        .footer-content {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .footer-logo {
+            font-family: 'Press Start 2P', cursive;
+            font-size: 0.6rem;
+            color: var(--primary);
+            margin-bottom: 0.5rem;
+        }
+
+        footer p {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+        }
+
+        footer a {
+            color: var(--primary);
+            text-decoration: none;
+        }
+
+        footer a:hover {
+            text-decoration: underline;
+        }
+
+        @media (max-width: 768px) {
+            .hero {
+                padding: 3rem 1.5rem 2rem;
+            }
+
+            main {
+                padding: 2rem 1.5rem 3rem;
+            }
+
+            .hero-meta {
+                flex-direction: column;
+                gap: 0.75rem;
+            }
+
+            .nav-links {
+                flex-direction: column;
+            }
+
+            .nav-link {
+                width: 100%;
+                justify-content: center;
+            }
+        }
+
+        .pixel-corner {
+            position: fixed;
+            width: 8px;
+            height: 8px;
+            background: var(--primary);
+            opacity: 0.5;
+        }
+
+        .pixel-corner.top-left { top: 10px; left: 10px; }
+        .pixel-corner.top-right { top: 10px; right: 10px; }
+        .pixel-corner.bottom-left { bottom: 10px; left: 10px; }
+        .pixel-corner.bottom-right { bottom: 10px; right: 10px; }
+    </style>
+</head>
+<body>
+    <div class="bg-grid"></div>
+    <div class="pixel-corner top-left"></div>
+    <div class="pixel-corner top-right"></div>
+    <div class="pixel-corner bottom-left"></div>
+    <div class="pixel-corner bottom-right"></div>
+
+    <header>
+        <div class="header-content">
+            <a href="index.html" class="back-link">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+                </svg>
+                Home
+            </a>
+            <div class="header-nav">
+                <span class="header-section">SECTION 2.7</span>
+            </div>
+        </div>
+    </header>
+
+    <section class="hero">
+        <div class="section-badge">
+            <span class="section-number">2.7</span>
+            <span class="section-label">Resources</span>
+        </div>
+        <h1>Resources & Next Steps</h1>
+        <div class="hero-meta">
+            <div class="meta-item">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <span>~11 min read</span>
+            </div>
+            <div class="meta-item">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                </svg>
+                <span>3,100 words</span>
+            </div>
+        </div>
+        <div class="learning-goal">
+            <div class="learning-goal-label">Learning Goal</div>
+            <p>Discover additional resources for game design learning and prepare for Chapter 3.</p>
+        </div>
+    </section>
+
+    <main>
+        <article class="content">
+
+
+<h2>Further Learning: Game Design Theory</h2>
+
+<p>These resources will deepen your understanding of the concepts covered in Chapter 2.</p>
+
+<p>---</p>
+
+<h3>Game Design Talks & Videos</h3>
+
+<strong>1. Mark Brown - Game Maker's Toolkit (YouTube)</strong>
+<ul>
+<li><strong>Why it's great:</strong> Mark analyzes game design with incredible clarity. His "Boss Keys" series deconstructs level design in Zelda games, perfect for understanding progression.</li>
+<li><strong>Recommended videos:</strong></li>
+<li>"What Makes Celeste's Assist Mode Special" (accessibility in difficulty design)</li>
+<li>"How Games Get Balanced" (challenge balancing)</li>
+<li>"Secrets of Game Feel and Juice" (feedback loops and polish)</li>
+<li><strong>Link:</strong> Search "Game Maker's Toolkit" on YouTube</li>
+</ul>
+
+<p>---</p>
+
+<strong>2. GDC (Game Developers Conference) Talks</strong>
+<ul>
+<li><strong>Why it's great:</strong> Professional developers share postmortems, design philosophies, and technical breakdowns. Free on YouTube.</li>
+<li><strong>Recommended talks:</strong></li>
+<li>"Celeste and TowerFall: Designing for Player Trust" by Matt Thorson (feedback and fairness)</li>
+<li>"Magic: The Gathering - 20 Years, 20 Lessons Learned" by Mark Rosewater (evergreen design principles)</li>
+<li>"Juice It or Lose It" by Martin Jonasson & Petri Purho (making games feel good)</li>
+<li><strong>Link:</strong> Search "GDC" on YouTube, filter by "Most Popular"</li>
+</ul>
+
+<p>---</p>
+
+<strong>3. Extra Credits (YouTube)</strong>
+<ul>
+<li><strong>Why it's great:</strong> Short, animated videos on game design topics. Great for quick learning.</li>
+<li><strong>Recommended videos:</strong></li>
+<li>"Perfect Imbalance" (why asymmetry keeps games interesting)</li>
+<li>"Choice and Consequence" (designing meaningful decisions)</li>
+<li>"Flow" (difficulty balancing and flow state)</li>
+<li><strong>Link:</strong> Search "Extra Credits" on YouTube</li>
+</ul>
+
+<p>---</p>
+
+<h3>Books on Game Design</h3>
+
+<strong>4. "The Art of Game Design: A Book of Lenses" by Jesse Schell</strong>
+<ul>
+<li><strong>Why it's great:</strong> The definitive game design textbook. 100+ "lenses" (perspectives) for analyzing your game.</li>
+<li><strong>Best for:</strong> Deep dives into design philosophy. Not a quick read, but invaluable long-term.</li>
+<li><strong>Where to get:</strong> Amazon, local library, or eBook</li>
+</ul>
+
+<p>---</p>
+
+<strong>5. "Rules of Play" by Katie Salen and Eric Zimmerman</strong>
+<ul>
+<li><strong>Why it's great:</strong> Academic but accessible. Covers game systems, player psychology, and design frameworks.</li>
+<li><strong>Best for:</strong> Understanding <em>why</em> games work, not just <em>how</em> to make them.</li>
+<li><strong>Where to get:</strong> Amazon, used bookstores (often cheaper)</li>
+</ul>
+
+<p>---</p>
+
+<strong>6. "Level Up! The Guide to Great Video Game Design" by Scott Rogers</strong>
+<ul>
+<li><strong>Why it's great:</strong> Practical, beginner-friendly, funny. Covers everything from core mechanics to UI design.</li>
+<li><strong>Best for:</strong> Designers who want actionable advice with humor.</li>
+<li><strong>Where to get:</strong> Amazon, or check your local library</li>
+</ul>
+
+<p>---</p>
+
+<h3>Online Articles & Resources</h3>
+
+<strong>7. Gamasutra / Game Developer (gamedeveloper.com)</strong>
+<ul>
+<li><strong>Why it's great:</strong> Industry news, postmortems, design deep-dives from professional developers.</li>
+<li><strong>Recommended articles:</strong></li>
+<li>Search "postmortem" + your favorite indie game (e.g., "Celeste postmortem") to see how mechanics evolved during development.</li>
+<li><strong>Link:</strong> https://www.gamedeveloper.com</li>
+</ul>
+
+<p>---</p>
+
+<strong>8. "Game Design Patterns" by Staffan BjÃ¶rk and Jussi Holopainen</strong>
+<ul>
+<li><strong>Why it's great:</strong> Catalog of reusable design patterns (like software design patterns, but for games).</li>
+<li><strong>Best for:</strong> Inspiration when stuck on mechanic design.</li>
+<li><strong>Link:</strong> Search "game design patterns wiki" or check the book on Amazon</li>
+</ul>
+
+<p>---</p>
+
+<strong>9. Designer Notes Podcast by Soren Johnson</strong>
+<ul>
+<li><strong>Why it's great:</strong> Interviews with legendary designers (Sid Meier, Jonathan Blow, Amy Hennig). Deep discussions on design philosophy.</li>
+<li><strong>Best for:</strong> Long commutes, workouts, or relaxing while absorbing wisdom.</li>
+<li><strong>Link:</strong> Search "Designer Notes Podcast"</li>
+</ul>
+
+<p>---</p>
+
+<h2>Game Design Document Templates & Examples</h2>
+
+<p>Need inspiration for your GDD? Check out these resources:</p>
+
+<p>---</p>
+
+<strong>10. Sample GDDs from Real Games</strong>
+<ul>
+<li><strong>Doom (1993):</strong> Search "Doom design document" for the original pitch docâ€”concise and inspiring.</li>
+<li><strong>Diablo:</strong> Search "Diablo pitch document"â€”shows how a one-page pitch became a genre-defining game.</li>
+<li><strong>Indie GDDs:</strong> Many indie devs share GDDs on their blogs or Patreon. Search "[game name] GDD" for games you love.</li>
+</ul>
+
+<p>---</p>
+
+<strong>11. GDD Templates</strong>
+<ul>
+<li><strong>Beginner Template:</strong> Search "one-page game design document template" for simplified versions.</li>
+<li><strong>Comprehensive Template:</strong> Search "game design document template" on Google Docsâ€”many free templates available.</li>
+</ul>
+
+<p>---</p>
+
+<h2>Mechanics Analysis: Learn from Great Games</h2>
+
+<p>Want to sharpen your mechanic analysis skills? Play these games <em>critically</em> and ask:</p>
+<ul>
+<li>What are the core mechanics?</li>
+<li>How do mechanics interact?</li>
+<li>How does difficulty progress?</li>
+<li>What feedback keeps me engaged?</li>
+</ul>
+
+<p>---</p>
+
+<h3>Recommended Games to Study (By Genre)</h3>
+
+<strong>Platformers:</strong>
+<ul>
+<li><strong>Celeste</strong> (tight movement, difficulty accessibility)</li>
+<li><strong>Super Meat Boy</strong> (precision platforming, fast retry loop)</li>
+<li><strong>Hollow Knight</strong> (exploration, combat depth)</li>
+</ul>
+
+<strong>Puzzle Games:</strong>
+<ul>
+<li><strong>Portal 1 & 2</strong> (single mechanic deeply explored)</li>
+<li><strong>The Witness</strong> (environmental storytelling through puzzles)</li>
+<li><strong>Baba Is You</strong> (rules as mechanics)</li>
+</ul>
+
+<strong>Action/Combat:</strong>
+<ul>
+<li><strong>Hades</strong> (fast combat, roguelike progression)</li>
+<li><strong>Doom Eternal</strong> (aggressive combat loop)</li>
+<li><strong>Dark Souls</strong> (deliberate combat, learning enemy patterns)</li>
+</ul>
+
+<strong>Simulation:</strong>
+<ul>
+<li><strong>Stardew Valley</strong> (layered systems, player-driven goals)</li>
+<li><strong>Cities: Skylines</strong> (systems complexity)</li>
+<li><strong>Factorio</strong> (optimization and efficiency loops)</li>
+</ul>
+
+<strong>Narrative:</strong>
+<ul>
+<li><strong>Undertale</strong> (choice-driven mechanics)</li>
+<li><strong>What Remains of Edith Finch</strong> (environmental storytelling)</li>
+<li><strong>Disco Elysium</strong> (dialogue as mechanics)</li>
+</ul>
+
+<p>Play these games with a designer's mindset. Pause and ask: "Why did the designer make this choice?"</p>
+
+<p>---</p>
+
+<h2>Chapter 2 Checklist</h2>
+
+<p>Before moving to Chapter 3, make sure you've completed:</p>
+
+<h3>Section 2.1: Core vs. Secondary Mechanics</h3>
+<ul class="checklist-items">
+<li>☐ Read the section and understood the difference</li>
+<li>☐ Identified 2-4 core mechanics for your game</li>
+<li>☐ Labeled remaining mechanics as secondary</li>
+<li>☐ Created a build-order priority list (core first, then secondary)</li>
+</ul>
+
+<p>---</p>
+
+<h3>Section 2.2: Player Agency and Decision-Making</h3>
+<ul class="checklist-items">
+<li>☐ Read about player agency spectrum (high to low)</li>
+<li>☐ Identified decision types in your game (tactical, strategic, moral, creative)</li>
+<li>☐ Determined your game's agency level (and whether it's intentional)</li>
+<li>☐ Listed 3-5 decisions players make in your game</li>
+</ul>
+
+<p>---</p>
+
+<h3>Section 2.3: Challenge, Progression, and Balancing</h3>
+<ul class="checklist-items">
+<li>☐ Understood flow state and difficulty curves</li>
+<li>☐ Chose progression type(s) for your game (level-based, skill-based, unlock-based)</li>
+<li>☐ Mapped out 3-5 sections with difficulty ranges</li>
+<li>☐ Planned assist/accessibility options (if applicable)</li>
+</ul>
+
+<p>---</p>
+
+<h3>Section 2.4: Feedback Loops and Player Rewards</h3>
+<ul class="checklist-items">
+<li>☐ Identified immediate feedback (seconds) for player actions</li>
+<li>☐ Mapped short-term feedback (minutes) like level completion</li>
+<li>☐ Planned long-term feedback (hours) like story beats and unlocks</li>
+<li>☐ Balanced intrinsic (mastery, story) and extrinsic (collectibles, points) rewards</li>
+</ul>
+
+<p>---</p>
+
+<h3>Section 2.5: Introduction to Game Design Documents</h3>
+<ul class="checklist-items">
+<li>☐ Understood what a GDD is and why it matters</li>
+<li>☐ Learned the difference between professional (50-200 pages) and beginner (2-10 pages) GDDs</li>
+<li>☐ Reviewed the 7-section GDD structure</li>
+<li>☐ Understood the "living document" philosophy</li>
+</ul>
+
+<p>---</p>
+
+<h3>Section 2.6: Exercise - Design Three Core Mechanics</h3>
+<ul class="checklist-items">
+<li>☐ <strong>Completed the main exercise!</strong></li>
+<li>☐ Reviewed your Game Concept Document from Chapter 1</li>
+<li>☐ Identified and narrowed down to 3 core mechanics</li>
+<li>☐ Documented each mechanic using the template (input, response, why it's fun, examples)</li>
+<li>☐ Mapped mechanic interactions (how they combine)</li>
+<li>☐ Sketched progression (when mechanics are introduced and mastered)</li>
+<li>☐ <strong>Created your Mechanics Design Document</strong></li>
+</ul>
+
+<p>---</p>
+
+<h3>Optional (But Encouraged!)</h3>
+<ul class="checklist-items">
+<li>☐ Shared your Mechanics Design Document with a peer for feedback</li>
+<li>☐ Explored one or more additional resources from Section 2.7</li>
+<li>☐ Played a game critically and analyzed its core mechanics</li>
+</ul>
+
+<p>---</p>
+
+<h2>Preview: Chapter 3 - Development Tools & Getting Started</h2>
+
+<p>You've done the design work. Now it's time to <strong>build</strong>.</p>
+
+<p>Chapter 3 is where theory meets practice. You'll learn:</p>
+
+<p>---</p>
+
+<h3>What's in Chapter 3?</h3>
+
+<strong>Section 3.1: Overview of Game Engines (Godot + Unity Comparison)</strong>
+<ul>
+<li>What is a game engine?</li>
+<li>Godot vs. Unity: pros, cons, which to choose</li>
+<li>Why we recommend Godot for beginners (free, open-source, lightweight)</li>
+</ul>
+
+<strong>Section 3.2: Installation and Setup Guide</strong>
+<ul>
+<li>Step-by-step installation for Godot (primary) and Unity (optional)</li>
+<li>Setting up your first project</li>
+<li>Configuring settings for 2D games</li>
+</ul>
+
+<strong>Section 3.3: Interface Tour and Basic Navigation</strong>
+<ul>
+<li>Understanding the Godot editor (scenes, nodes, inspector)</li>
+<li>Understanding the Unity editor (hierarchy, inspector, project window)</li>
+<li>Where everything lives and how to find it</li>
+</ul>
+
+<strong>Section 3.4: Understanding Assets (Sprites, Sounds, Scripts)</strong>
+<ul>
+<li>What are assets?</li>
+<li>Where to find free assets (art, audio, fonts)</li>
+<li>How to import assets into your project</li>
+<li>Basic file organization</li>
+</ul>
+
+<strong>Section 3.5: Version Control Basics (Git/GitHub) - Optional</strong>
+<ul>
+<li>Why version control matters</li>
+<li>Basic Git commands (commit, push, pull)</li>
+<li>Keeping your project safe and backed up</li>
+<li><em>Note: Optional for beginners, but highly recommended</em></li>
+</ul>
+
+<strong>Section 3.6: Main Exercise - Install Engine and Create First Project</strong>
+<ul>
+<li>Hands-on: Install Godot or Unity</li>
+<li>Create a new 2D project</li>
+<li>Import a simple sprite</li>
+<li>Move it with code (your first script!)</li>
+<li>Success = You've built something interactive</li>
+</ul>
+
+<strong>Section 3.7: Troubleshooting FAQ and Next Steps</strong>
+<ul>
+<li>Common installation issues and fixes</li>
+<li>Resources for learning your chosen engine</li>
+<li>Preview of where to go after this workshop</li>
+</ul>
+
+<p>---</p>
+
+<h3>By the End of Chapter 3, You'll Have:</h3>
+
+<p>✅ <strong>A working game engine installed</strong> (Godot or Unity)</p>
+<p>✅ <strong>A project set up</strong> and ready to build</p>
+<p>✅ <strong>Basic familiarity</strong> with the editor interface</p>
+<p>✅ <strong>Your first interactive prototype</strong> (moving a sprite with code)</p>
+<p>✅ <strong>A foundation</strong> to start building Pixel Questâ€”or YOUR game!</p>
+
+<p>---</p>
+
+<h2>Tips for Moving Forward</h2>
+
+<p>Before you dive into Chapter 3, here are some mindset tips:</p>
+
+<p>---</p>
+
+<h3>Tip 1: Start with ONE Mechanic</h3>
+
+<p>Don't try to build all three core mechanics at once. Pick the simplest (probably movement) and prototype that first. Get it working, get it feeling good, <em>then</em> add the next mechanic.</p>
+
+<strong>Why:</strong> Building incrementally prevents overwhelm and lets you test as you go.
+
+<p>---</p>
+
+<h3>Tip 2: Embrace "Good Enough" for Your First Build</h3>
+
+<p>Your first prototype won't look like Celeste. That's okay. Placeholder art, basic sound effects, rough codeâ€”all of that is <strong>perfectly fine</strong>. Polish comes later. Functionality comes first.</p>
+
+<strong>Why:</strong> Perfectionism kills beginner projects. Ship rough, iterate often.
+
+<p>---</p>
+
+<h3>Tip 3: Playtest Early and Often</h3>
+
+<p>As soon as you have <em>something</em> playable (even if it's just moving left and right), have someone else try it. Watch them play. Don't explain anythingâ€”just observe.</p>
+
+<strong>Why:</strong> You'll discover issues you'd never notice on your own. Players see your game with fresh eyes.
+
+<p>---</p>
+
+<h3>Tip 4: Don't Be Afraid to Revise Your GDD</h3>
+
+<p>Remember: the GDD is a living document. If a mechanic doesn't feel fun when you build it, change it. If a progression structure isn't working, adjust it. Design is iterative.</p>
+
+<strong>Why:</strong> No plan survives contact with reality. Flexibility is a strength, not a weakness.
+
+<p>---</p>
+
+<h3>Tip 5: Celebrate Small Wins</h3>
+
+<p>Did your character jump for the first time? Celebrate. Did you finish your first level? Celebrate. Game development is a marathon, and small wins keep you motivated.</p>
+
+<strong>Why:</strong> Progress is incremental. Acknowledging it fuels momentum.
+
+<p>---</p>
+
+<h2>Motivational Closing</h2>
+
+<p>You've just completed <strong>Chapter 2: Game Mechanics & Design</strong>. That's no small feat. You've learned concepts that professional designers use every day. You've documented your mechanics with clarity and intention.</p>
+
+<p>Here's the truth: <strong>You're not just learning to make gamesâ€”you're learning to think like a designer.</strong></p>
+
+<p>That skillâ€”breaking down complex systems, understanding player psychology, balancing challenge and rewardâ€”is valuable far beyond game development. It's applicable to UX design, product management, teaching, storytelling, and more.</p>
+
+<p>But more importantly, you're building something that's <em>yours</em>. A game that reflects your creativity, your ideas, your vision. That's powerful.</p>
+
+<p>Chapter 3 is where the magic happens. You'll take your designs and make them real. You'll see your mechanics come to life. You'll play your own game for the first time.</p>
+
+<p>And trust us: that momentâ€”when you move your character around a level <em>you</em> builtâ€”is unforgettable.</p>
+
+<p>You're ready. Let's do this.</p>
+
+<p>---</p>
+
+<h2>Quick Reference: Chapter 2 Key Takeaways</h2>
+
+<p>Before moving on, here's a summary of Chapter 2's core lessons:</p>
+
+<strong>Core vs. Secondary Mechanics (2.1):</strong>
+<ul>
+<li>Core mechanics (2-4) are essential, repeated constantly. Build these first.</li>
+<li>Secondary mechanics add depth but aren't required. Add after core is solid.</li>
+</ul>
+
+<strong>Player Agency (2.2):</strong>
+<ul>
+<li>Agency is the degree to which players make meaningful choices.</li>
+<li>High agency = sandbox freedom. Low agency = guided experience. Both are valid.</li>
+<li>Four decision types: Tactical, Strategic, Moral/Narrative, Creative.</li>
+</ul>
+
+<strong>Challenge & Progression (2.3):</strong>
+<ul>
+<li>Keep players in flow state: Challenge â‰ˆ Skill.</li>
+<li>Difficulty curve: Gradual upward slope, avoid spikes.</li>
+<li>Progression types: Level-based, Skill-based, Unlock-based.</li>
+</ul>
+
+<strong>Feedback & Rewards (2.4):</strong>
+<ul>
+<li>Three feedback layers: Immediate (seconds), Short-term (minutes), Long-term (hours).</li>
+<li>Intrinsic rewards (mastery, story) are deeper than extrinsic (points, collectibles).</li>
+<li>Avoid grinding by making core loop fun.</li>
+</ul>
+
+<strong>Game Design Documents (2.5):</strong>
+<ul>
+<li>GDDs are blueprints. Beginner GDDs should be 2-10 pages, not 50+.</li>
+<li>Living documentsâ€”they evolve as you develop.</li>
+<li>Balance writing (plan mechanics) with prototyping (test feel).</li>
+</ul>
+
+<strong>Exercise - Design Mechanics (2.6):</strong>
+<ul>
+<li>You documented your 3 core mechanics thoroughly.</li>
+<li>You mapped how mechanics interact.</li>
+<li>You sketched progression.</li>
+<li>You now have a Mechanics Design Document to guide development.</li>
+</ul>
+
+<p>---</p>
+
+<strong>Keep these lessons in mind as you move forward. They're the foundation of good game design.</strong>
+
+<p>---</p>
+
+<h2>Final Checklist Before Chapter 3</h2>
+
+<p>Before you start Chapter 3, make sure you have:</p>
+
+<p>✅ <strong>Game Concept Document</strong> (from Chapter 1)</p>
+<p>✅ <strong>Mechanics Design Document</strong> (from Chapter 2)</p>
+<p>✅ <strong>A clear idea of your 3 core mechanics</strong></p>
+<p>✅ <strong>Excitement to start building</strong> (if not, revisit your conceptâ€”make sure it's something you <em>want</em> to build)</p>
+
+<p>If you have all four, you're ready for Chapter 3.</p>
+
+<p>---</p>
+
+<strong>Next:</strong> [Chapter 3.1 - Overview of Game Engines](../chapter-3/3.1-overview-of-game-engines.md)
+
+<p>Chapter 2 is complete. You've designed your game. Now let's build it. Chapter 3 starts with choosing and setting up your game engine. See you there!</p>
+
+<p>---</p>
+
+<strong>Document Version:</strong> 1.0
+<strong>Chapter 2 Complete!</strong>
+<strong>Next Step:</strong> Begin Chapter 3 - Development Tools & Getting Started
+        </article>
+
+        <nav class="bottom-nav">
+            <div class="nav-links">
+                <a href="ch2sec6.html" class="nav-link prev">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+                    </svg>
+                    2.6 Exercise - Design Three Core Mechanics
+                </a>
+                <a href="ch2.html" class="nav-link chapter-complete">
+                    ✅ Chapter 2 Complete! Return to Overview
+                </a>
+            </div>
+            <div class="back-to-chapter">
+                <a href="ch2.html">← Back to Chapter 2</a>
+            </div>
+        </nav>
+    </main>
+
+    <footer>
+        <div class="footer-content">
+            <div class="footer-logo">SLCC GAME DEV WORKSHOP</div>
+            <p><a href="index.html">Home</a> · <a href="ch2.html">Chapter 2</a></p>
+        </div>
+    </footer>
+</body>
+</html>
