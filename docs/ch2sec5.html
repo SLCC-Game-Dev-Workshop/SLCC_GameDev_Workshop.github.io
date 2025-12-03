@@ -1,0 +1,1124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>2.5 Introduction to Game Design Documents | SLCC Game Dev Workshop</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #4ade80;
+            --primary-dim: #22c55e;
+            --primary-glow: rgba(74, 222, 128, 0.3);
+            --bg-dark: #0a0a0f;
+            --bg-card: #12121a;
+            --bg-card-hover: #1a1a25;
+            --text-primary: #e4e4e7;
+            --text-muted: #71717a;
+            --border: #27272a;
+            --accent-purple: #a855f7;
+            --accent-cyan: #22d3ee;
+            --accent-pink: #ec4899;
+            --accent-yellow: #facc15;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: 'Space Mono', monospace;
+            background-color: var(--bg-dark);
+            color: var(--text-primary);
+            line-height: 1.8;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            background: repeating-linear-gradient(
+                0deg,
+                transparent,
+                transparent 2px,
+                rgba(0, 0, 0, 0.1) 2px,
+                rgba(0, 0, 0, 0.1) 4px
+            );
+            z-index: 1000;
+            opacity: 0.3;
+        }
+
+        .bg-grid {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                linear-gradient(rgba(74, 222, 128, 0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(74, 222, 128, 0.03) 1px, transparent 1px);
+            background-size: 50px 50px;
+            z-index: -1;
+        }
+
+        header {
+            padding: 1.5rem 2rem;
+            border-bottom: 1px solid var(--border);
+            background: linear-gradient(180deg, rgba(74, 222, 128, 0.05) 0%, transparent 100%);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            backdrop-filter: blur(10px);
+        }
+
+        .header-content {
+            max-width: 900px;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--text-muted);
+            text-decoration: none;
+            font-size: 0.85rem;
+            transition: all 0.3s ease;
+        }
+
+        .back-link:hover {
+            color: var(--primary);
+        }
+
+        .back-link svg {
+            width: 18px;
+            height: 18px;
+            transition: transform 0.3s ease;
+        }
+
+        .back-link:hover svg {
+            transform: translateX(-3px);
+        }
+
+        .header-nav {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .header-section {
+            font-family: 'Press Start 2P', cursive;
+            font-size: 0.6rem;
+            color: var(--primary);
+            letter-spacing: 0.05em;
+        }
+
+        .hero {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 4rem 2rem 3rem;
+            border-bottom: 1px solid var(--border);
+            animation: fadeInUp 0.6s ease-out;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .section-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .section-number {
+            font-family: 'Press Start 2P', cursive;
+            font-size: 0.9rem;
+            color: var(--bg-dark);
+            background: var(--accent-cyan);
+            padding: 0.5rem 1rem;
+        }
+
+        .section-label {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+        }
+
+        .hero h1 {
+            font-size: clamp(1.5rem, 4vw, 2.25rem);
+            line-height: 1.4;
+            margin-bottom: 1rem;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        .learning-goal {
+            background: var(--bg-card);
+            border-left: 3px solid var(--primary);
+            padding: 1rem 1.5rem;
+            margin-top: 1.5rem;
+        }
+
+        .learning-goal-label {
+            font-size: 0.7rem;
+            color: var(--primary);
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            margin-bottom: 0.5rem;
+            font-weight: 700;
+        }
+
+        .learning-goal p {
+            color: var(--text-muted);
+            font-size: 0.95rem;
+            margin: 0;
+        }
+
+        .hero-meta {
+            display: flex;
+            gap: 2rem;
+            margin-top: 1.5rem;
+        }
+
+        .meta-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+
+        .meta-item svg {
+            width: 16px;
+            height: 16px;
+            color: var(--primary);
+        }
+
+        main {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 3rem 2rem 4rem;
+        }
+
+        .content h2 {
+            font-family: 'Press Start 2P', cursive;
+            font-size: 0.85rem;
+            color: var(--primary);
+            margin-top: 3rem;
+            margin-bottom: 1.5rem;
+            padding-bottom: 0.75rem;
+            border-bottom: 1px solid var(--border);
+            letter-spacing: 0.05em;
+        }
+
+        .content h2:first-child {
+            margin-top: 0;
+        }
+
+        .content h3 {
+            font-size: 1.25rem;
+            color: var(--text-primary);
+            margin-top: 2.5rem;
+            margin-bottom: 1rem;
+            font-weight: 700;
+        }
+
+        .content h4 {
+            font-size: 1rem;
+            color: var(--accent-cyan);
+            margin-top: 2rem;
+            margin-bottom: 0.75rem;
+            font-weight: 700;
+        }
+
+        .content p {
+            margin-bottom: 1.25rem;
+            color: var(--text-primary);
+            font-size: 0.95rem;
+        }
+
+        .content strong {
+            color: var(--text-primary);
+            font-weight: 700;
+        }
+
+        .content em {
+            color: var(--text-muted);
+            font-style: italic;
+        }
+
+        .content ul, .content ol {
+            margin-bottom: 1.5rem;
+            padding-left: 1.5rem;
+        }
+
+        .content li {
+            margin-bottom: 0.75rem;
+            color: var(--text-primary);
+            font-size: 0.95rem;
+        }
+
+        .content li::marker {
+            color: var(--primary);
+        }
+
+        .callout {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            padding: 1.25rem 1.5rem;
+            margin: 1.5rem 0;
+            position: relative;
+        }
+
+        .callout::before {
+            font-family: 'Press Start 2P', cursive;
+            font-size: 0.55rem;
+            position: absolute;
+            top: -0.6rem;
+            left: 1rem;
+            padding: 0.2rem 0.5rem;
+            background: var(--bg-dark);
+        }
+
+        .callout p {
+            margin: 0;
+            font-size: 0.9rem;
+        }
+
+        .callout.tip {
+            border-color: var(--primary);
+        }
+
+        .callout.tip::before {
+            content: '💡 TIP';
+            color: var(--primary);
+        }
+
+        .callout.warning {
+            border-color: var(--accent-yellow);
+        }
+
+        .callout.warning::before {
+            content: '⚠️ WARNING';
+            color: var(--accent-yellow);
+        }
+
+        .callout.note {
+            border-color: var(--accent-purple);
+        }
+
+        .callout.note::before {
+            content: '📝 NOTE';
+            color: var(--accent-purple);
+        }
+
+        hr {
+            border: none;
+            border-top: 1px solid var(--border);
+            margin: 3rem 0;
+        }
+
+        .bottom-nav {
+            margin-top: 4rem;
+            padding-top: 2rem;
+            border-top: 1px solid var(--border);
+        }
+
+        .nav-links {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .nav-link {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 1rem 1.5rem;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            color: var(--text-primary);
+            text-decoration: none;
+            font-size: 0.85rem;
+            transition: all 0.3s ease;
+        }
+
+        .nav-link:hover {
+            border-color: var(--primary);
+            color: var(--primary);
+        }
+
+        .nav-link svg {
+            width: 18px;
+            height: 18px;
+        }
+
+        .nav-link.prev svg {
+            transition: transform 0.3s ease;
+        }
+
+        .nav-link.prev:hover svg {
+            transform: translateX(-3px);
+        }
+
+        .nav-link.next svg {
+            transition: transform 0.3s ease;
+        }
+
+        .nav-link.next:hover svg {
+            transform: translateX(3px);
+        }
+
+        .back-to-chapter {
+            display: flex;
+            justify-content: center;
+            margin-top: 1.5rem;
+        }
+
+        .back-to-chapter a {
+            color: var(--text-muted);
+            text-decoration: none;
+            font-size: 0.85rem;
+            transition: color 0.3s ease;
+        }
+
+        .back-to-chapter a:hover {
+            color: var(--primary);
+        }
+
+        footer {
+            border-top: 1px solid var(--border);
+            padding: 2rem;
+            text-align: center;
+            background: var(--bg-card);
+        }
+
+        .footer-content {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .footer-logo {
+            font-family: 'Press Start 2P', cursive;
+            font-size: 0.6rem;
+            color: var(--primary);
+            margin-bottom: 0.5rem;
+        }
+
+        footer p {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+        }
+
+        footer a {
+            color: var(--primary);
+            text-decoration: none;
+        }
+
+        footer a:hover {
+            text-decoration: underline;
+        }
+
+        @media (max-width: 768px) {
+            .hero {
+                padding: 3rem 1.5rem 2rem;
+            }
+
+            main {
+                padding: 2rem 1.5rem 3rem;
+            }
+
+            .hero-meta {
+                flex-direction: column;
+                gap: 0.75rem;
+            }
+
+            .nav-links {
+                flex-direction: column;
+            }
+
+            .nav-link {
+                width: 100%;
+                justify-content: center;
+            }
+        }
+
+        .pixel-corner {
+            position: fixed;
+            width: 8px;
+            height: 8px;
+            background: var(--primary);
+            opacity: 0.5;
+        }
+
+        .pixel-corner.top-left { top: 10px; left: 10px; }
+        .pixel-corner.top-right { top: 10px; right: 10px; }
+        .pixel-corner.bottom-left { bottom: 10px; left: 10px; }
+        .pixel-corner.bottom-right { bottom: 10px; right: 10px; }
+    </style>
+</head>
+<body>
+    <div class="bg-grid"></div>
+    <div class="pixel-corner top-left"></div>
+    <div class="pixel-corner top-right"></div>
+    <div class="pixel-corner bottom-left"></div>
+    <div class="pixel-corner bottom-right"></div>
+
+    <header>
+        <div class="header-content">
+            <a href="index.html" class="back-link">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+                </svg>
+                Home
+            </a>
+            <div class="header-nav">
+                <span class="header-section">SECTION 2.5</span>
+            </div>
+        </div>
+    </header>
+
+    <section class="hero">
+        <div class="section-badge">
+            <span class="section-number">2.5</span>
+            <span class="section-label">Section</span>
+        </div>
+        <h1>Introduction to Game Design Documents</h1>
+        <div class="hero-meta">
+            <div class="meta-item">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <span>~10 min read</span>
+            </div>
+            <div class="meta-item">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                </svg>
+                <span>2,900 words</span>
+            </div>
+        </div>
+        <div class="learning-goal">
+            <div class="learning-goal-label">Learning Goal</div>
+            <p>Understand what a Game Design Document (GDD) is, why it matters, and how to create one that actually helps your development process.</p>
+        </div>
+    </section>
+
+    <main>
+        <article class="content">
+
+
+<h2>Why Do You Need a GDD?</h2>
+
+<p>Here's a truth: you <em>can</em> make a game without a GDD. Many solo indie devs do. But here's why having oneâ€”especially as a beginnerâ€”is incredibly valuable:</p>
+
+<h3>1. Clarity</h3>
+
+<p>Writing things down forces you to think through details. What seemed clear in your head might reveal gaps when you try to explain it. The GDD makes those gaps visible <em>before</em> you start coding.</p>
+
+<strong>Example:</strong>
+<p>You think: "Players can jump!"</p>
+<p>You write: "Players press Spacebar to jump. Jump height is 3 tiles. Variable height: hold longer = jump higher (max 5 tiles). Wall-jump possible if touching wall mid-air."</p>
+
+<p>See the difference? Writing forces specificity.</p>
+
+<p>---</p>
+
+<h3>2. Reference</h3>
+
+<p>Six weeks into development, you'll forget decisions you made on day one. The GDD is your referenceâ€”a place to check "How high does the player jump again?" or "What was the narrative hook for Zone 3?"</p>
+
+<p>This prevents:</p>
+<ul>
+<li>Redesigning mechanics you already designed</li>
+<li>Forgetting story beats</li>
+<li>Inconsistent difficulty pacing</li>
+</ul>
+
+<p>---</p>
+
+<h3>3. Communication (If Working with Others)</h3>
+
+<p>If you're working with a teamâ€”even just one other personâ€”the GDD is how you align. Your artist needs to know the visual style. Your sound designer needs to know the mood. Your programmer needs to know the mechanics. The GDD is the source of truth.</p>
+
+<p>Even if you're solo, the GDD helps you communicate with <em>playtesters</em> or <em>mentors</em> who want to understand your vision.</p>
+
+<p>---</p>
+
+<h3>4. Scope Control</h3>
+
+<p>A GDD helps you see the <em>full scope</em> of your game laid out. When you write "5 zones, 10 screens each, 3 enemy types per zone, 20 collectibles," you can calculate: "That's 50 screens, 15 enemy types, 20 collectibles to design and implement."</p>
+
+<p>Suddenly, scope becomes tangible. You can make informed decisions: "That's too much for 3 months. Let's cut it to 3 zones."</p>
+
+<p>---</p>
+
+<h2>Professional GDDs vs. Beginner GDDs</h2>
+
+<p>Let's set expectations. Professional GDDs can be <strong>50-200 pages</strong> long, with spreadsheets, diagrams, technical specs, UI mockups, and exhaustive detail.</p>
+
+<strong>You do not need that.</strong>
+
+<p>A professional GDD is for teams of 10-100 people working for years. Your first game is a solo or small-team project over weeks or months. Your GDD should match your scope.</p>
+
+<h3>Professional GDD (What You DON'T Need)</h3>
+
+<ul>
+<li>100+ pages of documentation</li>
+<li>Every dialogue line scripted</li>
+<li>Every asset listed with file paths</li>
+<li>Marketing strategy and budget analysis</li>
+<li>Legal and compliance sections</li>
+</ul>
+
+<h3>Beginner GDD (What You DO Need)</h3>
+
+<ul>
+<li><strong>2-10 pages</strong> (seriously, that's enough)</li>
+<li>Core mechanics clearly explained</li>
+<li>Level progression outline (not every detail, just the arc)</li>
+<li>High-level art/audio direction</li>
+<li>Technical notes (engine, platform, controls)</li>
+</ul>
+
+<p>Your GDD is a <strong>living document</strong>â€”it will change as you develop. Don't aim for perfection. Aim for clarity and usefulness.</p>
+
+<p>> <strong>ðŸ’¡ Tip:</strong> If your GDD is longer than 15 pages for your first game, you're probably over-documenting. Keep it lean. You can always add detail later if needed.</p>
+
+<p>---</p>
+
+<h2>What Goes in a Beginner GDD?</h2>
+
+<p>Here's a typical structure for a beginner-friendly GDD. You'll customize it based on your game, but this is a solid starting point.</p>
+
+<p>---</p>
+
+<h3>Section 1: Game Overview (From Chapter 1)</h3>
+
+<strong>What to include:</strong>
+<ul>
+<li>Game title</li>
+<li>Genre</li>
+<li>Elevator pitch (1-2 sentences)</li>
+<li>Target audience</li>
+<li>Platform and engine</li>
+</ul>
+
+<p>This section is mostly copy-paste from your Game Concept Document. It's here to remind you (and anyone reading) what the game <em>is</em>.</p>
+
+<strong>Example (Pixel Quest):</strong>
+<ul>
+<li><strong>Title:</strong> Pixel Quest</li>
+<li><strong>Genre:</strong> 2D Platformer</li>
+<li><strong>Pitch:</strong> Play as a sentient pixel escaping a malfunctioning computer system before being deleted by anti-virus software.</li>
+<li><strong>Audience:</strong> Fans of challenging platformers like Celeste and Super Meat Boy</li>
+<li><strong>Platform:</strong> PC (Windows/Mac/Linux)</li>
+<li><strong>Engine:</strong> Godot 4</li>
+</ul>
+
+<p>---</p>
+
+<h3>Section 2: Core Mechanics (From Chapter 2.1)</h3>
+
+<strong>What to include:</strong>
+<ul>
+<li>List of core mechanics (2-4 primary actions)</li>
+<li>Detailed explanation of each mechanic (player input, game response, why it's fun)</li>
+<li>List of secondary mechanics (optional features)</li>
+</ul>
+
+<p>This is where you get specific about <em>what the player can do</em>.</p>
+
+<strong>Example (Pixel Quest):</strong>
+
+<strong>Core Mechanics:</strong>
+
+<ol>
+<li><strong>Horizontal Movement</strong></li>
+</ol>
+<ul>
+<li>Input: Arrow keys / WASD</li>
+<li>Response: Bit moves left/right at 150 units/sec, smooth acceleration</li>
+<li>Why: Responsive movement is the foundation of platforming</li>
+</ul>
+
+<ol>
+<li><strong>Jump</strong></li>
+</ol>
+<ul>
+<li>Input: Spacebar (hold for variable height)</li>
+<li>Response: Jump 3 tiles (short press) to 5 tiles (full hold)</li>
+<li>Why: Gives player control over jump height for precision platforming</li>
+</ul>
+
+<ol>
+<li><strong>Wall-Cling</strong></li>
+</ol>
+<ul>
+<li>Input: Hold direction into wall while airborne</li>
+<li>Response: Bit sticks to wall, slides slowly, can jump off (wall-jump)</li>
+<li>Why: Enables vertical navigation and recovery from mistakes</li>
+</ul>
+
+<ol>
+<li><strong>Glitch-Phase</strong> (unlocked mid-game)</li>
+</ol>
+<ul>
+<li>Input: Hold Shift while moving</li>
+<li>Response: Bit phases through solid objects for 2 seconds, meter depletes, recharges on stable ground</li>
+<li>Why: Thematic ability that enables puzzle-solving and advanced movement</li>
+</ul>
+
+<strong>Secondary Mechanics:</strong>
+<ul>
+<li>Data fragment collection (optional collectibles)</li>
+<li>Checkpoint system (respawn points)</li>
+<li>Environmental hazards (spikes, pits, glitch platforms)</li>
+</ul>
+
+<p>---</p>
+
+<h3>Section 3: Progression & Difficulty (From Chapter 2.3)</h3>
+
+<strong>What to include:</strong>
+<ul>
+<li>Progression type (level-based, skill-based, unlock-based)</li>
+<li>Level/zone breakdown (how many, what each teaches)</li>
+<li>Difficulty curve (easy â†’ hard, with specific examples)</li>
+</ul>
+
+<p>This helps you plan how the game unfolds over time.</p>
+
+<strong>Example (Pixel Quest):</strong>
+
+<strong>Progression Type:</strong> Level-based + Unlock-based
+
+<strong>Zone Breakdown:</strong>
+<ul>
+<li><strong>Zone 1: Text Editor</strong> (10 screens, Easy â†’ Medium, teaches core movement)</li>
+<li><strong>Zone 2: Image Editor</strong> (10 screens, Medium, introduces RGB layers + Glitch-Phase unlock)</li>
+<li><strong>Zone 3: Web Browser</strong> (10 screens, Medium-High, combines mechanics)</li>
+<li><strong>Zone 4: File System</strong> (10 screens, Hard, mastery challenges)</li>
+<li><strong>Zone 5: System Core</strong> (10 screens, Very Hard, final gauntlet)</li>
+</ul>
+
+<strong>Difficulty Curve:</strong>
+<ul>
+<li>Start: No hazards, just platforms (teaching movement)</li>
+<li>Mid: Hazards + enemies + timing challenges</li>
+<li>End: Combines all mechanics in complex ways</li>
+</ul>
+
+<p>---</p>
+
+<h3>Section 4: Player Agency & Decisions (From Chapter 2.2)</h3>
+
+<strong>What to include:</strong>
+<ul>
+<li>Types of decisions players make (tactical, strategic, narrative, creative)</li>
+<li>Agency level (high, medium, low) and why</li>
+</ul>
+
+<p>This section is brief but helps you clarify what choices players have.</p>
+
+<strong>Example (Pixel Quest):</strong>
+
+<strong>Agency Level:</strong> Medium (guided structure, tactical freedom)
+
+<strong>Decision Types:</strong>
+<ul>
+<li><strong>Tactical:</strong> When to jump, dash, use Glitch-Phase (moment-to-moment)</li>
+<li><strong>Strategic:</strong> Which paths to take (safe vs. risky), whether to collect fragments now or later</li>
+<li><strong>Narrative:</strong> Final choice (Escape, Accept, Convince) determines ending</li>
+</ul>
+
+<strong>No Creative Decisions:</strong> Pixel Quest is linear with fixed mechanicsâ€”no character customization or open-ended building.
+
+<p>---</p>
+
+<h3>Section 5: Feedback & Rewards (From Chapter 2.4)</h3>
+
+<strong>What to include:</strong>
+<ul>
+<li>Immediate feedback (visual, audio, haptic)</li>
+<li>Short-term feedback (milestones, level completion)</li>
+<li>Long-term feedback (story beats, unlocks)</li>
+<li>Reward types (intrinsic vs. extrinsic)</li>
+</ul>
+
+<p>This helps you plan how to keep players motivated.</p>
+
+<strong>Example (Pixel Quest):</strong>
+
+<strong>Immediate Feedback:</strong>
+<ul>
+<li>Jump: Trail effect, "boop" sound</li>
+<li>Collect fragment: Sparkle effect, chime sound</li>
+<li>Die: RGB pixel explosion, instant respawn</li>
+</ul>
+
+<strong>Short-Term Feedback:</strong>
+<ul>
+<li>Checkpoint: Glow effect, confirmation sound</li>
+<li>Screen complete: Success jingle, progress message</li>
+</ul>
+
+<strong>Long-Term Feedback:</strong>
+<ul>
+<li>Zone complete: Stats screen (deaths, time), story cutscene</li>
+<li>Fragments collected: Lore entries unlock</li>
+</ul>
+
+<strong>Reward Balance:</strong>
+<ul>
+<li><strong>Intrinsic:</strong> Movement feels great, overcoming challenges feels skillful</li>
+<li><strong>Extrinsic:</strong> Data fragments, zone completion, story unlocks</li>
+</ul>
+
+<p>---</p>
+
+<h3>Section 6: Art & Audio Direction (High-Level)</h3>
+
+<strong>What to include:</strong>
+<ul>
+<li>Visual style (pixel art, 3D, hand-drawn, etc.)</li>
+<li>Color palette</li>
+<li>Audio mood (chiptune, orchestral, ambient, etc.)</li>
+</ul>
+
+<p>You're not specifying every assetâ€”just the overall vibe.</p>
+
+<strong>Example (Pixel Quest):</strong>
+
+<strong>Visual Style:</strong>
+<ul>
+<li>Retro pixel art with glitch aesthetics</li>
+<li>Heavy use of RGB color separation effects</li>
+<li>Monochrome backgrounds with neon accents (cyan, magenta, yellow)</li>
+<li>Minimalist UI (just health/phase meter, collectible counter)</li>
+</ul>
+
+<strong>Audio Style:</strong>
+<ul>
+<li>Chiptune music with glitch/electronic influences</li>
+<li>Minimal SFX (jump, land, collect, death)</li>
+<li>Atmospheric background hum (digital, slightly unsettling)</li>
+</ul>
+
+<p>---</p>
+
+<h3>Section 7: Technical Requirements</h3>
+
+<strong>What to include:</strong>
+<ul>
+<li>Platform (PC, console, mobile, web)</li>
+<li>Engine (Unity, Godot, Unreal, custom, etc.)</li>
+<li>Controls (keyboard, controller, touch)</li>
+<li>Resolution and performance targets</li>
+</ul>
+
+<p>This keeps technical constraints in mind.</p>
+
+<strong>Example (Pixel Quest):</strong>
+
+<strong>Platform:</strong> PC (Windows, Mac, Linux)
+
+<strong>Engine:</strong> Godot 4 (2D engine, free, beginner-friendly)
+
+<strong>Controls:</strong>
+<ul>
+<li>Keyboard: WASD/Arrow Keys (move), Spacebar (jump), Shift (Glitch-Phase)</li>
+<li>Controller: Left stick (move), A button (jump), Right bumper (Glitch-Phase)</li>
+</ul>
+
+<strong>Resolution:</strong> 1920Ã—1080 (16:9 aspect ratio)
+
+<strong>Performance Target:</strong> 60 FPS minimum
+
+<p>---</p>
+
+<h2>The Living Document Philosophy</h2>
+
+<p>Here's the most important thing to understand about GDDs: <strong>they change</strong>.</p>
+
+<p>You'll write a GDD, start developing, discover that a mechanic doesn't work as planned, and revise. That's not failureâ€”that's <em>iteration</em>, and it's how good games are made.</p>
+
+<h3>How to Treat Your GDD</h3>
+
+<strong>Do:</strong>
+<ul>
+<li>Update it when you make design decisions</li>
+<li>Refer to it when you're unsure what to build next</li>
+<li>Share it with playtesters for feedback</li>
+<li>Revise sections that aren't working</li>
+</ul>
+
+<strong>Don't:</strong>
+<ul>
+<li>Treat it as gospel (it's a guide, not a contract)</li>
+<li>Spend weeks perfecting it before building (diminishing returns)</li>
+<li>Refuse to deviate from it (if something's not fun, change it!)</li>
+<li>Expect it to answer every question (some things you discover by prototyping)</li>
+</ul>
+
+<p>> <strong>ðŸ’¡ Tip:</strong> Set a reminder to review your GDD every 2 weeks. Does it still match your game? If not, update it. The doc should reflect reality, not fantasy.</p>
+
+<p>---</p>
+
+<h2>When to Write vs. When to Prototype</h2>
+
+<p>Here's a common beginner mistake: spending months writing a 50-page GDD and never actually building anything.</p>
+
+<strong>The truth:</strong> Some things you can plan. Some things you have to <em>feel</em>.
+
+<h3>Write First (Design on Paper)</h3>
+
+<strong>Good for writing:</strong>
+<ul>
+<li>Core mechanics (what buttons do what)</li>
+<li>Level progression (Zone 1, Zone 2, Zone 3...)</li>
+<li>Story structure (beginning, middle, end)</li>
+<li>Art direction (colors, style, mood)</li>
+</ul>
+
+<p>These are decisions you can think through logically.</p>
+
+<p>---</p>
+
+<h3>Prototype First (Design by Doing)</h3>
+
+<strong>Good for prototyping:</strong>
+<ul>
+<li>Movement "feel" (how fast? how floaty? how responsive?)</li>
+<li>Jump height and arc (does 3 tiles feel right, or should it be 4?)</li>
+<li>Enemy behavior (how aggressive should they be?)</li>
+<li>Visual "juice" (what particle effects look cool?)</li>
+</ul>
+
+<p>These are decisions you can only make by <em>playing</em> the game.</p>
+
+<p>---</p>
+
+<h3>The Iteration Loop</h3>
+
+<p>Here's the process:</p>
+
+<ol>
+<li><strong>Write:</strong> Plan a mechanic (e.g., "Player can double-jump")</li>
+<li><strong>Prototype:</strong> Build it in the engine (rough implementation)</li>
+<li><strong>Playtest:</strong> Does it feel good? Is it fun?</li>
+<li><strong>Revise:</strong> Adjust based on feel (maybe double-jump height is too high)</li>
+<li><strong>Update GDD:</strong> Document the final decision (jump height = 4 tiles)</li>
+</ol>
+
+<p>The GDD is your plan, the prototype is your test, and the playtest is your feedback loop.</p>
+
+<p>---</p>
+
+<h2>Pixel Quest GDD Preview</h2>
+
+<p>In the next section (2.6), you'll create your own simplified GDD. But here's a preview of what Pixel Quest's full GDD looks like (condensed):</p>
+
+<p>---</p>
+
+<strong>PIXEL QUEST - GAME DESIGN DOCUMENT</strong>
+
+<strong>Section 1: Overview</strong>
+<ul>
+<li>Title: Pixel Quest</li>
+<li>Genre: 2D Platformer</li>
+<li>Pitch: Sentient pixel escapes computer system</li>
+<li>Audience: Platformer fans (Celeste, Super Meat Boy)</li>
+<li>Platform: PC, Engine: Godot 4</li>
+</ul>
+
+<strong>Section 2: Core Mechanics</strong>
+<ul>
+<li>Movement (left/right, 150 units/sec)</li>
+<li>Jump (variable height, 3-5 tiles)</li>
+<li>Wall-Cling (stick + wall-jump)</li>
+<li>Glitch-Phase (phase through walls, 2-sec duration)</li>
+</ul>
+
+<strong>Section 3: Progression</strong>
+<ul>
+<li>5 zones, 10 screens each</li>
+<li>Level-based + unlock-based</li>
+<li>Difficulty: Easy (Zone 1) â†’ Very Hard (Zone 5)</li>
+</ul>
+
+<strong>Section 4: Agency</strong>
+<ul>
+<li>Medium agency (tactical decisions in platforming)</li>
+<li>Final narrative choice (3 endings)</li>
+</ul>
+
+<strong>Section 5: Feedback & Rewards</strong>
+<ul>
+<li>Immediate: Jump sound, trail effects</li>
+<li>Short-term: Checkpoints, screen completion</li>
+<li>Long-term: Story unlocks, lore entries</li>
+<li>Intrinsic: Movement mastery, story engagement</li>
+</ul>
+
+<strong>Section 6: Art & Audio</strong>
+<ul>
+<li>Pixel art with RGB glitch effects</li>
+<li>Chiptune music with electronic glitches</li>
+<li>Minimalist UI</li>
+</ul>
+
+<strong>Section 7: Technical</strong>
+<ul>
+<li>Godot 4, PC (Win/Mac/Linux)</li>
+<li>Keyboard + Controller support</li>
+<li>1920Ã—1080, 60 FPS</li>
+</ul>
+
+<p>---</p>
+
+<p>That's 1-2 pages. Clean, focused, actionable.</p>
+
+<p>---</p>
+
+<h2>Tips for Writing Your GDD</h2>
+
+<h3>Tip 1: Start with the Template</h3>
+
+<p>Use the structure above as a starting point. Fill in each section based on what you've learned in Chapter 2.</p>
+
+<p>---</p>
+
+<h3>Tip 2: Be Specific, Not Exhaustive</h3>
+
+<strong>Bad (too vague):</strong> "Players can jump."
+<strong>Good (specific):</strong> "Press Spacebar to jump 3 tiles high. Hold for variable height up to 5 tiles."
+
+<strong>Bad (too exhaustive):</strong> "Level 1-1 has 47 platforms at coordinates [X, Y, Z]..."
+<strong>Good (specific but concise):</strong> "Level 1-1 teaches jumping with 5 safe platforms, no hazards."
+
+<p>---</p>
+
+<h3>Tip 3: Use Bullet Points and Headings</h3>
+
+<p>GDDs are reference documents. Make them scannable.</p>
+
+<strong>Bad (wall of text):</strong> "The player controls a character who can move left and right using the arrow keys or WASD and can jump using the spacebar which has variable height based on how long you hold it..."
+
+<strong>Good (structured):</strong>
+<strong>Movement:</strong>
+<ul>
+<li>Input: Arrow keys / WASD</li>
+<li>Speed: 150 units/sec</li>
+<li>Variable speed: Gradual acceleration</li>
+</ul>
+
+<strong>Jump:</strong>
+<ul>
+<li>Input: Spacebar</li>
+<li>Height: 3 tiles (tap) to 5 tiles (hold)</li>
+<li>Cooldown: None (can jump immediately after landing)</li>
+</ul>
+
+<p>---</p>
+
+<h3>Tip 4: Include Visuals (Optional but Helpful)</h3>
+
+<p>If you're a visual thinker, add:</p>
+<ul>
+<li>Flowcharts (progression structure)</li>
+<li>Sketches (level layouts)</li>
+<li>Mood boards (art direction)</li>
+</ul>
+
+<p>But don't stress if you're not an artist. Text is fine.</p>
+
+<p>---</p>
+
+<h3>Tip 5: Keep It Under 10 Pages</h3>
+
+<p>Seriously. If your first-game GDD is 30 pages, you're over-documenting. Save the detail for when you're prototyping.</p>
+
+<p>---</p>
+
+<h2>Summary</h2>
+
+<p>Let's recap what we've covered:</p>
+
+<ul>
+<li>A <strong>Game Design Document (GDD)</strong> is the blueprint for your game. It explains <em>how</em> your game works, not just <em>what</em> it is.</li>
+<li><strong>Why you need it:</strong> Clarity, reference, communication, scope control.</li>
+<li><strong>Professional GDDs</strong> are 50-200 pages. <strong>Beginner GDDs</strong> should be 2-10 pages. Don't over-document.</li>
+<li><strong>What goes in a GDD:</strong> Overview, Core Mechanics, Progression, Agency, Feedback, Art/Audio, Technical specs.</li>
+<li><strong>Living document:</strong> GDDs change as you develop. Update them regularly to reflect reality.</li>
+<li><strong>Write vs. Prototype:</strong> Plan mechanics on paper, but prototype "feel" in-engine.</li>
+<li><strong>Pixel Quest example:</strong> A simple, 1-2 page GDD that covers all essentials.</li>
+</ul>
+
+<p>Your GDD is a tool, not a prison. It should <em>help</em> you build, not <em>slow you down</em>. Keep it lean, keep it updated, and use it as a referenceâ€”not a bible.</p>
+
+<p>---</p>
+
+<strong>Next:</strong> [Chapter 2.6 - Exercise: Design Three Core Mechanics](2.6-exercise-design-three-core-mechanics.md)
+
+<p>You've learned about GDDs. Now it's time to create one. In the next section, you'll design <strong>three core mechanics</strong> for your game using a simplified GDD template. This will be the blueprint you use when you start building in Chapter 3. Let's put everything into practice!</p>
+        </article>
+
+        <nav class="bottom-nav">
+            <div class="nav-links">
+                <a href="ch2sec4.html" class="nav-link prev">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+                    </svg>
+                    2.4 Feedback Loops & Player Rewards
+                </a>
+                <a href="ch2sec6.html" class="nav-link next">
+                    2.6 Exercise - Design Three Core Mechanics
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                    </svg>
+                </a>
+            </div>
+            <div class="back-to-chapter">
+                <a href="ch2.html">← Back to Chapter 2</a>
+            </div>
+        </nav>
+    </main>
+
+    <footer>
+        <div class="footer-content">
+            <div class="footer-logo">SLCC GAME DEV WORKSHOP</div>
+            <p><a href="index.html">Home</a> · <a href="ch2.html">Chapter 2</a></p>
+        </div>
+    </footer>
+</body>
+</html>
